@@ -55,8 +55,8 @@ export const updateUserTier = onCall(
 
     const {tier} = request.data;
 
-    if (!["free", "paid"].includes(tier)) {
-      throw new Error("Invalid tier. Must be 'free' or 'paid'");
+    if (!["free", "paid", "admin"].includes(tier)) {
+      throw new Error("Invalid tier. Must be 'free', 'paid', or 'admin'");
     }
 
     try {
