@@ -12,6 +12,15 @@ const firebaseConfig = {
   appId: process.env.NEXT_PUBLIC_FIREBASE_APP_ID,
 };
 
+// Debug: log config to see if env vars are loaded
+if (typeof window !== "undefined") {
+  console.log("Firebase Config loaded:", {
+    projectId: firebaseConfig.projectId,
+    authDomain: firebaseConfig.authDomain,
+    apiKey: firebaseConfig.apiKey ? "***" : "MISSING",
+  });
+}
+
 const app = initializeApp(firebaseConfig);
 
 export const auth = getAuth(app);
