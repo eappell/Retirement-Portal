@@ -1,0 +1,4 @@
+{
+  "buildCommand": "cd apps/portal && npm run build",
+  "outputDirectory": "apps/portal/.next"
+}
