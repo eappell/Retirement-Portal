@@ -1,0 +1,77 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    // Helper functions
+    function isAuthenticated() {
+      return request.auth != null;
+    }
+
+    function isOwner(userId) {
+      return request.auth.uid == userId;
+    }
+
+    function getUserTier(userId) {
+      return get(/databases/$(database)/documents/users/$(userId)).data.tier;
+    }
+
+    function isPaidUser(userId) {
+      return getUserTier(userId) == 'paid';
+    }
+
+    // User profiles - only authenticated users can read their own profile
+    match /users/{userId} {
+      allow read: if isOwner(userId);
+      allow create: if isAuthenticated() && request.resource.data.tier in ['free', 'paid'];
+      allow update: if isOwner(userId);
+      allow delete: if isOwner(userId);
+
+      // User profile sub-collection
+      match /profile/{document=**} {
+        allow read, write: if isOwner(userId);
+      }
+
+      // Applications data - free users can read only, paid users can read/write
+      match /applications/{appId} {
+        allow read: if isOwner(userId);
+        allow write: if isOwner(userId) && isPaidUser(userId);
+
+        match /savedCalculations/{calculation=**} {
+          allow read: if isOwner(userId);
+          allow create, write, delete: if isOwner(userId) && isPaidUser(userId);
+        }
+
+        match /savedRecommendations/{recommendation=**} {
+          allow read: if isOwner(userId);
+          allow create, write, delete: if isOwner(userId) && isPaidUser(userId);
+        }
+
+        match /preferences/{document=**} {
+          allow read, write: if isOwner(userId);
+        }
+      }
+
+      // Analytics - users can write their own events
+      match /analytics/{document=**} {
+        allow read: if isOwner(userId);
+        allow create: if isOwner(userId);
+      }
+
+      // Usage tracking - track AI queries for free users
+      match /usage/{document=**} {
+        allow read: if isOwner(userId);
+        allow write: if isOwner(userId);
+      }
+    }
+
+    // Admin access to analytics (for analytics dashboard)
+    match /analytics/{document=**} {
+      allow read: if request.auth.token.isAdmin == true;
+    }
+
+    // Public data (if needed for read-only recommendations)
+    match /publicData/{document=**} {
+      allow read: if true;
+      allow write: if request.auth.token.isAdmin == true;
+    }
+  }
+}
