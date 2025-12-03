@@ -60,32 +60,6 @@ document.querySelectorAll('.tool-button, .cta-button').forEach(button => {
     });
 });
 
-// Add ripple animation styles dynamically
-const style = document.createElement('style');
-style.textContent = `
-    .tool-button, .cta-button {
-        position: relative;
-        overflow: hidden;
-    }
-    
-    .ripple {
-        position: absolute;
-        border-radius: 50%;
-        background: rgba(255, 255, 255, 0.6);
-        transform: scale(0);
-        animation: ripple-animation 0.6s ease-out;
-        pointer-events: none;
-    }
-    
-    @keyframes ripple-animation {
-        to {
-            transform: scale(4);
-            opacity: 0;
-        }
-    }
-`;
-document.head.appendChild(style);
-
 // Log portal loaded message
 console.log('🎉 Retirement Planning Portal loaded successfully!');
 console.log('💰 Ready to help you plan for your future.');
