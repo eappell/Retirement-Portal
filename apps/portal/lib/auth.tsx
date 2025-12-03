@@ -41,30 +41,37 @@ export const AuthProvider = ({children}: {children: ReactNode}) => {
 
   // Listen for auth state changes
   useEffect(() => {
-    const unsubscribe = onAuthStateChanged(auth, async (firebaseUser) => {
-      try {
-        if (firebaseUser) {
-          // Get user tier from Firestore
-          const userDocRef = doc(db, "users", firebaseUser.uid);
-          const userDocSnap = await getDoc(userDocRef);
+    const unsubscribe = onAuthStateChanged(
+      auth,
+      async (firebaseUser) => {
+        try {
+          if (firebaseUser) {
+            // Get user tier from Firestore
+            const userDocRef = doc(db, "users", firebaseUser.uid);
+            const userDocSnap = await getDoc(userDocRef);
 
-          const userData = userDocSnap.data();
-          const tier = (userData?.tier as "free" | "paid") || "free";
+            const userData = userDocSnap.data();
+            const tier = (userData?.tier as "free" | "paid") || "free";
 
-          setUser({
-            ...firebaseUser,
-            tier,
-          });
-        } else {
-          setUser(null);
+            setUser({
+              ...firebaseUser,
+              tier,
+            });
+          } else {
+            setUser(null);
+          }
+        } catch (err) {
+          console.error("Error fetching user data:", err);
+          setError(err instanceof Error ? err.message : "An error occurred");
+        } finally {
+          setLoading(false);
         }
-      } catch (err) {
-        console.error("Error fetching user data:", err);
-        setError(err instanceof Error ? err.message : "An error occurred");
-      } finally {
+      },
+      (err) => {
+        console.error("Auth state change error:", err);
         setLoading(false);
       }
-    });
+    );
 
     return unsubscribe;
   }, []);
