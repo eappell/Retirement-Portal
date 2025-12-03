@@ -1,5 +1,0 @@
-{
-  "buildCommand": "cd apps/portal && npm install && npm run build",
-  "outputDirectory": "apps/portal/.next",
-  "framework": "nextjs"
-}
