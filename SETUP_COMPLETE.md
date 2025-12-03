@@ -17,17 +17,21 @@
   - Admin access controls
   - Analytics data collection
 
-### 3. Cloud Functions Created ✅
+### 3. Cloud Functions Created ✅ → NOW DEPLOYED ✅
 - **Language**: TypeScript
-- **Status**: Code written, ready for deployment (requires Blaze plan)
-- **Functions Included**:
-  - `onUserCreated` - New user initialization
-  - `updateUserTier` - Tier upgrade handling
-  - `getUserTier` - Fetch user tier
-  - `trackEvent` - Analytics event logging
-  - `getAnalyticsReport` - Admin analytics
-  - `checkQueryLimit` - Free tier rate limiting
-  - `incrementQueryCount` - Query tracking
+- **Status**: ALL 7 FUNCTIONS DEPLOYED AND LIVE
+- **Runtime**: Node.js 24 (2nd Gen)
+- **Region**: us-central1
+- **Functions Deployed**:
+  - ✅ `onUserCreated` - Firestore trigger for new users
+  - ✅ `updateUserTier` - Callable: Upgrade user to paid
+  - ✅ `getUserTier` - Callable: Fetch user's current tier
+  - ✅ `trackEvent` - Callable: Log analytics events
+  - ✅ `getAnalyticsReport` - Callable: Admin analytics data
+  - ✅ `checkQueryLimit` - Callable: Check free tier limits
+  - ✅ `incrementQueryCount` - Callable: Track queries
+
+**Note**: Blaze plan is now in use. Functions are active and ready for your frontend to call!
 
 ### 4. Project Documentation Created ✅
 - **FIREBASE_SETUP.md** - Complete Firebase configuration guide
@@ -265,24 +269,30 @@ NEXT_PUBLIC_FIREBASE_APP_ID=...
 
 ## ⚠️ Important Notes
 
-1. **Blaze Plan Required**
-   - Cloud Functions deployment requires pay-as-you-go plan
+1. **✅ Blaze Plan Active**
+   - Cloud Functions are deployed and running
    - Very affordable ($0 for most projects within free tier limits)
-   - Only charged after free tier limits exceeded
+   - All 7 functions are live and ready to use
 
 2. **Namecheap Hosting**
    - Portal will run on your Linux server
    - Next.js requires Node.js to be installed
    - We can help with setup/deployment when ready
 
-3. **Security Rules Live**
+3. **Security Rules Live** ✅
    - Your Firestore is now protected!
    - Freemium logic is enforced at database level
    - Users cannot bypass tier restrictions
 
-4. **Analytics Running**
+4. **Analytics Running** ✅
    - All infrastructure is in place
-   - Just need to call the functions from your app
+   - Functions are deployed and callable
+   - Ready for your frontend to use
+
+5. **Cloud Functions Deployed** ✅
+   - All 7 functions active in us-central1
+   - Node.js 24 runtime
+   - Ready for immediate use
 
 ---
 
@@ -290,9 +300,13 @@ NEXT_PUBLIC_FIREBASE_APP_ID=...
 
 1. **Review** the documentation (FIREBASE_SETUP.md & PROJECT_PLAN.md)
 2. **Verify** your Firebase project is accessible
-3. **Decide** on next steps (frontend development)
-4. **Plan** your Next.js app structure
-5. **Consider** upgrading to Blaze plan if ready
+3. **Get Firebase Web Config**:
+   - Visit: https://console.firebase.google.com/project/retirement-portal-prod/settings/general
+   - Click "Your apps" → Select/create web app
+   - Copy the config values
+   - Create `.env.local` in Next.js app with credentials
+4. **Start building** the Next.js portal frontend
+5. **Test** Cloud Functions from your app
 
 ---
 
