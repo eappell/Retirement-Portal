@@ -57,7 +57,7 @@ const PLANS = [
     ],
     cta: "Upgrade Now",
     ctaDisabled: false,
-    tier: "consultant",
+    tier: "paid",
     color: "amber",
   },
 ];
@@ -105,7 +105,6 @@ export default function UpgradePage() {
   const isCurrentPlan = (planTier: string) => {
     if (planTier === "free" && tier === "free") return true;
     if (planTier === "paid" && tier === "paid") return true;
-    if (planTier === "consultant" && tier === "consultant") return true;
     return false;
   };
 
