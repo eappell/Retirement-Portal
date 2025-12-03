@@ -1,6 +1,5 @@
 {
   "version": 2,
-  "installCommand": "npm install",
   "buildCommand": "npm run build",
-  "outputDirectory": "apps/portal/.next"
+  "outputDirectory": ".next"
 }

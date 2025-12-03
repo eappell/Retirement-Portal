@@ -1,6 +1,6 @@
 {
   "scripts": {
-    "build": "npm install --prefix apps/portal && npm --prefix apps/portal run build"
+    "build": "npm install --prefix apps/portal && npm --prefix apps/portal run build && cp -r apps/portal/.next .next"
   },
   "dependencies": {
     "firebase-admin": "^13.6.0"
