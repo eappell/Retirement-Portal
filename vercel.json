@@ -1,5 +1,5 @@
 {
   "version": 2,
-  "buildCommand": "npm --prefix apps/portal run build",
+  "buildCommand": "npm run build",
   "outputDirectory": "apps/portal/.next"
 }
