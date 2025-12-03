@@ -46,29 +46,37 @@ export const AuthProvider = ({children}: {children: ReactNode}) => {
       async (firebaseUser) => {
         try {
           if (firebaseUser) {
-            // Get user tier from Firestore
-            const userDocRef = doc(db, "users", firebaseUser.uid);
-            const userDocSnap = await getDoc(userDocRef);
+            try {
+              // Get user tier from Firestore
+              const userDocRef = doc(db, "users", firebaseUser.uid);
+              const userDocSnap = await getDoc(userDocRef);
 
-            const userData = userDocSnap.data();
-            const tier = (userData?.tier as "free" | "paid") || "free";
+              const userData = userDocSnap.data();
+              const tier = (userData?.tier as "free" | "paid") || "free";
 
-            setUser({
-              ...firebaseUser,
-              tier,
-            });
+              setUser({
+                ...firebaseUser,
+                tier,
+              });
+            } catch (firestoreErr) {
+              console.error("Error fetching user tier from Firestore:", firestoreErr);
+              // Set user anyway, but with default tier
+              setUser({
+                ...firebaseUser,
+                tier: "free",
+              });
+            }
           } else {
             setUser(null);
           }
         } catch (err) {
-          console.error("Error fetching user data:", err);
-          setError(err instanceof Error ? err.message : "An error occurred");
+          console.error("Auth state change error:", err);
         } finally {
           setLoading(false);
         }
       },
       (err) => {
-        console.error("Auth state change error:", err);
+        console.error("Auth listener error:", err);
         setLoading(false);
       }
     );
