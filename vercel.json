@@ -1,7 +1,6 @@
 {
   "version": 2,
   "buildCommand": "npm --prefix apps/portal run build",
-  "startCommand": "npm --prefix apps/portal run start",
   "env": {
     "NEXT_PUBLIC_FIREBASE_API_KEY": "@NEXT_PUBLIC_FIREBASE_API_KEY",
     "NEXT_PUBLIC_FIREBASE_AUTH_DOMAIN": "@NEXT_PUBLIC_FIREBASE_AUTH_DOMAIN",
