@@ -68,6 +68,12 @@ service cloud.firestore {
       allow read: if request.auth.token.isAdmin == true;
     }
 
+    // Application configurations - admin only for write, all authenticated users can read
+    match /apps/{document=**} {
+      allow read: if isAuthenticated();
+      allow create, update, delete: if request.auth.token.isAdmin == true;
+    }
+
     // Public data (if needed for read-only recommendations)
     match /publicData/{document=**} {
       allow read: if true;

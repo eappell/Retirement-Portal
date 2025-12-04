@@ -303,16 +303,22 @@ export default function AdminDashboard() {
         {/* Admin Actions */}
         <div className="bg-white rounded-lg shadow-lg p-8">
           <h2 className="text-xl font-bold text-gray-900 mb-6">Admin Actions</h2>
-          <div className="space-y-3">
-            <button className="w-full md:w-auto bg-indigo-600 hover:bg-indigo-700 text-white font-semibold py-2 px-6 rounded-lg transition-colors">
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+            <button className="bg-indigo-600 hover:bg-indigo-700 text-white font-semibold py-2 px-6 rounded-lg transition-colors">
               Export User Data
             </button>
-            <button className="w-full md:w-auto ml-0 md:ml-3 bg-gray-600 hover:bg-gray-700 text-white font-semibold py-2 px-6 rounded-lg transition-colors">
+            <button className="bg-gray-600 hover:bg-gray-700 text-white font-semibold py-2 px-6 rounded-lg transition-colors">
               View User List
             </button>
-            <button className="w-full md:w-auto ml-0 md:ml-3 bg-orange-600 hover:bg-orange-700 text-white font-semibold py-2 px-6 rounded-lg transition-colors">
+            <button className="bg-orange-600 hover:bg-orange-700 text-white font-semibold py-2 px-6 rounded-lg transition-colors">
               View Analytics Events
             </button>
+            <a
+              href="/admin/apps"
+              className="bg-purple-600 hover:bg-purple-700 text-white font-semibold py-2 px-6 rounded-lg transition-colors text-center"
+            >
+              Manage Applications
+            </a>
           </div>
         </div>
       </main>

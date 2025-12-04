@@ -61,8 +61,10 @@ export function IFrameWrapper({
   // Listen for toolbar button messages from iframe
   useEffect(() => {
     const handleMessage = (event: MessageEvent) => {
+      console.log("IFrameWrapper received message:", event.data);
       // In production, verify the origin
       if (event.data?.type === "TOOLBAR_BUTTONS") {
+        console.log("Received TOOLBAR_BUTTONS, count:", event.data.buttons?.length);
         setToolbarButtons(event.data.buttons || []);
         // Inject buttons into the app header placeholder
         const placeholder = document.getElementById("app-toolbar-placeholder");
@@ -166,7 +168,7 @@ export function IFrameWrapper({
         title={appName}
         className="flex-1 w-full border-0"
         allow="camera;microphone;geolocation"
-        sandbox="allow-same-origin allow-scripts allow-popups allow-forms allow-modals"
+        sandbox="allow-same-origin allow-scripts allow-popups allow-forms allow-modals allow-top-navigation"
       />
     </div>
   );

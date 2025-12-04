@@ -5,6 +5,8 @@ import {useRouter} from "next/navigation";
 import {useAuth} from "@/lib/auth";
 import {useUserTier} from "@/lib/useUserTier";
 import {useAnalytics} from "@/lib/useAnalytics";
+import {db} from "@/lib/firebase";
+import {collection, getDocs} from "firebase/firestore";
 import Link from "next/link";
 import {Header} from "@/components/Header";
 
@@ -14,15 +16,17 @@ interface App {
   description: string;
   icon: string;
   url: string;
+  freeAllowed?: boolean;
 }
 
-const APPS: App[] = [
+const DEFAULT_APPS: App[] = [
   {
     id: "income-estimator",
     name: "Income Estimator",
     description: "Estimate your retirement income from various sources",
     icon: "📊",
-    url: "https://retire.appell.me",
+    url: "http://localhost:5173/",
+    freeAllowed: true,
   },
   {
     id: "retire-abroad",
@@ -30,6 +34,7 @@ const APPS: App[] = [
     description: "Plan your retirement in another country",
     icon: "🌍",
     url: "https://retire-abroad-ai.vercel.app/",
+    freeAllowed: true,
   },
 ];
 
@@ -39,6 +44,8 @@ export default function DashboardPage() {
   const {tier, subscriptionExpiry, loading: tierLoading} = useUserTier();
   const {trackEvent} = useAnalytics();
   const [mounted, setMounted] = useState(false);
+  const [apps, setApps] = useState<App[]>(DEFAULT_APPS);
+  const [loadingApps, setLoadingApps] = useState(true);
 
   useEffect(() => {
     setMounted(true);
@@ -49,6 +56,46 @@ export default function DashboardPage() {
       router.push("/");
     }
   }, [user, mounted, router]);
+
+  // Load apps from Firestore
+  useEffect(() => {
+    const loadApps = async () => {
+      try {
+        setLoadingApps(true);
+        const appsRef = collection(db, "apps");
+        const snapshot = await getDocs(appsRef);
+        const loadedApps: App[] = [];
+
+        snapshot.forEach((doc) => {
+          const data = doc.data();
+          loadedApps.push({
+            id: data.id,
+            name: data.name,
+            description: data.description,
+            icon: data.icon || "📦",
+            url: data.url,
+            freeAllowed: data.freeAllowed,
+          });
+        });
+
+        if (loadedApps.length > 0) {
+          setApps(loadedApps);
+        } else {
+          setApps(DEFAULT_APPS);
+        }
+      } catch (error) {
+        console.error("Error loading apps:", error);
+        // Fall back to default apps
+        setApps(DEFAULT_APPS);
+      } finally {
+        setLoadingApps(false);
+      }
+    };
+
+    if (mounted) {
+      loadApps();
+    }
+  }, [mounted]);
 
   const handleAppClick = (app: App) => {
     trackEvent({
@@ -163,10 +210,10 @@ export default function DashboardPage() {
         <div>
           <h2 className="text-2xl font-bold text-gray-900 mb-6">Available Tools</h2>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-            {APPS.map((app) => (
+            {apps.map((app) => (
               <Link
                 key={app.id}
-                href={`/apps?appId=${app.id}&name=${encodeURIComponent(app.name)}&url=${encodeURIComponent(app.url)}`}
+                href={`/apps/${app.id}?name=${encodeURIComponent(app.name)}&url=${encodeURIComponent(app.url)}`}
                 onClick={() => handleAppClick(app)}
                 className="bg-white rounded-lg shadow-lg hover:shadow-xl transition-shadow p-6 block group"
               >
