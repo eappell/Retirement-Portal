@@ -9,6 +9,42 @@ import {db} from "@/lib/firebase";
 import {collection, getDocs} from "firebase/firestore";
 import Link from "next/link";
 import {Header} from "@/components/Header";
+import {
+  CubeIcon,
+  CalculatorIcon,
+  ChartBarIcon,
+  CurrencyDollarIcon,
+  CreditCardIcon,
+  GlobeAltIcon,
+  RocketLaunchIcon,
+  BuildingOfficeIcon,
+  HomeIcon,
+  UserGroupIcon,
+  DocumentTextIcon,
+  ChatBubbleLeftIcon,
+  ShoppingCartIcon,
+  SparklesIcon,
+  BoltIcon,
+} from "@heroicons/react/24/outline";
+
+// Available HeroIcons mapping
+const AVAILABLE_ICONS = [
+  { name: "Calculator", component: CalculatorIcon },
+  { name: "Chart Bar", component: ChartBarIcon },
+  { name: "Currency Dollar", component: CurrencyDollarIcon },
+  { name: "Credit Card", component: CreditCardIcon },
+  { name: "Globe", component: GlobeAltIcon },
+  { name: "Rocket", component: RocketLaunchIcon },
+  { name: "Building", component: BuildingOfficeIcon },
+  { name: "Home", component: HomeIcon },
+  { name: "User Group", component: UserGroupIcon },
+  { name: "Document", component: DocumentTextIcon },
+  { name: "Chat", component: ChatBubbleLeftIcon },
+  { name: "Shopping Cart", component: ShoppingCartIcon },
+  { name: "Sparkles", component: SparklesIcon },
+  { name: "Bolt", component: BoltIcon },
+  { name: "Cube", component: CubeIcon },
+];
 
 interface App {
   id: string;
@@ -107,9 +143,9 @@ export default function DashboardPage() {
 
   if (!mounted || !user) {
     return (
-      <div className="flex min-h-screen items-center justify-center bg-gradient-to-br from-blue-50 to-indigo-100">
+      <div className="flex min-h-screen items-center justify-center" style={{background: 'linear-gradient(to bottom right, #E8E3DF, #BFCDE0)'}}>
         <div className="text-center">
-          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-indigo-600 mx-auto mb-4"></div>
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 mx-auto mb-4" style={{borderColor: '#0B5394'}}></div>
           <p className="text-gray-600">Loading dashboard...</p>
         </div>
       </div>
@@ -124,7 +160,7 @@ export default function DashboardPage() {
     : null;
 
   return (
-    <div className="min-h-screen bg-gray-50">
+    <div className="min-h-screen bg-background">
       <Header />
 
       <main className="max-w-7xl mx-auto px-4 py-12 sm:px-6 lg:px-8">
@@ -181,11 +217,14 @@ export default function DashboardPage() {
               <p className="text-purple-700 text-sm mb-4">
                 Get unlimited access to all tools and remove daily query limits.
               </p>
-              <Link
+                            <Link
                 href="/upgrade"
-                className="inline-block bg-purple-600 hover:bg-purple-700 text-white font-semibold py-2 px-4 rounded-lg transition-colors"
+                className="inline-block text-white font-semibold py-2 px-4 rounded-lg transition-colors"
+                style={{backgroundColor: '#0B5394'}}
+                onMouseEnter={(e) => e.currentTarget.style.backgroundColor = '#094170'}
+                onMouseLeave={(e) => e.currentTarget.style.backgroundColor = '#0B5394'}
               >
-                View Plans
+                Upgrade to Premium
               </Link>
             </div>
           )}
@@ -210,25 +249,48 @@ export default function DashboardPage() {
         <div>
           <h2 className="text-2xl font-bold text-gray-900 mb-6">Available Tools</h2>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-            {apps.map((app) => (
-              <Link
-                key={app.id}
-                href={`/apps/${app.id}?name=${encodeURIComponent(app.name)}&url=${encodeURIComponent(app.url)}`}
-                onClick={() => handleAppClick(app)}
-                className="bg-white rounded-lg shadow-lg hover:shadow-xl transition-shadow p-6 block group"
-              >
-                <div className="flex items-start justify-between">
-                  <div>
-                    <div className="text-4xl mb-4">{app.icon}</div>
-                    <h3 className="text-xl font-bold text-gray-900 group-hover:text-indigo-600 transition-colors">
-                      {app.name}
-                    </h3>
-                    <p className="text-gray-600 mt-2">{app.description}</p>
+            {apps.map((app, index) => {
+              // Create different gradients using the color palette
+              const gradients = [
+                'linear-gradient(135deg, #BFCDE0 0%, #E8E3DF 100%)',
+                'linear-gradient(135deg, #E8E3DF 0%, #D2CAC1 100%)',
+                'linear-gradient(135deg, #D2CAC1 0%, #BFCDE0 100%)',
+                'linear-gradient(135deg, #FEFCFD 0%, #BFCDE0 100%)',
+              ];
+              const gradient = gradients[index % gradients.length];
+              
+              return (
+                <Link
+                  key={app.id}
+                  href={`/apps/${app.id}?name=${encodeURIComponent(app.name)}&url=${encodeURIComponent(app.url)}`}
+                  onClick={() => handleAppClick(app)}
+                  className="rounded-lg shadow-lg hover:shadow-xl transition-shadow p-6 block group"
+                  style={{background: gradient}}
+                >
+                  <div className="flex items-start justify-between">
+                    <div className="flex items-start gap-4">
+                      <div className="flex-shrink-0">
+                        {(() => {
+                          const iconData = AVAILABLE_ICONS.find(i => i.name === app.icon);
+                          if (iconData) {
+                            const IconComponent = iconData.component;
+                            return <IconComponent className="h-10 w-10" style={{color: '#6b5e62'}} />;
+                          }
+                          return <CubeIcon className="h-10 w-10" style={{color: '#6b5e62'}} />;
+                        })()}
+                      </div>
+                      <div>
+                        <h3 className="text-xl font-bold group-hover:transition-colors" style={{color: '#6b5e62'}} onMouseEnter={(e) => e.currentTarget.style.color = '#0B5394'} onMouseLeave={(e) => e.currentTarget.style.color = '#6b5e62'}>
+                          {app.name}
+                        </h3>
+                        <p className="mt-2" style={{color: '#6b5e62'}}>{app.description}</p>
+                      </div>
+                    </div>
+                    <div className="text-2xl" style={{color: '#6b5e62'}}>→</div>
                   </div>
-                  <div className="text-2xl">→</div>
-                </div>
-              </Link>
-            ))}
+                </Link>
+              );
+            })}
           </div>
         </div>
 

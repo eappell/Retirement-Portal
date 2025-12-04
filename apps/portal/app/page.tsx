@@ -28,7 +28,7 @@ export default function Home() {
   }
 
   return (
-    <div className="flex min-h-screen items-center justify-center bg-gradient-to-br from-blue-50 to-indigo-100 px-4">
+    <div className="flex min-h-screen items-center justify-center px-4" style={{background: 'linear-gradient(to bottom right, #E8E3DF, #BFCDE0)'}}>
       <div className="max-w-md w-full">
         <div className="bg-white rounded-lg shadow-lg p-8 space-y-6">
           <div className="text-center">
@@ -39,14 +39,20 @@ export default function Home() {
           <div className="space-y-4">
             <Link
               href="/auth/signup"
-              className="block w-full bg-indigo-600 hover:bg-indigo-700 text-white font-semibold py-3 px-4 rounded-lg text-center transition-colors"
+              className="block w-full text-white font-semibold py-3 px-4 rounded-lg text-center transition-colors"
+              style={{backgroundColor: '#0B5394'}}
+              onMouseEnter={(e) => e.currentTarget.style.backgroundColor = '#094170'}
+              onMouseLeave={(e) => e.currentTarget.style.backgroundColor = '#0B5394'}
             >
               Create Account
             </Link>
 
             <Link
               href="/auth/login"
-              className="block w-full bg-green-600 hover:bg-green-700 text-white font-semibold py-3 px-4 rounded-lg text-center transition-colors"
+              className="block w-full text-white font-semibold py-3 px-4 rounded-lg text-center transition-colors"
+              style={{backgroundColor: '#0B5394'}}
+              onMouseEnter={(e) => e.currentTarget.style.backgroundColor = '#094170'}
+              onMouseLeave={(e) => e.currentTarget.style.backgroundColor = '#0B5394'}
             >
               Sign In
             </Link>
@@ -62,7 +68,10 @@ export default function Home() {
 
             <Link
               href="/auth/guest"
-              className="block w-full bg-blue-100 hover:bg-blue-200 text-blue-900 font-semibold py-3 px-4 rounded-lg text-center transition-colors"
+              className="block w-full font-semibold py-3 px-4 rounded-lg text-center transition-colors"
+              style={{backgroundColor: '#BFCDE0', color: '#6b5e62'}}
+              onMouseEnter={(e) => e.currentTarget.style.backgroundColor = '#a8bdd4'}
+              onMouseLeave={(e) => e.currentTarget.style.backgroundColor = '#BFCDE0'}
             >
               Continue as Guest
             </Link>

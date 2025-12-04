@@ -22,12 +22,12 @@ service cloud.firestore {
       return isAuthenticated() && getUserTier(request.auth.uid) == 'admin';
     }
 
-    // User profiles - only authenticated users can read their own profile
+    // User profiles - only authenticated users can read their own profile, admins can read all
     match /users/{userId} {
-      allow read: if isOwner(userId);
-      allow create: if isAuthenticated() && request.resource.data.tier in ['free', 'paid'];
-      allow update: if isOwner(userId);
-      allow delete: if isOwner(userId);
+      allow read: if isOwner(userId) || isAdmin();
+      allow create: if isAuthenticated() && request.resource.data.tier in ['free', 'paid', 'admin'];
+      allow update: if isOwner(userId) || isAdmin();
+      allow delete: if isOwner(userId) || isAdmin();
 
       // User profile sub-collection
       match /profile/{document=**} {

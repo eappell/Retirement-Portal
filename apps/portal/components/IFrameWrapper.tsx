@@ -2,6 +2,7 @@
 
 import { useEffect, useRef, useState } from "react";
 import { useAuth } from "@/lib/auth";
+import { useTheme } from "@/lib/theme";
 import { auth } from "@/lib/firebase";
 import { ToolbarButton } from "./SecondaryToolbar";
 
@@ -19,6 +20,7 @@ export function IFrameWrapper({
   description,
 }: IFrameWrapperProps) {
   const { user } = useAuth();
+  const { theme } = useTheme();
   const iframeRef = useRef<HTMLIFrameElement>(null);
   const [authToken, setAuthToken] = useState<string>("");
   const [loading, setLoading] = useState(true);
@@ -58,6 +60,20 @@ export function IFrameWrapper({
     getAuthToken();
   }, [user]);
 
+  // Send theme changes to iframe
+  useEffect(() => {
+    if (iframeRef.current && !loading) {
+      console.log('[IFrameWrapper] Sending THEME_CHANGE:', theme);
+      iframeRef.current.contentWindow?.postMessage(
+        {
+          type: "THEME_CHANGE",
+          theme: theme,
+        },
+        "*"
+      );
+    }
+  }, [theme, loading]);
+
   // Listen for toolbar button messages from iframe
   useEffect(() => {
     const handleMessage = (event: MessageEvent) => {
@@ -76,7 +92,8 @@ export function IFrameWrapper({
 
             const btn = document.createElement("button");
             btn.className =
-              "inline-flex items-center justify-center p-2 rounded-md transition-colors text-gray-700 dark:text-slate-300 hover:bg-gray-100 dark:hover:bg-slate-700 hover:text-gray-900 dark:hover:text-slate-100";
+              "inline-flex items-center justify-center p-2 rounded-md transition-colors";
+            btn.style.color = "#46494c";
             btn.setAttribute("aria-label", button.label);
             btn.title = button.tooltip || button.label;
 
@@ -86,6 +103,20 @@ export function IFrameWrapper({
               const iconContainer = document.createElement("div");
               iconContainer.innerHTML = button.icon;
               iconContainer.className = "h-5 w-5";
+              // Apply color to SVG element
+              const svg = iconContainer.querySelector("svg");
+              if (svg) {
+                // Set initial color based on theme
+                const isDark = document.documentElement.classList.contains("dark");
+                svg.style.color = isDark ? "#FEFCFD" : "#46494c";
+                
+                // Watch for theme changes
+                const observer = new MutationObserver(() => {
+                  const isDark = document.documentElement.classList.contains("dark");
+                  svg.style.color = isDark ? "#FEFCFD" : "#46494c";
+                });
+                observer.observe(document.documentElement, { attributes: true, attributeFilter: ['class'] });
+              }
               btn.appendChild(iconContainer);
             } else {
               // Emoji or other text icon

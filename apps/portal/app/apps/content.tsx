@@ -17,7 +17,7 @@ const APP_REGISTRY = {
   },
   "retire-abroad": {
     name: "Retire Abroad AI",
-    url: "https://retire-abroad-ai.vercel.app/",
+    url: "http://localhost:3001/",
     description: "Plan your retirement in another country with AI recommendations",
     freeAllowed: true,
   },

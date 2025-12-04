@@ -22,22 +22,40 @@ import {
   TrashIcon,
   CheckIcon,
   XMarkIcon,
+  CubeIcon,
+  SparklesIcon,
+  BoltIcon,
+  RocketLaunchIcon,
+  ChartBarIcon,
+  GlobeAltIcon,
+  BuildingOfficeIcon,
+  CalculatorIcon,
+  CreditCardIcon,
+  CurrencyDollarIcon,
+  HomeIcon,
+  UserGroupIcon,
+  DocumentTextIcon,
+  ChatBubbleLeftIcon,
+  ShoppingCartIcon,
 } from "@heroicons/react/24/outline";
 
 // Available HeroIcons for app selection
 const AVAILABLE_ICONS = [
-  { name: "Cube", icon: "📦" },
-  { name: "Sparkles", icon: "✨" },
-  { name: "Bolt", icon: "⚡" },
-  { name: "Target", icon: "🎯" },
-  { name: "Rocket", icon: "🚀" },
-  { name: "TrendingUp", icon: "📈" },
-  { name: "Globe", icon: "🌍" },
-  { name: "Building", icon: "🏢" },
-  { name: "BarChart", icon: "📊" },
-  { name: "Calculator", icon: "🧮" },
-  { name: "CreditCard", icon: "💳" },
-  { name: "DollarSign", icon: "💵" },
+  { name: "Calculator", component: CalculatorIcon },
+  { name: "Chart Bar", component: ChartBarIcon },
+  { name: "Currency Dollar", component: CurrencyDollarIcon },
+  { name: "Credit Card", component: CreditCardIcon },
+  { name: "Globe", component: GlobeAltIcon },
+  { name: "Rocket", component: RocketLaunchIcon },
+  { name: "Building", component: BuildingOfficeIcon },
+  { name: "Home", component: HomeIcon },
+  { name: "User Group", component: UserGroupIcon },
+  { name: "Document", component: DocumentTextIcon },
+  { name: "Chat", component: ChatBubbleLeftIcon },
+  { name: "Shopping", component: ShoppingCartIcon },
+  { name: "Cube", component: CubeIcon },
+  { name: "Sparkles", component: SparklesIcon },
+  { name: "Bolt", component: BoltIcon },
 ];
 
 interface App {
@@ -65,7 +83,7 @@ export default function AdminAppsPage() {
     name: "",
     description: "",
     url: "",
-    icon: "📦",
+    icon: "Calculator",
     freeAllowed: true,
   });
   const [error, setError] = useState<string>("");
@@ -234,7 +252,7 @@ export default function AdminAppsPage() {
   if (!mounted || tierLoading || loading) {
     return (
       <div className="flex min-h-screen items-center justify-center">
-        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-indigo-600"></div>
+        <div className="animate-spin rounded-full h-12 w-12 border-b-2" style={{borderColor: '#0B5394'}}></div>
       </div>
     );
   }
@@ -244,7 +262,7 @@ export default function AdminAppsPage() {
   }
 
   return (
-    <div className="min-h-screen bg-gray-50">
+    <div className="min-h-screen bg-background">
       <Header />
 
       <main className="max-w-7xl mx-auto px-4 py-12 sm:px-6 lg:px-8">
@@ -257,7 +275,7 @@ export default function AdminAppsPage() {
 
         {/* Success Alert */}
         {success && (
-          <div className="mb-6 bg-green-50 border border-green-200 text-green-800 px-4 py-3 rounded-lg">
+          <div className="mb-6 px-4 py-3 rounded-lg" style={{backgroundColor: '#E8E3DF', borderColor: '#D2CAC1', borderWidth: '1px', color: '#6b5e62'}}>
             {success}
           </div>
         )}
@@ -269,7 +287,10 @@ export default function AdminAppsPage() {
           </div>
           <button
             onClick={() => setShowNewForm(true)}
-            className="inline-flex items-center gap-2 bg-indigo-600 hover:bg-indigo-700 text-white font-semibold py-2 px-4 rounded-lg transition-colors"
+            className="inline-flex items-center gap-2 text-white font-semibold py-2 px-4 rounded-lg transition-colors"
+            style={{backgroundColor: '#0B5394'}}
+            onMouseEnter={(e) => e.currentTarget.style.backgroundColor = '#094170'}
+            onMouseLeave={(e) => e.currentTarget.style.backgroundColor = '#0B5394'}
           >
             <PlusIcon className="h-5 w-5" />
             Add Application
@@ -338,20 +359,28 @@ export default function AdminAppsPage() {
                   Icon
                 </label>
                 <div className="flex gap-2 flex-wrap">
-                  {AVAILABLE_ICONS.map((iconOption) => (
-                    <button
-                      key={iconOption.name}
-                      onClick={() => setNewApp({ ...newApp, icon: iconOption.icon })}
-                      className={`text-2xl p-2 rounded border-2 transition-all ${
-                        newApp.icon === iconOption.icon
-                          ? "border-indigo-600 bg-indigo-50"
-                          : "border-gray-200 hover:border-gray-300"
-                      }`}
-                      title={iconOption.name}
-                    >
-                      {iconOption.icon}
-                    </button>
-                  ))}
+                  {AVAILABLE_ICONS.map((iconOption) => {
+                    const IconComponent = iconOption.component;
+                    return (
+                      <button
+                        key={iconOption.name}
+                        type="button"
+                        onClick={() => setNewApp({ ...newApp, icon: iconOption.name })}
+                        className={`p-2 rounded border-2 transition-all ${
+                          newApp.icon === iconOption.name
+                            ? "border-blue-600 bg-blue-50"
+                            : "border-gray-200 hover:border-gray-300"
+                        }`}
+                        title={iconOption.name}
+                        style={{
+                          borderColor: newApp.icon === iconOption.name ? '#0B5394' : undefined,
+                          backgroundColor: newApp.icon === iconOption.name ? '#BFCDE0' : undefined,
+                        }}
+                      >
+                        <IconComponent className="h-6 w-6" style={{color: '#6b5e62'}} />
+                      </button>
+                    );
+                  })}
                 </div>
               </div>
             </div>
@@ -448,21 +477,29 @@ export default function AdminAppsPage() {
                       <label className="block text-sm font-medium text-gray-700 mb-2">
                         Icon
                       </label>
-                      <div className="flex gap-2 flex-wrap">
-                        {AVAILABLE_ICONS.map((iconOption) => (
-                          <button
-                            key={iconOption.name}
-                            onClick={() => setEditForm({ ...editForm, icon: iconOption.icon })}
-                            className={`text-2xl p-2 rounded border-2 transition-all ${
-                              editForm.icon === iconOption.icon
-                                ? "border-indigo-600 bg-indigo-50"
-                                : "border-gray-200 hover:border-gray-300"
-                            }`}
-                            title={iconOption.name}
-                          >
-                            {iconOption.icon}
-                          </button>
-                        ))}
+                        <div className="flex gap-2 flex-wrap">
+                        {AVAILABLE_ICONS.map((iconOption) => {
+                          const IconComponent = iconOption.component;
+                          return (
+                            <button
+                              key={iconOption.name}
+                              type="button"
+                              onClick={() => setEditForm({ ...editForm, icon: iconOption.name })}
+                              className={`p-2 rounded border-2 transition-all ${
+                                editForm.icon === iconOption.name
+                                  ? "border-blue-600 bg-blue-50"
+                                  : "border-gray-200 hover:border-gray-300"
+                              }`}
+                              title={iconOption.name}
+                              style={{
+                                borderColor: editForm.icon === iconOption.name ? '#0B5394' : undefined,
+                                backgroundColor: editForm.icon === iconOption.name ? '#BFCDE0' : undefined,
+                              }}
+                            >
+                              <IconComponent className="h-6 w-6" style={{color: '#6b5e62'}} />
+                            </button>
+                          );
+                        })}
                       </div>
                     </div>
                   </div>
@@ -502,7 +539,16 @@ export default function AdminAppsPage() {
                   <div className="flex items-start justify-between">
                     <div className="flex-1">
                       <div className="flex items-center gap-4">
-                        <div className="text-4xl">{app.icon}</div>
+                        <div className="p-2 rounded-lg" style={{backgroundColor: '#BFCDE0'}}>
+                          {(() => {
+                            const iconData = AVAILABLE_ICONS.find(i => i.name === app.icon);
+                            if (iconData) {
+                              const IconComponent = iconData.component;
+                              return <IconComponent className="h-8 w-8" style={{color: '#6b5e62'}} />;
+                            }
+                            return <CubeIcon className="h-8 w-8" style={{color: '#6b5e62'}} />;
+                          })()}
+                        </div>
                         <div>
                           <h3 className="text-lg font-bold text-gray-900">{app.name}</h3>
                           <p className="text-gray-600">{app.description}</p>
@@ -530,14 +576,20 @@ export default function AdminAppsPage() {
                     <div className="flex gap-2">
                       <button
                         onClick={() => handleEdit(app)}
-                        className="inline-flex items-center gap-2 bg-blue-600 hover:bg-blue-700 text-white font-semibold py-2 px-4 rounded-lg transition-colors"
+                        className="inline-flex items-center gap-2 text-white font-semibold py-2 px-4 rounded-lg transition-colors"
+                        style={{backgroundColor: '#0B5394'}}
+                        onMouseEnter={(e) => e.currentTarget.style.backgroundColor = '#094170'}
+                        onMouseLeave={(e) => e.currentTarget.style.backgroundColor = '#0B5394'}
                       >
                         <PencilIcon className="h-5 w-5" />
                         Edit
                       </button>
                       <button
                         onClick={() => handleDelete(app.id, app.firestoreId)}
-                        className="inline-flex items-center gap-2 bg-red-600 hover:bg-red-700 text-white font-semibold py-2 px-4 rounded-lg transition-colors"
+                        className="inline-flex items-center gap-2 text-white font-semibold py-2 px-4 rounded-lg transition-colors"
+                        style={{backgroundColor: '#6b5e62'}}
+                        onMouseEnter={(e) => e.currentTarget.style.backgroundColor = '#5a4e52'}
+                        onMouseLeave={(e) => e.currentTarget.style.backgroundColor = '#6b5e62'}
                       >
                         <TrashIcon className="h-5 w-5" />
                         Delete

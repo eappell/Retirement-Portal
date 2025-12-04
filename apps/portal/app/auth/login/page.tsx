@@ -43,7 +43,7 @@ export default function LoginPage() {
   };
 
   return (
-    <div className="flex min-h-screen items-center justify-center bg-gradient-to-br from-blue-50 to-indigo-100 px-4">
+    <div className="flex min-h-screen items-center justify-center px-4" style={{background: 'linear-gradient(to bottom right, #E8E3DF, #BFCDE0)'}}>
       <div className="max-w-md w-full">
         <div className="bg-white rounded-lg shadow-lg p-8 space-y-6">
           <div className="text-center">
@@ -85,7 +85,10 @@ export default function LoginPage() {
             <button
               type="submit"
               disabled={loading}
-              className="w-full bg-green-600 hover:bg-green-700 disabled:bg-gray-400 text-white font-semibold py-2 px-4 rounded-lg transition-colors"
+              className="w-full disabled:bg-gray-400 text-white font-semibold py-2 px-4 rounded-lg transition-colors"
+              style={{backgroundColor: loading ? undefined : '#0B5394'}}
+              onMouseEnter={(e) => !loading && (e.currentTarget.style.backgroundColor = '#094170')}
+              onMouseLeave={(e) => !loading && (e.currentTarget.style.backgroundColor = '#0B5394')}
             >
               {loading ? "Signing in..." : "Sign In"}
             </button>
@@ -93,7 +96,7 @@ export default function LoginPage() {
 
           <div className="text-center text-sm text-gray-600">
             Don't have an account?{" "}
-            <Link href="/auth/signup" className="text-indigo-600 hover:text-indigo-700 font-medium">
+            <Link href="/auth/signup" className="font-medium" style={{color: '#0B5394'}}>
               Create one
             </Link>
           </div>

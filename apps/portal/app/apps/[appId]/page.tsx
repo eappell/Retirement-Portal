@@ -9,6 +9,42 @@ import { Header } from "@/components/Header";
 import { IFrameWrapper } from "@/components/IFrameWrapper";
 import { db } from "@/lib/firebase";
 import { collection, getDocs, query, where } from "firebase/firestore";
+import {
+  CubeIcon,
+  CalculatorIcon,
+  ChartBarIcon,
+  CurrencyDollarIcon,
+  CreditCardIcon,
+  GlobeAltIcon,
+  RocketLaunchIcon,
+  BuildingOfficeIcon,
+  HomeIcon,
+  UserGroupIcon,
+  DocumentTextIcon,
+  ChatBubbleLeftIcon,
+  ShoppingCartIcon,
+  SparklesIcon,
+  BoltIcon,
+} from "@heroicons/react/24/outline";
+
+// Available HeroIcons mapping
+const AVAILABLE_ICONS = [
+  { name: "Calculator", component: CalculatorIcon },
+  { name: "Chart Bar", component: ChartBarIcon },
+  { name: "Currency Dollar", component: CurrencyDollarIcon },
+  { name: "Credit Card", component: CreditCardIcon },
+  { name: "Globe", component: GlobeAltIcon },
+  { name: "Rocket", component: RocketLaunchIcon },
+  { name: "Building", component: BuildingOfficeIcon },
+  { name: "Home", component: HomeIcon },
+  { name: "User Group", component: UserGroupIcon },
+  { name: "Document", component: DocumentTextIcon },
+  { name: "Chat", component: ChatBubbleLeftIcon },
+  { name: "Shopping Cart", component: ShoppingCartIcon },
+  { name: "Sparkles", component: SparklesIcon },
+  { name: "Bolt", component: BoltIcon },
+  { name: "Cube", component: CubeIcon },
+];
 
 // Fallback registry for default apps
 const DEFAULT_APPS: Record<string, any> = {
@@ -165,14 +201,26 @@ export default function AppPage() {
 
       {/* App Info Bar */}
       <div className="bg-white border-b border-gray-200">
-        <div className="max-w-7xl mx-auto px-4 py-2 sm:px-6 lg:px-8 flex items-center justify-between">
-          <div className="flex-1">
-            <h2 className="text-lg font-semibold text-gray-900">
-              {appTitle || finalAppName}
-            </h2>
-            {appDescription && (
-              <p className="text-sm text-gray-600">{appDescription}</p>
-            )}
+        <div className="max-w-7xl mx-auto px-4 py-3 sm:px-6 lg:px-8 flex items-center justify-between">
+          <div className="flex items-center gap-4 flex-1">
+            {/* App Icon */}
+            {(() => {
+              const iconData = AVAILABLE_ICONS.find(i => i.name === appConfig.icon);
+              if (iconData) {
+                const IconComponent = iconData.component;
+                return <IconComponent className="h-8 w-8 text-gray-700 dark:text-gray-300" />;
+              }
+              return <CubeIcon className="h-8 w-8 text-gray-700 dark:text-gray-300" />;
+            })()}
+            {/* App Name and Description */}
+            <div className="flex-1">
+              <h2 className="text-lg font-semibold text-gray-900">
+                {appConfig.name}
+              </h2>
+              {appConfig.description && (
+                <p className="text-sm text-gray-600">{appConfig.description}</p>
+              )}
+            </div>
           </div>
           <div id="app-toolbar-placeholder" className="flex-shrink-0 flex items-center gap-2" />
         </div>

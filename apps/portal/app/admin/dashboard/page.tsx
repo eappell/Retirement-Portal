@@ -12,6 +12,12 @@ import {
   where,
   getDocs,
 } from "firebase/firestore";
+import {
+  ArrowDownTrayIcon,
+  UsersIcon,
+  ChartBarIcon,
+  Cog6ToothIcon,
+} from "@heroicons/react/24/outline";
 
 interface UserStats {
   totalUsers: number;
@@ -150,7 +156,7 @@ export default function AdminDashboard() {
   if (!mounted || tierLoading || loading) {
     return (
       <div className="flex min-h-screen items-center justify-center">
-        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-indigo-600"></div>
+        <div className="animate-spin rounded-full h-12 w-12 border-b-2" style={{borderColor: '#0B5394'}}></div>
       </div>
     );
   }
@@ -160,7 +166,7 @@ export default function AdminDashboard() {
   }
 
   return (
-    <div className="min-h-screen bg-gray-50">
+    <div className="min-h-screen bg-background">
       <Header />
 
       <main className="max-w-7xl mx-auto px-4 py-12 sm:px-6 lg:px-8">
@@ -169,11 +175,52 @@ export default function AdminDashboard() {
           <p className="text-gray-600 mt-2">System analytics and user management</p>
         </div>
 
+        {/* Admin Actions */}
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
+          <button 
+            className="inline-flex items-center justify-center gap-2 text-white font-semibold py-3 px-6 rounded-lg transition-colors"
+            style={{backgroundColor: '#0B5394'}}
+            onMouseEnter={(e) => e.currentTarget.style.backgroundColor = '#094170'}
+            onMouseLeave={(e) => e.currentTarget.style.backgroundColor = '#0B5394'}
+          >
+            <ArrowDownTrayIcon className="h-5 w-5" />
+            Export User Data
+          </button>
+          <button 
+            className="inline-flex items-center justify-center gap-2 text-white font-semibold py-3 px-6 rounded-lg transition-colors"
+            style={{backgroundColor: '#6b5e62'}}
+            onMouseEnter={(e) => e.currentTarget.style.backgroundColor = '#5a4e52'}
+            onMouseLeave={(e) => e.currentTarget.style.backgroundColor = '#6b5e62'}
+          >
+            <UsersIcon className="h-5 w-5" />
+            View User List
+          </button>
+          <button 
+            className="inline-flex items-center justify-center gap-2 text-white font-semibold py-3 px-6 rounded-lg transition-colors"
+            style={{backgroundColor: '#0B5394'}}
+            onMouseEnter={(e) => e.currentTarget.style.backgroundColor = '#094170'}
+            onMouseLeave={(e) => e.currentTarget.style.backgroundColor = '#0B5394'}
+          >
+            <ChartBarIcon className="h-5 w-5" />
+            View Analytics Events
+          </button>
+          <a
+            href="/admin/apps"
+            className="inline-flex items-center justify-center gap-2 text-white font-semibold py-3 px-6 rounded-lg transition-colors"
+            style={{backgroundColor: '#6b5e62'}}
+            onMouseEnter={(e) => e.currentTarget.style.backgroundColor = '#5a4e52'}
+            onMouseLeave={(e) => e.currentTarget.style.backgroundColor = '#6b5e62'}
+          >
+            <Cog6ToothIcon className="h-5 w-5" />
+            Manage Applications
+          </a>
+        </div>
+
         {/* Key Metrics */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
           <div className="bg-white rounded-lg shadow-lg p-6">
             <h3 className="text-gray-600 text-sm font-semibold uppercase">Total Users</h3>
-            <p className="text-3xl font-bold text-indigo-600 mt-2">{stats.totalUsers}</p>
+            <p className="text-3xl font-bold mt-2" style={{color: '#0B5394'}}>{stats.totalUsers}</p>
             <p className="text-xs text-gray-500 mt-2">
               {stats.paidUsers} paid • {stats.freeUsers} free
             </p>
@@ -181,7 +228,7 @@ export default function AdminDashboard() {
 
           <div className="bg-white rounded-lg shadow-lg p-6">
             <h3 className="text-gray-600 text-sm font-semibold uppercase">Active Users</h3>
-            <p className="text-3xl font-bold text-green-600 mt-2">{analytics.monthlyActiveUsers}</p>
+            <p className="text-3xl font-bold mt-2" style={{color: '#0B5394'}}>{analytics.monthlyActiveUsers}</p>
             <p className="text-xs text-gray-500 mt-2">
               {analytics.dailyActiveUsers} daily • {analytics.weeklyActiveUsers} weekly
             </p>
@@ -189,7 +236,7 @@ export default function AdminDashboard() {
 
           <div className="bg-white rounded-lg shadow-lg p-6">
             <h3 className="text-gray-600 text-sm font-semibold uppercase">Total Queries</h3>
-            <p className="text-3xl font-bold text-purple-600 mt-2">{stats.totalQueries}</p>
+            <p className="text-3xl font-bold mt-2" style={{color: '#0B5394'}}>{stats.totalQueries}</p>
             <p className="text-xs text-gray-500 mt-2">
               Avg {stats.averageQueriesPerUser} per user
             </p>
@@ -215,10 +262,11 @@ export default function AdminDashboard() {
                     {stats.freeUsers} ({Math.round((stats.freeUsers / stats.totalUsers) * 100)}%)
                   </span>
                 </div>
-                <div className="w-full bg-gray-200 rounded-full h-2">
+                <div className="w-full rounded-full h-2" style={{backgroundColor: '#E8E3DF'}}>
                   <div
-                    className="bg-blue-600 h-2 rounded-full"
+                    className="h-2 rounded-full"
                     style={{
+                      backgroundColor: '#0B5394',
                       width: `${(stats.freeUsers / stats.totalUsers) * 100}%`,
                     }}
                   ></div>
@@ -232,10 +280,11 @@ export default function AdminDashboard() {
                     {stats.paidUsers} ({Math.round((stats.paidUsers / stats.totalUsers) * 100)}%)
                   </span>
                 </div>
-                <div className="w-full bg-gray-200 rounded-full h-2">
+                <div className="w-full rounded-full h-2" style={{backgroundColor: '#E8E3DF'}}>
                   <div
-                    className="bg-purple-600 h-2 rounded-full"
+                    className="h-2 rounded-full"
                     style={{
+                      backgroundColor: '#BFCDE0',
                       width: `${(stats.paidUsers / stats.totalUsers) * 100}%`,
                     }}
                   ></div>
@@ -271,7 +320,7 @@ export default function AdminDashboard() {
                     <span className="text-gray-700">
                       {index + 1}. {app.name}
                     </span>
-                    <span className="bg-indigo-100 text-indigo-800 px-3 py-1 rounded-full text-sm font-semibold">
+                    <span className="px-3 py-1 rounded-full text-sm font-semibold" style={{backgroundColor: '#BFCDE0', color: '#6b5e62'}}>
                       {app.count} launches
                     </span>
                   </div>
@@ -300,27 +349,6 @@ export default function AdminDashboard() {
           </div>
         </div>
 
-        {/* Admin Actions */}
-        <div className="bg-white rounded-lg shadow-lg p-8">
-          <h2 className="text-xl font-bold text-gray-900 mb-6">Admin Actions</h2>
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-            <button className="bg-indigo-600 hover:bg-indigo-700 text-white font-semibold py-2 px-6 rounded-lg transition-colors">
-              Export User Data
-            </button>
-            <button className="bg-gray-600 hover:bg-gray-700 text-white font-semibold py-2 px-6 rounded-lg transition-colors">
-              View User List
-            </button>
-            <button className="bg-orange-600 hover:bg-orange-700 text-white font-semibold py-2 px-6 rounded-lg transition-colors">
-              View Analytics Events
-            </button>
-            <a
-              href="/admin/apps"
-              className="bg-purple-600 hover:bg-purple-700 text-white font-semibold py-2 px-6 rounded-lg transition-colors text-center"
-            >
-              Manage Applications
-            </a>
-          </div>
-        </div>
       </main>
     </div>
   );

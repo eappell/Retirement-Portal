@@ -57,7 +57,7 @@ export function Header() {
         <div className="flex justify-between items-center">
           {/* Logo/Brand */}
           <Link href="/dashboard" className="flex items-center gap-2">
-            <span className="text-2xl font-bold text-indigo-600 dark:text-indigo-400">🏛️</span>
+            <span className="text-2xl font-bold" style={{color: '#0B5394'}}>🏛️</span>
             <span className="text-xl font-bold text-gray-900 dark:text-slate-100">RetireWise</span>
           </Link>
 
@@ -66,7 +66,10 @@ export function Header() {
             <div className="group relative">
               <Link
                 href="/dashboard"
-                className="text-gray-700 hover:text-indigo-600 font-medium transition-colors dark:text-slate-300 dark:hover:text-indigo-400"
+                className="text-gray-700 font-medium transition-colors dark:text-slate-300"
+                style={{color: '#6b5e62'}}
+                onMouseEnter={(e) => e.currentTarget.style.color = '#0B5394'}
+                onMouseLeave={(e) => e.currentTarget.style.color = '#6b5e62'}
               >
                 Dashboard
               </Link>
@@ -177,7 +180,7 @@ export function Header() {
                 </div>
               </div>
               <div className="relative group">
-                <button className="w-10 h-10 rounded-full bg-indigo-600 text-white flex items-center justify-center font-semibold hover:bg-indigo-700 transition-colors dark:bg-indigo-500 dark:hover:bg-indigo-600">
+                <button className="w-10 h-10 rounded-full text-white flex items-center justify-center font-semibold transition-colors" style={{backgroundColor: '#0B5394'}} onMouseEnter={(e) => e.currentTarget.style.backgroundColor = '#094170'} onMouseLeave={(e) => e.currentTarget.style.backgroundColor = '#0B5394'}>
                   {user?.email ? user.email[0].toUpperCase() : "G"}
                 </button>
                 <div className="absolute top-full right-0 mt-2 px-2 py-1 bg-gray-900 text-white text-xs rounded opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all whitespace-nowrap z-50 dark:bg-gray-800">
