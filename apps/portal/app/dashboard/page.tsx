@@ -6,6 +6,7 @@ import {useAuth} from "@/lib/auth";
 import {useUserTier} from "@/lib/useUserTier";
 import {useAnalytics} from "@/lib/useAnalytics";
 import Link from "next/link";
+import {Header} from "@/components/Header";
 
 interface App {
   id: string;
@@ -34,7 +35,7 @@ const APPS: App[] = [
 
 export default function DashboardPage() {
   const router = useRouter();
-  const {user, logout} = useAuth();
+  const {user} = useAuth();
   const {tier, subscriptionExpiry, loading: tierLoading} = useUserTier();
   const {trackEvent} = useAnalytics();
   const [mounted, setMounted] = useState(false);
@@ -48,15 +49,6 @@ export default function DashboardPage() {
       router.push("/");
     }
   }, [user, mounted, router]);
-
-  const handleLogout = async () => {
-    await trackEvent({
-      eventType: "logout",
-      application: "portal",
-    });
-    await logout();
-    router.push("/");
-  };
 
   const handleAppClick = (app: App) => {
     trackEvent({
@@ -85,22 +77,8 @@ export default function DashboardPage() {
     : null;
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100">
-      {/* Header */}
-      <header className="bg-white shadow">
-        <div className="max-w-7xl mx-auto px-4 py-6 sm:px-6 lg:px-8 flex justify-between items-center">
-          <div>
-            <h1 className="text-3xl font-bold text-gray-900">Retirement Portal</h1>
-            <p className="text-gray-600 mt-1">Welcome back!</p>
-          </div>
-          <button
-            onClick={handleLogout}
-            className="bg-red-600 hover:bg-red-700 text-white font-semibold py-2 px-4 rounded-lg transition-colors"
-          >
-            Logout
-          </button>
-        </div>
-      </header>
+    <div className="min-h-screen bg-gray-50">
+      <Header />
 
       <main className="max-w-7xl mx-auto px-4 py-12 sm:px-6 lg:px-8">
         {/* User Info */}
@@ -188,7 +166,7 @@ export default function DashboardPage() {
             {APPS.map((app) => (
               <Link
                 key={app.id}
-                href={`/apps/${app.id}?name=${encodeURIComponent(app.name)}&url=${encodeURIComponent(app.url)}`}
+                href={`/apps?appId=${app.id}&name=${encodeURIComponent(app.name)}&url=${encodeURIComponent(app.url)}`}
                 onClick={() => handleAppClick(app)}
                 className="bg-white rounded-lg shadow-lg hover:shadow-xl transition-shadow p-6 block group"
               >

@@ -1,0 +1,265 @@
+"use client";
+
+import { useState } from "react";
+import Link from "next/link";
+import { useRouter } from "next/navigation";
+import { useAuth } from "@/lib/auth";
+import { useUserTier } from "@/lib/useUserTier";
+import { useAnalytics } from "@/lib/useAnalytics";
+import { useTheme } from "@/lib/theme";
+
+export function Header() {
+  const router = useRouter();
+  const { user, logout } = useAuth();
+  const { tier, loading: tierLoading } = useUserTier();
+  const { trackEvent } = useAnalytics();
+  const { theme, toggleTheme } = useTheme();
+  const [isMenuOpen, setIsMenuOpen] = useState(false);
+
+  const handleLogout = async () => {
+    await trackEvent({
+      eventType: "logout",
+      application: "portal",
+    });
+    await logout();
+    setIsMenuOpen(false);
+    router.push("/");
+  };
+
+  const handleNavClick = (path: string) => {
+    router.push(path);
+    setIsMenuOpen(false);
+  };
+
+  const getTierBadgeColor = () => {
+    switch (tier) {
+      case "admin":
+        return "bg-red-100 text-red-800";
+      case "paid":
+        return "bg-purple-100 text-purple-800";
+      case "free":
+        return "bg-blue-100 text-blue-800";
+      default:
+        return "bg-gray-100 text-gray-800";
+    }
+  };
+
+  const getTierLabel = () => {
+    if (user?.isAnonymous) return "Guest";
+    if (tier === "admin") return "Admin";
+    if (tier === "paid") return "Premium";
+    return "Free";
+  };
+
+  return (
+    <header className="bg-white shadow sticky top-0 z-50 dark:bg-slate-800 dark:shadow-lg">
+      <div className="max-w-7xl mx-auto px-4 py-4 sm:px-6 lg:px-8">
+        <div className="flex justify-between items-center">
+          {/* Logo/Brand */}
+          <Link href="/dashboard" className="flex items-center gap-2">
+            <span className="text-2xl font-bold text-indigo-600 dark:text-indigo-400">🏛️</span>
+            <span className="text-xl font-bold text-gray-900 dark:text-slate-100">Retire Portal</span>
+          </Link>
+
+          {/* Desktop Navigation */}
+          <nav className="hidden md:flex items-center gap-8">
+            <div className="group relative">
+              <Link
+                href="/dashboard"
+                className="text-gray-700 hover:text-indigo-600 font-medium transition-colors dark:text-slate-300 dark:hover:text-indigo-400"
+              >
+                Dashboard
+              </Link>
+              <div className="absolute top-full left-0 mt-2 px-2 py-1 bg-gray-900 text-white text-xs rounded opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all whitespace-nowrap">
+                View your dashboard
+              </div>
+            </div>
+            {!user?.isAnonymous && !tierLoading && tier !== "paid" && tier !== "admin" && (
+              <div className="group relative">
+                <Link
+                  href="/upgrade"
+                  className="text-gray-700 hover:text-purple-600 font-medium transition-colors dark:text-slate-300 dark:hover:text-purple-400"
+                >
+                  Upgrade
+                </Link>
+                <div className="absolute top-full left-0 mt-2 px-2 py-1 bg-gray-900 text-white text-xs rounded opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all whitespace-nowrap">
+                  Upgrade to premium
+                </div>
+              </div>
+            )}
+          </nav>
+
+          {/* User Menu */}
+          <div className="flex items-center gap-4">
+            {/* Tier Badge */}
+            {!tierLoading && (
+              <span
+                className={`hidden sm:inline-block px-3 py-1 rounded-full text-sm font-semibold ${getTierBadgeColor()}`}
+              >
+                {getTierLabel()}
+              </span>
+            )}
+
+            {/* Theme Toggle Button */}
+            <button
+              onClick={toggleTheme}
+              className="hidden sm:inline-flex items-center justify-center p-2 rounded-lg text-gray-700 hover:bg-gray-100 dark:text-gray-300 dark:hover:bg-gray-800 transition-colors group relative"
+              title={`Switch to ${theme === "light" ? "dark" : "light"} mode`}
+            >
+              {theme === "light" ? (
+                <svg
+                  className="h-5 w-5"
+                  fill="currentColor"
+                  viewBox="0 0 20 20"
+                >
+                  <path d="M17.293 13.293A8 8 0 016.707 2.707a8.001 8.001 0 1010.586 10.586z" />
+                </svg>
+              ) : (
+                <svg
+                  className="h-5 w-5"
+                  fill="currentColor"
+                  viewBox="0 0 20 20"
+                >
+                  <path
+                    fillRule="evenodd"
+                    d="M10 2a1 1 0 011 1v1a1 1 0 11-2 0V3a1 1 0 011-1zm4 8a4 4 0 11-8 0 4 4 0 018 0zm-.464 4.536l.707.707a1 1 0 001.414-1.414l-.707-.707a1 1 0 00-1.414 1.414zm2.12-10.607a1 1 0 010 1.414l-.707.707a1 1 0 11-1.414-1.414l.707-.707a1 1 0 011.414 0zM17 11a1 1 0 100-2h-1a1 1 0 100 2h1zm-7 4a1 1 0 011 1v1a1 1 0 11-2 0v-1a1 1 0 011-1zM5.05 6.464A1 1 0 106.464 5.05l-.707-.707a1 1 0 00-1.414 1.414l.707.707zm5.657-9.193a1 1 0 00-1.414 0l-.707.707A1 1 0 005.05 6.464l.707-.707a1 1 0 001.414-1.414zM5 11a1 1 0 100-2H4a1 1 0 100 2h1z"
+                    clipRule="evenodd"
+                  />
+                </svg>
+              )}
+              <div className="absolute top-full left-1/2 transform -translate-x-1/2 mt-2 px-2 py-1 bg-gray-900 text-white text-xs rounded opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all whitespace-nowrap z-50 dark:bg-gray-700">
+                {theme === "light" ? "Dark mode" : "Light mode"}
+              </div>
+            </button>
+
+            {/* Mobile Menu Button */}
+            <button
+              onClick={() => setIsMenuOpen(!isMenuOpen)}
+              className="md:hidden inline-flex items-center justify-center p-2 rounded-md text-gray-700 hover:bg-gray-100 dark:text-slate-300 dark:hover:bg-slate-700"
+            >
+              <svg
+                className="h-6 w-6"
+                fill="none"
+                stroke="currentColor"
+                viewBox="0 0 24 24"
+              >
+                {isMenuOpen ? (
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth={2}
+                    d="M6 18L18 6M6 6l12 12"
+                  />
+                ) : (
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth={2}
+                    d="M4 6h16M4 12h16M4 18h16"
+                  />
+                )}
+              </svg>
+            </button>
+
+            {/* Desktop User Menu */}
+            <div className="hidden md:flex items-center gap-4 border-l border-gray-200 dark:border-slate-700 pl-4">
+              <div className="text-right group relative">
+                <p className="text-sm font-semibold text-gray-900 dark:text-slate-100 cursor-help">
+                  {user?.email || "Guest User"}
+                </p>
+                <p className="text-xs text-gray-600 dark:text-slate-400">
+                  {tierLoading ? "Loading..." : getTierLabel()}
+                </p>
+                <div className="absolute top-full right-0 mt-2 px-3 py-2 bg-gray-900 text-white text-xs rounded opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all whitespace-nowrap z-50 dark:bg-gray-800">
+                  {user?.metadata?.creationTime
+                    ? `Member since ${new Date(user.metadata.creationTime).toLocaleDateString()}`
+                    : "Account information"}
+                </div>
+              </div>
+              <div className="relative group">
+                <button className="w-10 h-10 rounded-full bg-indigo-600 text-white flex items-center justify-center font-semibold hover:bg-indigo-700 transition-colors dark:bg-indigo-500 dark:hover:bg-indigo-600">
+                  {user?.email ? user.email[0].toUpperCase() : "G"}
+                </button>
+                <div className="absolute top-full right-0 mt-2 px-2 py-1 bg-gray-900 text-white text-xs rounded opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all whitespace-nowrap z-50 dark:bg-gray-800">
+                  Click for menu
+                </div>
+                <div className="absolute right-0 mt-2 w-48 bg-white rounded-lg shadow-lg opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all dark:bg-slate-800 dark:shadow-2xl z-50">
+                  <button
+                    onClick={() => handleNavClick("/profile")}
+                    className="block w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 rounded-t-lg dark:text-slate-200 dark:hover:bg-slate-700"
+                  >
+                    My Profile
+                  </button>
+                  {tier === "admin" && (
+                    <button
+                      onClick={() => handleNavClick("/admin/dashboard")}
+                      className="block w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 dark:text-slate-200 dark:hover:bg-slate-700"
+                    >
+                      Admin Dashboard
+                    </button>
+                  )}
+                  <button
+                    onClick={handleLogout}
+                    className="block w-full text-left px-4 py-2 text-sm text-red-600 hover:bg-red-50 rounded-b-lg border-t border-gray-200 dark:text-red-400 dark:hover:bg-slate-700 dark:border-slate-700"
+                  >
+                    Logout
+                  </button>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        {/* Mobile Menu */}
+        {isMenuOpen && (
+          <div className="md:hidden mt-4 pt-4 border-t border-gray-200 dark:border-slate-700 space-y-2">
+            <button
+              onClick={() => handleNavClick("/dashboard")}
+              className="block w-full text-left px-4 py-2 text-gray-700 hover:bg-gray-100 rounded dark:text-slate-300 dark:hover:bg-slate-700"
+            >
+              Dashboard
+            </button>
+            {!user?.isAnonymous && tier !== "paid" && tier !== "admin" && (
+              <button
+                onClick={() => handleNavClick("/upgrade")}
+                className="block w-full text-left px-4 py-2 text-gray-700 hover:bg-gray-100 rounded dark:text-slate-300 dark:hover:bg-slate-700"
+              >
+                Upgrade
+              </button>
+            )}
+            <button
+              onClick={toggleTheme}
+              className="block w-full text-left px-4 py-2 text-gray-700 hover:bg-gray-100 rounded flex items-center gap-2 dark:text-slate-300 dark:hover:bg-slate-700"
+            >
+              {theme === "light" ? (
+                <>
+                  <svg className="h-5 w-5" fill="currentColor" viewBox="0 0 20 20">
+                    <path d="M17.293 13.293A8 8 0 016.707 2.707a8.001 8.001 0 1010.586 10.586z" />
+                  </svg>
+                  Dark Mode
+                </>
+              ) : (
+                <>
+                  <svg className="h-5 w-5" fill="currentColor" viewBox="0 0 20 20">
+                    <path
+                      fillRule="evenodd"
+                      d="M10 2a1 1 0 011 1v1a1 1 0 11-2 0V3a1 1 0 011-1zm4 8a4 4 0 11-8 0 4 4 0 018 0zm-.464 4.536l.707.707a1 1 0 001.414-1.414l-.707-.707a1 1 0 00-1.414 1.414zm2.12-10.607a1 1 0 010 1.414l-.707.707a1 1 0 11-1.414-1.414l.707-.707a1 1 0 011.414 0zM17 11a1 1 0 100-2h-1a1 1 0 100 2h1zm-7 4a1 1 0 011 1v1a1 1 0 11-2 0v-1a1 1 0 011-1zM5.05 6.464A1 1 0 106.464 5.05l-.707-.707a1 1 0 00-1.414 1.414l.707.707zm5.657-9.193a1 1 0 00-1.414 0l-.707.707A1 1 0 005.05 6.464l.707-.707a1 1 0 001.414-1.414zM5 11a1 1 0 100-2H4a1 1 0 100 2h1z"
+                      clipRule="evenodd"
+                    />
+                  </svg>
+                  Light Mode
+                </>
+              )}
+            </button>
+            <button
+              onClick={handleLogout}
+              className="block w-full text-left px-4 py-2 text-red-600 hover:bg-red-50 rounded dark:text-red-400 dark:hover:bg-slate-700"
+            >
+              Logout
+            </button>
+          </div>
+        )}
+      </div>
+    </header>
+  );
+}
