@@ -213,8 +213,8 @@ export default function DashboardPage() {
 
           {!isPaid && !isAdmin && !isGuest && (
             <div className="mt-6 bg-gradient-to-r from-purple-50 to-indigo-50 dark:from-purple-900/30 dark:to-indigo-900/30 border border-purple-200 dark:border-purple-700 rounded-lg p-4">
-              <h4 className="font-semibold mb-2" style={{color: '#1f2937'}}>Upgrade to Premium</h4>
-              <p className="text-sm mb-4" style={{color: '#374151'}}>
+              <h4 className="font-semibold mb-2 dark:!text-purple-100" style={{color: '#1f2937'}}>Upgrade to Premium</h4>
+              <p className="text-sm mb-4 dark:!text-purple-200" style={{color: '#374151'}}>
                 Get unlimited access to all tools and remove daily query limits.
               </p>
                             <Link
@@ -274,19 +274,19 @@ export default function DashboardPage() {
                           const iconData = AVAILABLE_ICONS.find(i => i.name === app.icon);
                           if (iconData) {
                             const IconComponent = iconData.component;
-                            return <IconComponent className="h-10 w-10" style={{color: '#6b5e62'}} />;
+                            return <IconComponent className="h-10 w-10" style={{color: '#f3f4f6'}} />;
                           }
-                          return <CubeIcon className="h-10 w-10" style={{color: '#6b5e62'}} />;
+                          return <CubeIcon className="h-10 w-10" style={{color: '#f3f4f6'}} />;
                         })()}
                       </div>
                       <div>
-                        <h3 className="text-xl font-bold group-hover:transition-colors" style={{color: '#6b5e62'}} onMouseEnter={(e) => e.currentTarget.style.color = '#0B5394'} onMouseLeave={(e) => e.currentTarget.style.color = '#6b5e62'}>
+                        <h3 className="text-xl font-bold group-hover:transition-colors" style={{color: '#f3f4f6'}} onMouseEnter={(e) => e.currentTarget.style.color = '#ffffff'} onMouseLeave={(e) => e.currentTarget.style.color = '#f3f4f6'}>
                           {app.name}
                         </h3>
-                        <p className="mt-2" style={{color: '#6b5e62'}}>{app.description}</p>
+                        <p className="mt-2" style={{color: '#e5e7eb'}}>{app.description}</p>
                       </div>
                     </div>
-                    <div className="text-2xl" style={{color: '#6b5e62'}}>→</div>
+                    <div className="text-2xl" style={{color: '#f3f4f6'}}>→</div>
                   </div>
                 </Link>
               );
