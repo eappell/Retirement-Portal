@@ -213,8 +213,8 @@ export default function DashboardPage() {
 
           {!isPaid && !isAdmin && !isGuest && (
             <div className="mt-6 bg-gradient-to-r from-purple-50 to-indigo-50 dark:from-purple-900/30 dark:to-indigo-900/30 border border-purple-200 dark:border-purple-700 rounded-lg p-4">
-              <h4 className="font-semibold text-gray-900 dark:text-purple-100 mb-2">Upgrade to Premium</h4>
-              <p className="text-gray-800 dark:text-purple-200 text-sm mb-4">
+              <h4 className="font-semibold mb-2" style={{color: '#1f2937'}}>Upgrade to Premium</h4>
+              <p className="text-sm mb-4" style={{color: '#374151'}}>
                 Get unlimited access to all tools and remove daily query limits.
               </p>
                             <Link
@@ -250,12 +250,12 @@ export default function DashboardPage() {
           <h2 className="text-2xl font-bold text-gray-900 mb-6">Available Tools</h2>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
             {apps.map((app, index) => {
-              // Create different gradients using the color palette
+              // Create different gradients using vibrant standard colors
               const gradients = [
-                'linear-gradient(135deg, #BFCDE0 0%, #E8E3DF 100%)',
-                'linear-gradient(135deg, #E8E3DF 0%, #D2CAC1 100%)',
-                'linear-gradient(135deg, #D2CAC1 0%, #BFCDE0 100%)',
-                'linear-gradient(135deg, #FEFCFD 0%, #BFCDE0 100%)',
+                'linear-gradient(135deg, #60a5fa 0%, #3b82f6 100%)', // Blue
+                'linear-gradient(135deg, #34d399 0%, #10b981 100%)', // Green
+                'linear-gradient(135deg, #fbbf24 0%, #f59e0b 100%)', // Yellow/Amber
+                'linear-gradient(135deg, #a78bfa 0%, #8b5cf6 100%)', // Purple
               ];
               const gradient = gradients[index % gradients.length];
               
