@@ -18,6 +18,10 @@ service cloud.firestore {
       return getUserTier(userId) == 'paid';
     }
 
+    function isAdmin() {
+      return isAuthenticated() && getUserTier(request.auth.uid) == 'admin';
+    }
+
     // User profiles - only authenticated users can read their own profile
     match /users/{userId} {
       allow read: if isOwner(userId);
@@ -65,19 +69,19 @@ service cloud.firestore {
 
     // Admin access to analytics (for analytics dashboard)
     match /analytics/{document=**} {
-      allow read: if request.auth.token.isAdmin == true;
+      allow read: if isAdmin();
     }
 
     // Application configurations - admin only for write, all authenticated users can read
     match /apps/{document=**} {
       allow read: if isAuthenticated();
-      allow create, update, delete: if request.auth.token.isAdmin == true;
+      allow create, update, delete: if isAdmin();
     }
 
     // Public data (if needed for read-only recommendations)
     match /publicData/{document=**} {
       allow read: if true;
-      allow write: if request.auth.token.isAdmin == true;
+      allow write: if isAdmin();
     }
   }
 }

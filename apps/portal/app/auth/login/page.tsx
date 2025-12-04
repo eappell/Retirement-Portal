@@ -48,7 +48,7 @@ export default function LoginPage() {
         <div className="bg-white rounded-lg shadow-lg p-8 space-y-6">
           <div className="text-center">
             <h1 className="text-2xl font-bold text-gray-900">Sign In</h1>
-            <p className="text-gray-600 mt-2">Welcome back to your retirement portal</p>
+            <p className="text-gray-600 mt-2">Welcome back to RetireWise</p>
           </div>
 
           {error && (
@@ -85,7 +85,7 @@ export default function LoginPage() {
             <button
               type="submit"
               disabled={loading}
-              className="w-full bg-indigo-600 hover:bg-indigo-700 disabled:bg-gray-400 text-white font-semibold py-2 px-4 rounded-lg transition-colors"
+              className="w-full bg-green-600 hover:bg-green-700 disabled:bg-gray-400 text-white font-semibold py-2 px-4 rounded-lg transition-colors"
             >
               {loading ? "Signing in..." : "Sign In"}
             </button>

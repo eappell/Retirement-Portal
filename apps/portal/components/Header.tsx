@@ -58,7 +58,7 @@ export function Header() {
           {/* Logo/Brand */}
           <Link href="/dashboard" className="flex items-center gap-2">
             <span className="text-2xl font-bold text-indigo-600 dark:text-indigo-400">🏛️</span>
-            <span className="text-xl font-bold text-gray-900 dark:text-slate-100">Retire Portal</span>
+            <span className="text-xl font-bold text-gray-900 dark:text-slate-100">RetireWise</span>
           </Link>
 
           {/* Desktop Navigation */}

@@ -15,7 +15,7 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "Retirement Portal - Plan Your Future",
+  title: "RetireWise - Plan Your Future",
   description: "Comprehensive retirement planning portal with multiple retirement calculators and AI recommendations",
 };
 
