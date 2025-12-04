@@ -50,9 +50,9 @@ export default function Home() {
             <Link
               href="/auth/login"
               className="block w-full text-white font-semibold py-3 px-4 rounded-lg text-center transition-colors"
-              style={{backgroundColor: '#0B5394'}}
-              onMouseEnter={(e) => e.currentTarget.style.backgroundColor = '#094170'}
-              onMouseLeave={(e) => e.currentTarget.style.backgroundColor = '#0B5394'}
+              style={{backgroundColor: '#22c55e'}}
+              onMouseEnter={(e) => e.currentTarget.style.backgroundColor = '#16a34a'}
+              onMouseLeave={(e) => e.currentTarget.style.backgroundColor = '#22c55e'}
             >
               Sign In
             </Link>
