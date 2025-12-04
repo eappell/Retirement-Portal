@@ -213,8 +213,8 @@ export default function DashboardPage() {
 
           {!isPaid && !isAdmin && !isGuest && (
             <div className="mt-6 bg-gradient-to-r from-purple-50 to-indigo-50 dark:from-purple-900/30 dark:to-indigo-900/30 border border-purple-200 dark:border-purple-700 rounded-lg p-4">
-              <h4 className="font-semibold mb-2 dark:!text-purple-100" style={{color: '#1f2937'}}>Upgrade to Premium</h4>
-              <p className="text-sm mb-4 dark:!text-purple-200" style={{color: '#374151'}}>
+              <h4 className="font-semibold mb-2 text-gray-900 dark:text-purple-100">Upgrade to Premium</h4>
+              <p className="text-sm mb-4 text-gray-800 dark:text-purple-200">
                 Get unlimited access to all tools and remove daily query limits.
               </p>
                             <Link
