@@ -108,10 +108,11 @@ export function IFrameWrapper({
       
       // Handle GET_SCENARIOS_RESPONSE - forward back to requesting iframe
       if (event.data?.type === "GET_SCENARIOS_RESPONSE") {
-        console.log("[Portal] Forwarding GET_SCENARIOS_RESPONSE");
-        // In a multi-iframe scenario, we'd route this to the healthcare cost iframe
-        // For now, it will be received by the healthcare cost app since it sent the request
-        window.postMessage(event.data, "*");
+        console.log("[Portal] Forwarding GET_SCENARIOS_RESPONSE to iframe");
+        // Forward back to the iframe (which sent the original GET_SCENARIOS request)
+        if (iframeRef.current) {
+          iframeRef.current.contentWindow?.postMessage(event.data, "*");
+        }
         return;
       }
       
