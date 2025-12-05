@@ -80,6 +80,42 @@ export function IFrameWrapper({
       console.log("IFrameWrapper received message:", event.data);
       // In production, verify the origin
       
+      // Handle healthcare data save request from Healthcare Cost app
+      if (event.data?.type === "SAVE_HEALTHCARE_DATA") {
+        console.log("[Portal] Saving healthcare data to portal localStorage:", event.data.data);
+        try {
+          localStorage.setItem('pendingHealthcareDataTransfer', JSON.stringify(event.data.data));
+          console.log("[Portal] Healthcare data saved successfully");
+        } catch (error) {
+          console.error("[Portal] Failed to save healthcare data:", error);
+        }
+        return;
+      }
+      
+      // Handle request for pending healthcare data from Retirement Planner
+      if (event.data?.type === "REQUEST_HEALTHCARE_DATA") {
+        console.log("[Portal] Retirement Planner requesting healthcare data");
+        const pendingData = localStorage.getItem('pendingHealthcareDataTransfer');
+        if (pendingData) {
+          console.log("[Portal] Sending healthcare data to Retirement Planner");
+          if (iframeRef.current) {
+            iframeRef.current.contentWindow?.postMessage(
+              {
+                type: 'HEALTHCARE_DATA_RESPONSE',
+                data: JSON.parse(pendingData)
+              },
+              "*"
+            );
+          }
+          // Clear after sending
+          localStorage.removeItem('pendingHealthcareDataTransfer');
+          console.log("[Portal] Cleared healthcare data from portal storage");
+        } else {
+          console.log("[Portal] No pending healthcare data found");
+        }
+        return;
+      }
+      
       // Handle cross-app data transfer requests
       if (event.data?.type === "APP_DATA_TRANSFER") {
         console.log("[Portal] Routing data transfer:", {
