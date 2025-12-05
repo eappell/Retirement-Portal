@@ -74,11 +74,47 @@ export function IFrameWrapper({
     }
   }, [theme, loading]);
 
-  // Listen for toolbar button messages from iframe
+  // Listen for toolbar button messages and app-to-app messages from iframe
   useEffect(() => {
     const handleMessage = (event: MessageEvent) => {
       console.log("IFrameWrapper received message:", event.data);
       // In production, verify the origin
+      
+      // Handle cross-app data transfer requests
+      if (event.data?.type === "APP_DATA_TRANSFER") {
+        console.log("[Portal] Routing data transfer:", {
+          from: event.data.sourceApp,
+          to: event.data.targetApp,
+          dataType: event.data.dataType,
+        });
+        
+        // Forward the message to all iframes (they'll filter by targetApp)
+        // In a multi-iframe setup, you'd need to track which iframe is which app
+        // For now, broadcast to the current iframe
+        if (iframeRef.current) {
+          iframeRef.current.contentWindow?.postMessage(event.data, "*");
+        }
+        return;
+      }
+      
+      // Handle GET_SCENARIOS request - forward to retirement planner iframe
+      if (event.data?.type === "GET_SCENARIOS") {
+        console.log("[Portal] Forwarding GET_SCENARIOS request");
+        if (iframeRef.current) {
+          iframeRef.current.contentWindow?.postMessage(event.data, "*");
+        }
+        return;
+      }
+      
+      // Handle GET_SCENARIOS_RESPONSE - forward back to requesting iframe
+      if (event.data?.type === "GET_SCENARIOS_RESPONSE") {
+        console.log("[Portal] Forwarding GET_SCENARIOS_RESPONSE");
+        // In a multi-iframe scenario, we'd route this to the healthcare cost iframe
+        // For now, it will be received by the healthcare cost app since it sent the request
+        window.postMessage(event.data, "*");
+        return;
+      }
+      
       if (event.data?.type === "TOOLBAR_BUTTONS") {
         console.log("Received TOOLBAR_BUTTONS, count:", event.data.buttons?.length);
         setToolbarButtons(event.data.buttons || []);
