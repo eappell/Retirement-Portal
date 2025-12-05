@@ -80,6 +80,20 @@ export function IFrameWrapper({
       console.log("IFrameWrapper received message:", event.data);
       // In production, verify the origin
       
+      // If iframe requests current theme, reply with the portal theme
+      if (event.data?.type === "REQUEST_THEME") {
+        if (iframeRef.current) {
+          iframeRef.current.contentWindow?.postMessage(
+            {
+              type: "THEME_CHANGE",
+              theme,
+            },
+            "*"
+          );
+        }
+        return;
+      }
+
       // Handle healthcare data save request from Healthcare Cost app
       if (event.data?.type === "SAVE_HEALTHCARE_DATA") {
         console.log("[Portal] Saving healthcare data to portal localStorage:", event.data.data);
