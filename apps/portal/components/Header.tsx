@@ -7,6 +7,7 @@ import { useAuth } from "@/lib/auth";
 import { useUserTier } from "@/lib/useUserTier";
 import { useAnalytics } from "@/lib/useAnalytics";
 import { useTheme } from "@/lib/theme";
+import { AppSwitcher } from "./AppSwitcher";
 
 export function Header() {
   const router = useRouter();
@@ -63,6 +64,7 @@ export function Header() {
 
           {/* Desktop Navigation */}
           <nav className="hidden md:flex items-center gap-8">
+            <AppSwitcher />
             <div className="group relative">
               <Link
                 href="/dashboard"
