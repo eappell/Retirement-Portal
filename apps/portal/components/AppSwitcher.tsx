@@ -6,7 +6,10 @@ import { ChevronDownIcon } from "@heroicons/react/24/outline";
 import {
   CalculatorIcon,
   HeartIcon,
+  CubeIcon,
 } from "@heroicons/react/24/outline";
+import { db } from "@/lib/firebase";
+import { collection, getDocs } from "firebase/firestore";
 
 interface App {
   id: string;
@@ -15,24 +18,10 @@ interface App {
   url: string;
 }
 
-const REGISTERED_APPS: App[] = [
-  {
-    id: "retirement-planner-ai",
-    name: "Retirement Planner AI",
-    icon: "Calculator",
-    url: "/apps/retirement-planner-ai",
-  },
-  {
-    id: "healthcare-cost-estimator",
-    name: "Healthcare Cost Estimator",
-    icon: "Heart",
-    url: "/apps/healthcare-cost-estimator",
-  },
-];
-
-const ICON_MAP: Record<string, any> = {
+const ICON_MAP: Record<string, React.ComponentType<{ className?: string }>> = {
   Calculator: CalculatorIcon,
   Heart: HeartIcon,
+  Cube: CubeIcon,
 };
 
 export function AppSwitcher() {
@@ -40,19 +29,50 @@ export function AppSwitcher() {
   const pathname = usePathname();
   const [isOpen, setIsOpen] = useState(false);
   const [currentApp, setCurrentApp] = useState<App | null>(null);
+  const [apps, setApps] = useState<App[]>([]);
+  const [loading, setLoading] = useState(true);
   const dropdownRef = useRef<HTMLDivElement>(null);
+
+  // Load apps from Firestore
+  useEffect(() => {
+    const loadApps = async () => {
+      try {
+        const appsRef = collection(db, "apps");
+        const snapshot = await getDocs(appsRef);
+        const loadedApps: App[] = [];
+
+        snapshot.forEach((doc) => {
+          const data = doc.data();
+          loadedApps.push({
+            id: data.id,
+            name: data.name,
+            icon: data.icon || "Cube",
+            url: `/apps/${data.id}`,
+          });
+        });
+
+        setApps(loadedApps);
+      } catch (error) {
+        console.error("Error loading apps:", error);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    loadApps();
+  }, []);
 
   // Determine current app from pathname
   useEffect(() => {
     const appMatch = pathname?.match(/\/apps\/([^/?]+)/);
-    if (appMatch) {
+    if (appMatch && apps.length > 0) {
       const appId = appMatch[1];
-      const app = REGISTERED_APPS.find((a) => a.id === appId);
+      const app = apps.find((a) => a.id === appId);
       setCurrentApp(app || null);
     } else {
       setCurrentApp(null);
     }
-  }, [pathname]);
+  }, [pathname, apps]);
 
   // Close dropdown when clicking outside
   useEffect(() => {
@@ -98,42 +118,52 @@ export function AppSwitcher() {
           <div className="px-3 py-2 text-xs font-semibold text-gray-500 dark:text-slate-400 uppercase">
             Switch App
           </div>
-          {REGISTERED_APPS.map((app) => {
-            const Icon = ICON_MAP[app.icon] || CalculatorIcon;
-            const isActive = currentApp ? app.id === currentApp.id : false;
+          {loading ? (
+            <div className="px-4 py-2 text-gray-500 dark:text-gray-400">
+              Loading apps...
+            </div>
+          ) : apps.length === 0 ? (
+            <div className="px-4 py-2 text-gray-500 dark:text-gray-400">
+              No apps available
+            </div>
+          ) : (
+            apps.map((app) => {
+              const Icon = ICON_MAP[app.icon] || CalculatorIcon;
+              const isActive = currentApp ? app.id === currentApp.id : false;
 
-            return (
-              <button
-                key={app.id}
-                onClick={() => handleAppSelect(app)}
-                className={`w-full flex items-center gap-3 px-3 py-2 hover:bg-gray-50 dark:hover:bg-slate-700 transition-colors ${
-                  isActive ? "bg-blue-50 dark:bg-slate-700" : ""
-                }`}
-              >
-                <Icon
-                  className={`w-5 h-5 ${
-                    isActive
-                      ? "text-blue-600 dark:text-blue-400"
-                      : "text-gray-600 dark:text-slate-400"
+              return (
+                <button
+                  key={app.id}
+                  onClick={() => handleAppSelect(app)}
+                  className={`w-full flex items-center gap-3 px-3 py-2 hover:bg-gray-50 dark:hover:bg-slate-700 transition-colors ${
+                    isActive ? "bg-blue-50 dark:bg-slate-700" : ""
                   }`}
-                />
-                <div className="flex-1 text-left">
-                  <div
-                    className={`text-sm font-medium ${
+                >
+                  <Icon
+                    className={`w-5 h-5 ${
                       isActive
                         ? "text-blue-600 dark:text-blue-400"
-                        : "text-gray-900 dark:text-slate-100"
+                        : "text-gray-600 dark:text-slate-400"
                     }`}
-                  >
-                    {app.name}
+                  />
+                  <div className="flex-1 text-left">
+                    <div
+                      className={`text-sm font-medium ${
+                        isActive
+                          ? "text-blue-600 dark:text-blue-400"
+                          : "text-gray-900 dark:text-slate-100"
+                      }`}
+                    >
+                      {app.name}
+                    </div>
                   </div>
-                </div>
-                {isActive && (
-                  <div className="w-2 h-2 rounded-full bg-blue-600 dark:bg-blue-400"></div>
-                )}
-              </button>
-            );
-          })}
+                  {isActive && (
+                    <div className="w-2 h-2 rounded-full bg-blue-600 dark:bg-blue-400"></div>
+                  )}
+                </button>
+              );
+            })
+          )}
         </div>
       )}
     </div>
