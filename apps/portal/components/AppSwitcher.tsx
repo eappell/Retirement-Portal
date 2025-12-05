@@ -17,16 +17,16 @@ interface App {
 
 const REGISTERED_APPS: App[] = [
   {
-    id: "retirement-planner",
-    name: "Retirement Planner",
+    id: "retirement-planner-ai",
+    name: "Retirement Planner AI",
     icon: "Calculator",
-    url: "/apps/retirement-planner",
+    url: "/apps/retirement-planner-ai",
   },
   {
-    id: "healthcare-cost",
+    id: "healthcare-cost-estimator",
     name: "Healthcare Cost Estimator",
     icon: "Heart",
-    url: "/apps/healthcare-cost",
+    url: "/apps/healthcare-cost-estimator",
   },
 ];
 
@@ -74,12 +74,7 @@ export function AppSwitcher() {
     setIsOpen(false);
   };
 
-  // Don't show if not on an app page
-  if (!currentApp) {
-    return null;
-  }
-
-  const CurrentIcon = ICON_MAP[currentApp.icon] || CalculatorIcon;
+  const CurrentIcon = currentApp ? ICON_MAP[currentApp.icon] || CalculatorIcon : CalculatorIcon;
 
   return (
     <div className="relative" ref={dropdownRef}>
@@ -89,7 +84,7 @@ export function AppSwitcher() {
       >
         <CurrentIcon className="w-5 h-5 text-gray-700 dark:text-slate-300" />
         <span className="text-sm font-medium text-gray-900 dark:text-slate-100">
-          {currentApp.name}
+          {currentApp ? currentApp.name : "Apps"}
         </span>
         <ChevronDownIcon
           className={`w-4 h-4 text-gray-500 transition-transform ${
@@ -105,7 +100,7 @@ export function AppSwitcher() {
           </div>
           {REGISTERED_APPS.map((app) => {
             const Icon = ICON_MAP[app.icon] || CalculatorIcon;
-            const isActive = app.id === currentApp.id;
+            const isActive = currentApp ? app.id === currentApp.id : false;
 
             return (
               <button

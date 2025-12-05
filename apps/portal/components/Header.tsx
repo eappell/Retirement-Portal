@@ -55,30 +55,20 @@ export function Header() {
   return (
     <header className="bg-white shadow sticky top-0 z-50 dark:bg-slate-800 dark:shadow-lg">
       <div className="max-w-7xl mx-auto px-4 py-4 sm:px-6 lg:px-8">
-        <div className="flex justify-between items-center">
+        <div className="flex items-center">
           {/* Logo/Brand */}
           <Link href="/dashboard" className="flex items-center gap-2">
             <span className="text-2xl font-bold" style={{color: '#0B5394'}}>🏛️</span>
             <span className="text-xl font-bold text-gray-900 dark:text-slate-100">RetireWise</span>
           </Link>
 
-          {/* Desktop Navigation */}
-          <nav className="hidden md:flex items-center gap-8">
+          {/* Centered App Switcher */}
+          <div className="flex-1 flex justify-center">
             <AppSwitcher />
-            <div className="group relative">
-              <Link
-                href="/dashboard"
-                className="text-gray-700 font-medium transition-colors dark:text-slate-300"
-                style={{color: '#6b5e62'}}
-                onMouseEnter={(e) => e.currentTarget.style.color = '#0B5394'}
-                onMouseLeave={(e) => e.currentTarget.style.color = '#6b5e62'}
-              >
-                Dashboard
-              </Link>
-              <div className="absolute top-full left-0 mt-2 px-2 py-1 bg-gray-900 text-white text-xs rounded opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all whitespace-nowrap">
-                View your dashboard
-              </div>
-            </div>
+          </div>
+
+          {/* Right Side Navigation */}
+          <nav className="hidden md:flex items-center gap-4">
             {!user?.isAnonymous && !tierLoading && tier !== "paid" && tier !== "admin" && (
               <div className="group relative">
                 <Link
