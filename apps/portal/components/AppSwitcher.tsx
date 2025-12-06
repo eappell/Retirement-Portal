@@ -3,11 +3,7 @@
 import { useState, useEffect, useRef } from "react";
 import { useRouter, usePathname } from "next/navigation";
 import { ChevronDownIcon } from "@heroicons/react/24/outline";
-import {
-  CalculatorIcon,
-  HeartIcon,
-  CubeIcon,
-} from "@heroicons/react/24/outline";
+import { getIconComponent } from "./icon-map";
 import { db } from "@/lib/firebase";
 import { collection, getDocs } from "firebase/firestore";
 
@@ -18,11 +14,7 @@ interface App {
   url: string;
 }
 
-const ICON_MAP: Record<string, React.ComponentType<{ className?: string }>> = {
-  Calculator: CalculatorIcon,
-  Heart: HeartIcon,
-  Cube: CubeIcon,
-};
+// `getIconComponent` is provided by the curated `icon-map` module.
 
 export function AppSwitcher() {
   const router = useRouter();
@@ -94,27 +86,27 @@ export function AppSwitcher() {
     setIsOpen(false);
   };
 
-  const CurrentIcon = currentApp ? ICON_MAP[currentApp.icon] || CalculatorIcon : CalculatorIcon;
+  const CurrentIcon = getIconComponent(currentApp?.icon);
 
   return (
     <div className="relative" ref={dropdownRef}>
       <button
         onClick={() => setIsOpen(!isOpen)}
-        className="flex items-center gap-2 px-3 py-2 rounded-lg hover:bg-gray-100 dark:hover:bg-slate-700 transition-colors"
+        className="flex items-center gap-3 px-4 py-2 rounded-lg hover:bg-gray-100 dark:hover:bg-slate-700 transition-colors"
       >
-        <CurrentIcon className="w-5 h-5 text-gray-700 dark:text-slate-300" />
-        <span className="text-sm font-medium text-gray-900 dark:text-slate-100">
+        <CurrentIcon className="w-6 h-6 text-gray-700 dark:text-slate-300" />
+        <span className="text-base font-semibold text-gray-900 dark:text-slate-100 whitespace-nowrap">
           {currentApp ? currentApp.name : "Apps"}
         </span>
         <ChevronDownIcon
-          className={`w-4 h-4 text-gray-500 transition-transform ${
+          className={`w-5 h-5 text-gray-500 transition-transform ${
             isOpen ? "rotate-180" : ""
           }`}
         />
       </button>
 
       {isOpen && (
-        <div className="absolute top-full left-0 mt-2 w-64 bg-white dark:bg-slate-800 rounded-lg shadow-lg border border-gray-200 dark:border-slate-700 py-2 z-50">
+        <div className="absolute top-full left-0 mt-2 w-auto min-w-max bg-white dark:bg-slate-800 rounded-lg shadow-lg border border-gray-200 dark:border-slate-700 py-2 z-50">
           <div className="px-3 py-2 text-xs font-semibold text-gray-500 dark:text-slate-400 uppercase">
             Switch App
           </div>
@@ -128,19 +120,19 @@ export function AppSwitcher() {
             </div>
           ) : (
             apps.map((app) => {
-              const Icon = ICON_MAP[app.icon] || CalculatorIcon;
+              const Icon = getIconComponent(app.icon);
               const isActive = currentApp ? app.id === currentApp.id : false;
 
               return (
                 <button
                   key={app.id}
                   onClick={() => handleAppSelect(app)}
-                  className={`w-full flex items-center gap-3 px-3 py-2 hover:bg-gray-50 dark:hover:bg-slate-700 transition-colors ${
+                  className={`w-full flex items-center gap-4 px-4 py-3 hover:bg-gray-50 dark:hover:bg-slate-700 transition-colors ${
                     isActive ? "bg-blue-50 dark:bg-slate-700" : ""
                   }`}
                 >
                   <Icon
-                    className={`w-5 h-5 ${
+                    className={`w-6 h-6 flex-shrink-0 ${
                       isActive
                         ? "text-blue-600 dark:text-blue-400"
                         : "text-gray-600 dark:text-slate-400"
@@ -148,11 +140,11 @@ export function AppSwitcher() {
                   />
                   <div className="flex-1 text-left">
                     <div
-                      className={`text-sm font-medium ${
+                      className={`text-lg font-medium ${
                         isActive
                           ? "text-blue-600 dark:text-blue-400"
                           : "text-gray-900 dark:text-slate-100"
-                      }`}
+                        } whitespace-nowrap`}
                     >
                       {app.name}
                     </div>
