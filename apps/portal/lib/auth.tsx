@@ -58,6 +58,17 @@ export const AuthProvider = ({children}: {children: ReactNode}) => {
                 ...firebaseUser,
                 tier,
               });
+              // Persist the role for child apps and other windows
+              try {
+                localStorage.setItem("userRole", tier);
+                try {
+                  (window as any).__userRole = tier;
+                } catch (err) {
+                  /* ignore */
+                }
+              } catch (err) {
+                console.warn("Could not write userRole to localStorage", err);
+              }
             } catch (firestoreErr) {
               console.error("Error fetching user tier from Firestore:", firestoreErr);
               // Set user anyway, but with default tier
@@ -65,9 +76,29 @@ export const AuthProvider = ({children}: {children: ReactNode}) => {
                 ...firebaseUser,
                 tier: "free",
               });
+              try {
+                localStorage.setItem("userRole", "free");
+                try {
+                  (window as any).__userRole = "free";
+                } catch (err) {
+                  /* ignore */
+                }
+              } catch (err) {
+                console.warn("Could not write userRole to localStorage", err);
+              }
             }
           } else {
             setUser(null);
+            try {
+              localStorage.removeItem("userRole");
+            } catch (err) {
+              console.warn("Could not remove userRole from localStorage", err);
+            }
+            try {
+              (window as any).__userRole = null;
+            } catch (err) {
+              /* ignore */
+            }
           }
         } catch (err) {
           console.error("Auth state change error:", err);

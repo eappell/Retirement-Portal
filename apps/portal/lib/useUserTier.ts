@@ -24,12 +24,33 @@ export const useUserTier = () => {
 
         setTier((data.tier as "free" | "paid" | "admin") || "free");
         setSubscriptionExpiry(data.subscriptionExpiry || null);
+        try {
+          const r = (data.tier as string) || "free";
+          localStorage.setItem("userRole", r);
+          try {
+            (window as any).__userRole = r;
+          } catch (e) {
+            /* ignore */
+          }
+        } catch (err) {
+          console.warn("Could not write userRole to localStorage", err);
+        }
       } catch (err) {
         console.error("Error fetching user tier:", err);
         setError(err instanceof Error ? err.message : "Failed to fetch tier");
         // Set default to free on error
         setTier("free");
         setSubscriptionExpiry(null);
+        try {
+          localStorage.setItem("userRole", "free");
+          try {
+            (window as any).__userRole = "free";
+          } catch (e) {
+            /* ignore */
+          }
+        } catch (err) {
+          console.warn("Could not write userRole to localStorage", err);
+        }
       } finally {
         setLoading(false);
       }
