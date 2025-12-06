@@ -2,6 +2,7 @@
 
 import { useEffect, useRef, useState } from "react";
 import { useAuth } from "@/lib/auth";
+import { useUserTier } from "@/lib/useUserTier";
 import { useTheme } from "@/lib/theme";
 import { auth } from "@/lib/firebase";
 import { ToolbarButton } from "./SecondaryToolbar";
@@ -20,6 +21,7 @@ export function IFrameWrapper({
   description,
 }: IFrameWrapperProps) {
   const { user } = useAuth();
+  const { tier } = useUserTier();
   const { theme } = useTheme();
   const iframeRef = useRef<HTMLIFrameElement>(null);
   const [authToken, setAuthToken] = useState<string>("");
@@ -44,7 +46,7 @@ export function IFrameWrapper({
                   token,
                   userId: user.uid,
                   email: user.email,
-                  tier: user.tier || "free",
+                  tier: tier || user.tier || "free",
                 },
                 "*"
               );
@@ -59,6 +61,41 @@ export function IFrameWrapper({
 
     getAuthToken();
   }, [user]);
+
+  // Send role updates to iframe when our resolved tier changes
+  useEffect(() => {
+    if (iframeRef.current && !loading) {
+      const role = tier || user?.tier || "free";
+      iframeRef.current.contentWindow?.postMessage(
+        {
+          type: "USER_ROLE_UPDATE",
+          role,
+        },
+        "*"
+      );
+    }
+  }, [tier, user, loading]);
+
+  // Listen for storage events (other windows) and forward role changes
+  useEffect(() => {
+    const handleStorage = (e: StorageEvent) => {
+      if (e.key === "userRole") {
+        const newRole = e.newValue;
+        if (iframeRef.current) {
+          iframeRef.current.contentWindow?.postMessage(
+            {
+              type: "USER_ROLE_UPDATE",
+              role: newRole,
+            },
+            "*"
+          );
+        }
+      }
+    };
+
+    window.addEventListener("storage", handleStorage);
+    return () => window.removeEventListener("storage", handleStorage);
+  }, []);
 
   // Send theme changes to iframe
   useEffect(() => {
@@ -87,6 +124,37 @@ export function IFrameWrapper({
             {
               type: "THEME_CHANGE",
               theme,
+            },
+            "*"
+          );
+        }
+        return;
+      }
+
+      // Allow iframe to explicitly request current auth/token/role after it has attached listeners
+      if (event.data?.type === "REQUEST_AUTH") {
+        if (iframeRef.current) {
+          iframeRef.current.contentWindow?.postMessage(
+            {
+              type: "AUTH_TOKEN",
+              token: authToken,
+              userId: user?.uid,
+              email: user?.email,
+              tier: tier || user?.tier || "free",
+            },
+            "*"
+          );
+        }
+        return;
+      }
+
+      // Allow iframe to explicitly request the current role only
+      if (event.data?.type === "REQUEST_ROLE") {
+        if (iframeRef.current) {
+          iframeRef.current.contentWindow?.postMessage(
+            {
+              type: "USER_ROLE_UPDATE",
+              role: tier || user?.tier || "free",
             },
             "*"
           );
