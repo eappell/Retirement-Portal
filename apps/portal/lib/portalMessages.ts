@@ -14,7 +14,8 @@ export interface AuthTokenMessage {
   token: string;
   userId: string;
   email: string;
-  tier: 'free' | 'premium' | 'admin';
+  // Use 'paid' to match portal-wide tier naming (was 'premium' in older docs)
+  tier: 'free' | 'paid' | 'admin';
 }
 
 export interface ThemeChangeMessage {
