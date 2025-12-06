@@ -27,11 +27,6 @@ export const useUserTier = () => {
         try {
           const r = (data.tier as string) || "free";
           localStorage.setItem("userRole", r);
-          try {
-            (window as any).__userRole = r;
-          } catch (e) {
-            /* ignore */
-          }
         } catch (err) {
           console.warn("Could not write userRole to localStorage", err);
         }
@@ -43,11 +38,6 @@ export const useUserTier = () => {
         setSubscriptionExpiry(null);
         try {
           localStorage.setItem("userRole", "free");
-          try {
-            (window as any).__userRole = "free";
-          } catch (e) {
-            /* ignore */
-          }
         } catch (err) {
           console.warn("Could not write userRole to localStorage", err);
         }

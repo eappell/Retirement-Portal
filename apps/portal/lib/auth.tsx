@@ -61,11 +61,6 @@ export const AuthProvider = ({children}: {children: ReactNode}) => {
               // Persist the role for child apps and other windows
               try {
                 localStorage.setItem("userRole", tier);
-                try {
-                  (window as any).__userRole = tier;
-                } catch (err) {
-                  /* ignore */
-                }
               } catch (err) {
                 console.warn("Could not write userRole to localStorage", err);
               }
@@ -78,11 +73,6 @@ export const AuthProvider = ({children}: {children: ReactNode}) => {
               });
               try {
                 localStorage.setItem("userRole", "free");
-                try {
-                  (window as any).__userRole = "free";
-                } catch (err) {
-                  /* ignore */
-                }
               } catch (err) {
                 console.warn("Could not write userRole to localStorage", err);
               }
@@ -93,11 +83,6 @@ export const AuthProvider = ({children}: {children: ReactNode}) => {
               localStorage.removeItem("userRole");
             } catch (err) {
               console.warn("Could not remove userRole from localStorage", err);
-            }
-            try {
-              (window as any).__userRole = null;
-            } catch (err) {
-              /* ignore */
             }
           }
         } catch (err) {

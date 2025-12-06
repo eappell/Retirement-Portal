@@ -75,6 +75,32 @@ function handleRoleChange(role) {
 }
 ```
 
+  Handshake: requesting auth/role from the portal
+
+  If your iframe attaches its `message` listener after the portal posts initial messages, it may miss the `AUTH_TOKEN` or `USER_ROLE_UPDATE`. To avoid missed messages, send a one-time request to the parent asking for the current auth/role. Example boot handshake:
+
+  ```js
+  if (window.self !== window.top) {
+    // Ask parent and top for the current auth token and role
+    try {
+      window.parent.postMessage({ type: 'REQUEST_AUTH' }, '*');
+      window.parent.postMessage({ type: 'REQUEST_ROLE' }, '*');
+    } catch (e) {
+      // cross-origin parents may throw — ignore
+    }
+
+    // Optional: retry once after a short delay to handle timing
+    setTimeout(() => {
+      try {
+        window.parent.postMessage({ type: 'REQUEST_AUTH' }, '*');
+        window.parent.postMessage({ type: 'REQUEST_ROLE' }, '*');
+      } catch (e) {}
+    }, 300);
+  }
+  ```
+
+  The portal will respond with `AUTH_TOKEN` and/or `USER_ROLE_UPDATE` when it receives these requests.
+
 Reading role from localStorage
 
 - The portal writes `localStorage.userRole` on auth and tier changes.
