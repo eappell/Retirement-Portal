@@ -230,7 +230,7 @@ export default function AdminDashboard() {
           <button
             onClick={() => { if (!exportLoading) handleExportUsers(); }}
             disabled={exportLoading}
-            className={`inline-flex items-center justify-center gap-2 text-white font-semibold py-3 px-6 rounded-lg transition-colors ${exportLoading ? 'opacity-70 cursor-not-allowed' : ''}`}
+            className={`inline-flex items-center justify-center gap-2 text-white font-semibold py-3 px-6 rounded-lg transition-colors cursor-pointer ${exportLoading ? 'opacity-70 cursor-not-allowed' : ''}`}
             style={{backgroundColor: '#0B5394'}}
             onMouseEnter={(e) => { if (!exportLoading) e.currentTarget.style.backgroundColor = '#094170' }}
             onMouseLeave={(e) => { if (!exportLoading) e.currentTarget.style.backgroundColor = '#0B5394' }}
@@ -239,7 +239,7 @@ export default function AdminDashboard() {
             {exportLoading ? 'Exporting...' : 'Export User Data'}
           </button>
           <button 
-            className="inline-flex items-center justify-center gap-2 text-white font-semibold py-3 px-6 rounded-lg transition-colors"
+            className="inline-flex items-center justify-center gap-2 text-white font-semibold py-3 px-6 rounded-lg transition-colors cursor-pointer"
             style={{backgroundColor: '#6b5e62'}}
             onMouseEnter={(e) => e.currentTarget.style.backgroundColor = '#5a4e52'}
             onMouseLeave={(e) => e.currentTarget.style.backgroundColor = '#6b5e62'}
@@ -248,7 +248,7 @@ export default function AdminDashboard() {
             View User List
           </button>
           <button 
-            className="inline-flex items-center justify-center gap-2 text-white font-semibold py-3 px-6 rounded-lg transition-colors"
+            className="inline-flex items-center justify-center gap-2 text-white font-semibold py-3 px-6 rounded-lg transition-colors cursor-pointer"
             style={{backgroundColor: '#0B5394'}}
             onMouseEnter={(e) => e.currentTarget.style.backgroundColor = '#094170'}
             onMouseLeave={(e) => e.currentTarget.style.backgroundColor = '#0B5394'}
@@ -258,7 +258,7 @@ export default function AdminDashboard() {
           </button>
           <a
             href="/admin/apps"
-            className="inline-flex items-center justify-center gap-2 text-white font-semibold py-3 px-6 rounded-lg transition-colors"
+            className="inline-flex items-center justify-center gap-2 text-white font-semibold py-3 px-6 rounded-lg transition-colors cursor-pointer"
             style={{backgroundColor: '#6b5e62'}}
             onMouseEnter={(e) => e.currentTarget.style.backgroundColor = '#5a4e52'}
             onMouseLeave={(e) => e.currentTarget.style.backgroundColor = '#6b5e62'}
