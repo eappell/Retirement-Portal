@@ -316,7 +316,7 @@ export function IFrameWrapper({
           );
         }
       }
-    };
+    }
       // Handle cross-app data transfer requests
       if (event.data?.type === "APP_DATA_TRANSFER") {
         console.log("[Portal] Routing data transfer:", {
