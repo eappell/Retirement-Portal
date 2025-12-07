@@ -44,6 +44,9 @@ export default function AdminDashboard() {
   const [mounted, setMounted] = useState(false);
   const [loading, setLoading] = useState(true);
   const [exportLoading, setExportLoading] = useState(false);
+  const [showUsers, setShowUsers] = useState(false);
+  const [usersLoading, setUsersLoading] = useState(false);
+  const [usersList, setUsersList] = useState<Array<Record<string, any>>>([]);
   const [stats, setStats] = useState<UserStats>({
     totalUsers: 0,
     freeUsers: 0,
@@ -225,6 +228,49 @@ export default function AdminDashboard() {
           <p className="text-gray-600 mt-2">System analytics and user management</p>
         </div>
 
+        {/* Users Modal */}
+        {showUsers && (
+          <div className="fixed inset-0 z-50 flex items-center justify-center">
+            <div className="fixed inset-0 bg-black/50" onClick={() => setShowUsers(false)} />
+            <div className="relative bg-white dark:bg-slate-800 rounded-lg shadow-lg w-full max-w-3xl mx-4 p-6">
+              <div className="flex items-center justify-between mb-4">
+                <h3 className="text-lg font-semibold text-gray-900 dark:text-gray-100">User List</h3>
+                <button className="text-sm text-gray-600 dark:text-gray-300" onClick={() => setShowUsers(false)}>Close</button>
+              </div>
+              <div className="overflow-auto max-h-96">
+                {usersLoading ? (
+                  <p className="text-gray-600 dark:text-gray-300">Loading users...</p>
+                ) : usersList.length === 0 ? (
+                  <p className="text-gray-600 dark:text-gray-300">No users found.</p>
+                ) : (
+                  <table className="w-full text-left text-sm">
+                    <thead>
+                      <tr className="border-b border-gray-200 dark:border-slate-700">
+                        <th className="py-2 pr-4">ID</th>
+                        <th className="py-2 pr-4">Email</th>
+                        <th className="py-2 pr-4">Name</th>
+                        <th className="py-2 pr-4">Tier</th>
+                        <th className="py-2 pr-4">Queries</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {usersList.map((u) => (
+                        <tr key={u.id} className="border-b border-gray-100 dark:border-slate-700">
+                          <td className="py-2 pr-4 text-xs text-gray-600 dark:text-gray-300">{u.id}</td>
+                          <td className="py-2 pr-4 text-gray-700 dark:text-gray-200">{u.email}</td>
+                          <td className="py-2 pr-4 text-gray-700 dark:text-gray-200">{u.name}</td>
+                          <td className="py-2 pr-4 text-gray-700 dark:text-gray-200">{u.tier}</td>
+                          <td className="py-2 pr-4 text-gray-700 dark:text-gray-200">{u.queryCount}</td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                )}
+              </div>
+            </div>
+          </div>
+        )}
+
         {/* Admin Actions */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
           <button
@@ -238,14 +284,36 @@ export default function AdminDashboard() {
             <ArrowDownTrayIcon className="h-5 w-5" />
             {exportLoading ? 'Exporting...' : 'Export User Data'}
           </button>
-          <button 
+          <button
+            onClick={async () => {
+              if (usersLoading) return;
+              setShowUsers(true);
+              if (usersList.length === 0) {
+                setUsersLoading(true);
+                try {
+                  const usersRef = collection(db, "users");
+                  const snapshot = await getDocs(usersRef);
+                  const rows: Array<Record<string, any>> = [];
+                  snapshot.forEach((doc) => {
+                    const d = doc.data();
+                    rows.push({ id: doc.id, email: d.email || "", name: d.name || "", tier: d.tier || "", queryCount: d.queryCount || 0 });
+                  });
+                  setUsersList(rows);
+                } catch (err) {
+                  console.error("Error fetching users for list:", err);
+                  alert("Failed to load users. See console for details.");
+                } finally {
+                  setUsersLoading(false);
+                }
+              }
+            }}
             className="inline-flex items-center justify-center gap-2 text-white font-semibold py-3 px-6 rounded-lg transition-colors cursor-pointer"
             style={{backgroundColor: '#6b5e62'}}
             onMouseEnter={(e) => e.currentTarget.style.backgroundColor = '#5a4e52'}
             onMouseLeave={(e) => e.currentTarget.style.backgroundColor = '#6b5e62'}
           >
             <UsersIcon className="h-5 w-5" />
-            View User List
+            {usersLoading ? 'Loading...' : 'View User List'}
           </button>
           <button 
             className="inline-flex items-center justify-center gap-2 text-white font-semibold py-3 px-6 rounded-lg transition-colors cursor-pointer"
