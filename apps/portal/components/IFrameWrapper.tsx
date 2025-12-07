@@ -73,7 +73,7 @@ export function IFrameWrapper({
         },
         "*"
       );
-    }
+    };
   }, [tier, user, loading]);
 
   // Listen for storage events (other windows) and forward role changes
