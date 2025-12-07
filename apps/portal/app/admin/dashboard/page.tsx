@@ -43,6 +43,7 @@ export default function AdminDashboard() {
   const { tier, loading: tierLoading } = useUserTier();
   const [mounted, setMounted] = useState(false);
   const [loading, setLoading] = useState(true);
+  const [exportLoading, setExportLoading] = useState(false);
   const [stats, setStats] = useState<UserStats>({
     totalUsers: 0,
     freeUsers: 0,
@@ -153,6 +154,55 @@ export default function AdminDashboard() {
     }
   };
 
+  const handleExportUsers = async () => {
+    setExportLoading(true);
+    try {
+      const usersRef = collection(db, "users");
+      const snapshot = await getDocs(usersRef);
+      const rows: Array<Record<string, any>> = [];
+      snapshot.forEach((doc) => {
+        const data = doc.data();
+        rows.push({
+          id: doc.id,
+          email: data.email || "",
+          name: data.name || "",
+          tier: data.tier || "",
+          queryCount: data.queryCount || 0,
+          createdAt: data.createdAt ? (data.createdAt.toDate ? data.createdAt.toDate().toISOString() : String(data.createdAt)) : "",
+        });
+      });
+
+      // Build CSV
+      const header = ["id", "email", "name", "tier", "queryCount", "createdAt"];
+      const csv = [header.join(",")];
+      for (const r of rows) {
+        const line = header.map((h) => {
+          const v = r[h] ?? "";
+          const s = typeof v === "string" ? v : String(v);
+          // escape quotes
+          return `"${s.replace(/"/g, '""')}"`;
+        }).join(",");
+        csv.push(line);
+      }
+
+      const blob = new Blob([csv.join("\n")], { type: "text/csv;charset=utf-8;" });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement("a");
+      const ts = new Date().toISOString().slice(0,10);
+      a.href = url;
+      a.download = `users-${ts}.csv`;
+      document.body.appendChild(a);
+      a.click();
+      a.remove();
+      URL.revokeObjectURL(url);
+    } catch (err) {
+      console.error("Error exporting users:", err);
+      alert("Failed to export users. Check console for details.");
+    } finally {
+      setExportLoading(false);
+    }
+  };
+
   if (!mounted || tierLoading || loading) {
     return (
       <div className="flex min-h-screen items-center justify-center">
@@ -177,14 +227,16 @@ export default function AdminDashboard() {
 
         {/* Admin Actions */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
-          <button 
-            className="inline-flex items-center justify-center gap-2 text-white font-semibold py-3 px-6 rounded-lg transition-colors"
+          <button
+            onClick={() => { if (!exportLoading) handleExportUsers(); }}
+            disabled={exportLoading}
+            className={`inline-flex items-center justify-center gap-2 text-white font-semibold py-3 px-6 rounded-lg transition-colors ${exportLoading ? 'opacity-70 cursor-not-allowed' : ''}`}
             style={{backgroundColor: '#0B5394'}}
-            onMouseEnter={(e) => e.currentTarget.style.backgroundColor = '#094170'}
-            onMouseLeave={(e) => e.currentTarget.style.backgroundColor = '#0B5394'}
+            onMouseEnter={(e) => { if (!exportLoading) e.currentTarget.style.backgroundColor = '#094170' }}
+            onMouseLeave={(e) => { if (!exportLoading) e.currentTarget.style.backgroundColor = '#0B5394' }}
           >
             <ArrowDownTrayIcon className="h-5 w-5" />
-            Export User Data
+            {exportLoading ? 'Exporting...' : 'Export User Data'}
           </button>
           <button 
             className="inline-flex items-center justify-center gap-2 text-white font-semibold py-3 px-6 rounded-lg transition-colors"
@@ -333,17 +385,17 @@ export default function AdminDashboard() {
         </div>
 
         {/* Activity Summary */}
-        <div className="bg-white rounded-lg shadow-lg p-8 mb-8">
-          <h2 className="text-xl font-bold text-gray-900 mb-6">Event Activity</h2>
+        <div className="bg-white dark:bg-slate-800 rounded-lg shadow-lg p-8 mb-8">
+          <h2 className="text-xl font-bold text-gray-900 dark:text-gray-100 mb-6">Event Activity</h2>
           <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
             {analytics.recentEvents.map((event, index) => (
               <div
                 key={index}
-                className="p-4 bg-gradient-to-br from-gray-50 to-gray-100 rounded-lg border border-gray-200"
+                className="p-4 bg-gradient-to-br from-gray-50 to-gray-100 dark:from-slate-700 dark:to-slate-800 rounded-lg border border-gray-200 dark:border-slate-700"
               >
-                <p className="text-sm font-medium text-gray-600 capitalize">{event.type}</p>
-                <p className="text-2xl font-bold text-gray-900 mt-2">{event.count}</p>
-                <p className="text-xs text-gray-500 mt-1">events</p>
+                <p className="text-sm font-medium text-gray-600 dark:text-gray-300 capitalize">{event.type}</p>
+                <p className="text-2xl font-bold text-gray-900 dark:text-gray-100 mt-2">{event.count}</p>
+                <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">events</p>
               </div>
             ))}
           </div>
