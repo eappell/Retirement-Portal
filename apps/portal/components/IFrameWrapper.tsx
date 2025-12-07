@@ -91,7 +91,7 @@ export function IFrameWrapper({
           );
         }
       }
-    }
+    };
 
     window.addEventListener("storage", handleStorage);
     return () => window.removeEventListener("storage", handleStorage);
