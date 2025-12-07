@@ -437,7 +437,7 @@ export function IFrameWrapper({
           );
         }
       }
-    };
+    }
 
     window.addEventListener("message", handleMessage);
     return () => window.removeEventListener("message", handleMessage);
