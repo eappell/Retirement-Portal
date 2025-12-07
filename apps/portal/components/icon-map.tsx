@@ -5,6 +5,14 @@ import {
   BuildingOfficeIcon,
   CubeIcon,
   HeartIcon,
+  BellIcon,
+  ChartPieIcon,
+  CalendarIcon,
+  BookmarkIcon,
+  CheckCircleIcon,
+  ClipboardDocumentIcon,
+  CodeBracketIcon,
+  Cog6ToothIcon,
 } from "@heroicons/react/24/outline";
 
 export const ICON_MAP: Record<string, React.ComponentType<{ className?: string }>> = {
@@ -27,6 +35,22 @@ export const ICON_MAP: Record<string, React.ComponentType<{ className?: string }
 
   Heart: HeartIcon,
   HeartIcon: HeartIcon,
+  Bell: BellIcon,
+  BellIcon: BellIcon,
+  "Chart Pie": ChartPieIcon,
+  ChartPieIcon: ChartPieIcon,
+  Calendar: CalendarIcon,
+  CalendarIcon: CalendarIcon,
+  Bookmark: BookmarkIcon,
+  BookmarkIcon: BookmarkIcon,
+  "Check Circle": CheckCircleIcon,
+  CheckCircleIcon: CheckCircleIcon,
+  Clipboard: ClipboardDocumentIcon,
+  ClipboardDocumentIcon: ClipboardDocumentIcon,
+  Code: CodeBracketIcon,
+  CodeBracketIcon: CodeBracketIcon,
+  Cog: Cog6ToothIcon,
+  Cog6ToothIcon: Cog6ToothIcon,
 };
 
 function toPascalCase(s: string) {

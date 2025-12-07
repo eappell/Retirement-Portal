@@ -37,6 +37,15 @@ import {
   DocumentTextIcon,
   ChatBubbleLeftIcon,
   ShoppingCartIcon,
+  HeartIcon,
+  BellIcon,
+  ChartPieIcon,
+  CalendarIcon,
+  BookmarkIcon,
+  CheckCircleIcon,
+  ClipboardDocumentIcon,
+  CodeBracketIcon,
+  Cog6ToothIcon,
 } from "@heroicons/react/24/outline";
 
 // Available HeroIcons for app selection
@@ -56,6 +65,15 @@ const AVAILABLE_ICONS = [
   { name: "Cube", component: CubeIcon },
   { name: "Sparkles", component: SparklesIcon },
   { name: "Bolt", component: BoltIcon },
+  { name: "Heart", component: HeartIcon },
+  { name: "Bell", component: BellIcon },
+  { name: "Chart Pie", component: ChartPieIcon },
+  { name: "Calendar", component: CalendarIcon },
+  { name: "Bookmark", component: BookmarkIcon },
+  { name: "Check Circle", component: CheckCircleIcon },
+  { name: "Clipboard", component: ClipboardDocumentIcon },
+  { name: "Code", component: CodeBracketIcon },
+  { name: "Cog", component: Cog6ToothIcon },
 ];
 
 interface App {
