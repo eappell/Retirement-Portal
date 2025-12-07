@@ -73,7 +73,7 @@ export function IFrameWrapper({
         },
         "*"
       );
-    };
+    }
   }, [tier, user, loading]);
 
   // Listen for storage events (other windows) and forward role changes
@@ -108,16 +108,96 @@ export function IFrameWrapper({
         },
         "*"
       );
-    };
+    }
   }, [theme, loading]);
 
   // Listen for toolbar button messages and app-to-app messages from iframe
   useEffect(() => {
-    // ...existing code for handleMessage as a single const arrow function...
     const handleMessage = (event: MessageEvent) => {
-      // ...existing code from the previous handleMessage function...
-      // (No duplicate or trailing function definitions)
-    };
+      console.log("IFrameWrapper received message:", event.data);
+      // In production, verify the origin
+      
+      // If iframe requests current theme, reply with the portal theme
+      if (event.data?.type === "REQUEST_THEME") {
+        if (iframeRef.current) {
+          iframeRef.current.contentWindow?.postMessage(
+            {
+              type: "THEME_CHANGE",
+              theme,
+            },
+            "*"
+          );
+        }
+        return;
+      }
+
+      // Allow iframe to explicitly request current auth/token/role after it has attached listeners
+      if (event.data?.type === "REQUEST_AUTH") {
+        if (iframeRef.current) {
+          iframeRef.current.contentWindow?.postMessage(
+            {
+              type: "AUTH_TOKEN",
+              token: authToken,
+              userId: user?.uid,
+              email: user?.email,
+              tier: tier || user?.tier || "free",
+            },
+            "*"
+          );
+        }
+        return;
+      }
+
+      // Allow iframe to explicitly request the current role only
+      if (event.data?.type === "REQUEST_ROLE") {
+        if (iframeRef.current) {
+          iframeRef.current.contentWindow?.postMessage(
+            {
+              type: "USER_ROLE_UPDATE",
+              role: tier || user?.tier || "free",
+            },
+            "*"
+          );
+        }
+        return;
+      }
+
+      // Handle healthcare data save request from Healthcare Cost app
+      if (event.data?.type === "SAVE_HEALTHCARE_DATA") {
+        console.log("[Portal] Saving healthcare data to portal localStorage:", event.data.data);
+        try {
+          localStorage.setItem('pendingHealthcareDataTransfer', JSON.stringify(event.data.data));
+          console.log("[Portal] Healthcare data saved successfully");
+        } catch (error) {
+          console.error("[Portal] Failed to save healthcare data:", error);
+        }
+        return;
+      }
+      
+      // Handle request for pending healthcare data from Retirement Planner
+      if (event.data?.type === "REQUEST_HEALTHCARE_DATA") {
+        console.log("[Portal] Retirement Planner requesting healthcare data");
+        const pendingData = localStorage.getItem('pendingHealthcareDataTransfer');
+        if (pendingData) {
+          console.log("[Portal] Sending healthcare data to Retirement Planner");
+          if (iframeRef.current) {
+            iframeRef.current.contentWindow?.postMessage(
+              {
+                type: 'HEALTHCARE_DATA_RESPONSE',
+                data: JSON.parse(pendingData)
+              },
+              "*"
+            );
+          }
+          // Clear after sending
+          localStorage.removeItem('pendingHealthcareDataTransfer');
+          console.log("[Portal] Cleared healthcare data from portal storage");
+        } else {
+          console.log("[Portal] No pending healthcare data found");
+        }
+        return;
+      }
+      
       // Handle cross-app data transfer requests
       if (event.data?.type === "APP_DATA_TRANSFER") {
         console.log("[Portal] Routing data transfer:", {
