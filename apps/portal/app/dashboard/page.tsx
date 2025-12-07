@@ -9,42 +9,10 @@ import {db} from "@/lib/firebase";
 import {collection, getDocs} from "firebase/firestore";
 import Link from "next/link";
 import {Header} from "@/components/Header";
-import {
-  CubeIcon,
-  CalculatorIcon,
-  ChartBarIcon,
-  CurrencyDollarIcon,
-  CreditCardIcon,
-  GlobeAltIcon,
-  RocketLaunchIcon,
-  BuildingOfficeIcon,
-  HomeIcon,
-  UserGroupIcon,
-  DocumentTextIcon,
-  ChatBubbleLeftIcon,
-  ShoppingCartIcon,
-  SparklesIcon,
-  BoltIcon,
-} from "@heroicons/react/24/outline";
+import { CubeIcon } from "@heroicons/react/24/outline";
+import { getIconComponent } from "@/components/icon-map";
 
-// Available HeroIcons mapping
-const AVAILABLE_ICONS = [
-  { name: "Calculator", component: CalculatorIcon },
-  { name: "Chart Bar", component: ChartBarIcon },
-  { name: "Currency Dollar", component: CurrencyDollarIcon },
-  { name: "Credit Card", component: CreditCardIcon },
-  { name: "Globe", component: GlobeAltIcon },
-  { name: "Rocket", component: RocketLaunchIcon },
-  { name: "Building", component: BuildingOfficeIcon },
-  { name: "Home", component: HomeIcon },
-  { name: "User Group", component: UserGroupIcon },
-  { name: "Document", component: DocumentTextIcon },
-  { name: "Chat", component: ChatBubbleLeftIcon },
-  { name: "Shopping Cart", component: ShoppingCartIcon },
-  { name: "Sparkles", component: SparklesIcon },
-  { name: "Bolt", component: BoltIcon },
-  { name: "Cube", component: CubeIcon },
-];
+// Use shared icon resolver so Firestore icon names (e.g. "Heart") resolve correctly
 
 interface App {
   id: string;
@@ -271,12 +239,8 @@ export default function DashboardPage() {
                     <div className="flex items-start gap-4">
                       <div className="flex-shrink-0">
                         {(() => {
-                          const iconData = AVAILABLE_ICONS.find(i => i.name === app.icon);
-                          if (iconData) {
-                            const IconComponent = iconData.component;
-                            return <IconComponent className="h-10 w-10" style={{color: '#111827'}} />;
-                          }
-                          return <CubeIcon className="h-10 w-10" style={{color: '#111827'}} />;
+                          const IconComponent = getIconComponent(app.icon);
+                          return <IconComponent className="h-10 w-10" style={{color: '#111827'}} />;
                         })()}
                       </div>
                       <div>
