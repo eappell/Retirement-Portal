@@ -57,7 +57,7 @@ export function IFrameWrapper({
         setError(err instanceof Error ? err.message : "Failed to get auth token");
         setLoading(false);
       }
-    };
+    }
 
     getAuthToken();
   }, [user]);
