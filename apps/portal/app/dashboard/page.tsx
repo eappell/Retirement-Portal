@@ -160,7 +160,7 @@ export default function DashboardPage() {
     : null;
 
   return (
-    <div className="min-h-screen bg-background">
+    <div className="min-h-screen bg-background portal-dashboard">
       <Header />
 
       <main className="max-w-7xl mx-auto px-4 py-12 sm:px-6 lg:px-8">
@@ -274,19 +274,19 @@ export default function DashboardPage() {
                           const iconData = AVAILABLE_ICONS.find(i => i.name === app.icon);
                           if (iconData) {
                             const IconComponent = iconData.component;
-                            return <IconComponent className="h-10 w-10" style={{color: '#f3f4f6'}} />;
+                            return <IconComponent className="h-10 w-10" style={{color: '#111827'}} />;
                           }
-                          return <CubeIcon className="h-10 w-10" style={{color: '#f3f4f6'}} />;
+                          return <CubeIcon className="h-10 w-10" style={{color: '#111827'}} />;
                         })()}
                       </div>
                       <div>
-                        <h3 className="text-xl font-bold group-hover:transition-colors" style={{color: '#f3f4f6'}} onMouseEnter={(e) => e.currentTarget.style.color = '#ffffff'} onMouseLeave={(e) => e.currentTarget.style.color = '#f3f4f6'}>
+                        <h3 className="text-xl font-bold group-hover:transition-colors" style={{color: '#111827'}} onMouseEnter={(e) => e.currentTarget.style.color = '#000000'} onMouseLeave={(e) => e.currentTarget.style.color = '#111827'}>
                           {app.name}
                         </h3>
-                        <p className="mt-2" style={{color: '#e5e7eb'}}>{app.description}</p>
+                        <p className="mt-2" style={{color: '#111827'}}>{app.description}</p>
                       </div>
                     </div>
-                    <div className="text-2xl" style={{color: '#f3f4f6'}}>→</div>
+                    <div className="text-2xl" style={{color: '#111827'}}>→</div>
                   </div>
                 </Link>
               );
