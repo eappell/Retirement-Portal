@@ -108,7 +108,7 @@ export function IFrameWrapper({
         },
         "*"
       );
-    }
+    };
   }, [theme, loading]);
 
   // Listen for toolbar button messages and app-to-app messages from iframe
