@@ -399,69 +399,41 @@ export default function AdminDashboard() {
             onClick={() => { if (!exportLoading) handleExportUsers(); }}
             disabled={exportLoading}
             className={`inline-flex items-center justify-center gap-2 text-white font-semibold py-3 px-6 rounded-lg transition-colors cursor-pointer ${exportLoading ? 'opacity-70 cursor-not-allowed' : ''}`}
-            style={{backgroundColor: '#0B5394'}}
-            onMouseEnter={(e) => { if (!exportLoading) e.currentTarget.style.backgroundColor = '#094170' }}
-            onMouseLeave={(e) => { if (!exportLoading) e.currentTarget.style.backgroundColor = '#0B5394' }}
+            style={{ backgroundColor: '#0B5394' }}
+            onMouseEnter={(e) => { if (!exportLoading) e.currentTarget.style.backgroundColor = '#094170'; }}
+            onMouseLeave={(e) => { if (!exportLoading) e.currentTarget.style.backgroundColor = '#0B5394'; }}
           >
             <ArrowDownTrayIcon className="h-5 w-5" />
             {exportLoading ? 'Exporting...' : 'Export User Data'}
           </button>
-                              <button
-            onClick={async () => {
-              if (usersLoading) return;
-              setShowUsers(true);
-              if (usersList.length === 0) {
-                setUsersLoading(true);
-                try {
-                  const usersRef = collection(db, "users");
-                  const snapshot = await getDocs(usersRef);
-                  const rows: Array<Record<string, any>> = [];
-                  snapshot.forEach((doc) => {
-                    const d = doc.data();
-                    rows.push({ id: doc.id, email: d.email || "", name: d.name || "", tier: d.tier || "", queryCount: d.queryCount || 0 });
-                  });
-                  setUsersList(rows);
-                } catch (err) {
-                  console.error("Error fetching users for list:", err);
-                  alert("Failed to load users. See console for details.");
-                } finally {
-                  setUsersLoading(false);
-                                }}
-                                className="bg-gray-100 hover:bg-gray-200 rounded px-2 py-1 text-sm cursor-pointer"
-            }}
-            className="inline-flex items-center justify-center gap-2 text-white font-semibold py-3 px-6 rounded-lg transition-colors cursor-pointer"
-            style={{backgroundColor: '#6b5e62'}}
-            onMouseEnter={(e) => e.currentTarget.style.backgroundColor = '#5a4e52'}
-            onMouseLeave={(e) => e.currentTarget.style.backgroundColor = '#6b5e62'}
-          >
-            <UsersIcon className="h-5 w-5" />
-            {usersLoading ? 'Loading...' : 'View User List'}
-          </button>
+
           <button
-            onClick={() => setShowCreateModal(true)}
+            onClick={() => router.push('/admin/manage-users')}
             className="inline-flex items-center justify-center gap-2 text-white font-semibold py-3 px-6 rounded-lg transition-colors cursor-pointer"
-            style={{backgroundColor: '#16A34A'}}
-            onMouseEnter={(e) => e.currentTarget.style.backgroundColor = '#13843d'}
-            onMouseLeave={(e) => e.currentTarget.style.backgroundColor = '#16A34A'}
+            style={{ backgroundColor: '#6b5e62' }}
+            onMouseEnter={(e) => (e.currentTarget.style.backgroundColor = '#5a4e52')}
+            onMouseLeave={(e) => (e.currentTarget.style.backgroundColor = '#6b5e62')}
           >
             <UsersIcon className="h-5 w-5" />
-            Create User
+            Manage Users
           </button>
-          <button 
+
+          <button
             className="inline-flex items-center justify-center gap-2 text-white font-semibold py-3 px-6 rounded-lg transition-colors cursor-pointer"
-            style={{backgroundColor: '#0B5394'}}
-            onMouseEnter={(e) => e.currentTarget.style.backgroundColor = '#094170'}
-            onMouseLeave={(e) => e.currentTarget.style.backgroundColor = '#0B5394'}
+            style={{ backgroundColor: '#0B5394' }}
+            onMouseEnter={(e) => (e.currentTarget.style.backgroundColor = '#094170')}
+            onMouseLeave={(e) => (e.currentTarget.style.backgroundColor = '#0B5394')}
           >
             <ChartBarIcon className="h-5 w-5" />
             View Analytics Events
           </button>
+
           <a
             href="/admin/apps"
             className="inline-flex items-center justify-center gap-2 text-white font-semibold py-3 px-6 rounded-lg transition-colors cursor-pointer"
-            style={{backgroundColor: '#6b5e62'}}
-            onMouseEnter={(e) => e.currentTarget.style.backgroundColor = '#5a4e52'}
-            onMouseLeave={(e) => e.currentTarget.style.backgroundColor = '#6b5e62'}
+            style={{ backgroundColor: '#6b5e62' }}
+            onMouseEnter={(e) => (e.currentTarget.style.backgroundColor = '#5a4e52')}
+            onMouseLeave={(e) => (e.currentTarget.style.backgroundColor = '#6b5e62')}
           >
             <Cog6ToothIcon className="h-5 w-5" />
             Manage Applications
