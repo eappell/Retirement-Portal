@@ -58,7 +58,7 @@ export function Header() {
         <div className="flex items-center">
           {/* Logo/Brand */}
           <Link href="/dashboard" className="flex items-center gap-2">
-            <img src="/no-tagline-white.png" alt="RetireWise" className="h-8 w-auto" />
+            <img src="/no-tagline-white.png" alt="RetireWise" className="h-10 w-auto" />
           </Link>
 
           {/* Centered App Switcher */}
