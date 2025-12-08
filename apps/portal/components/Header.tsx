@@ -98,7 +98,7 @@ export function Header() {
             {/* Theme Toggle Button */}
             <button
               onClick={toggleTheme}
-              className="hidden sm:inline-flex items-center justify-center p-2 rounded-lg text-gray-700 hover:bg-gray-100 dark:text-gray-300 dark:hover:bg-gray-800 transition-colors group relative"
+              className="hidden sm:inline-flex items-center justify-center p-2 rounded-lg text-gray-700 hover:bg-gray-100 dark:text-gray-300 dark:hover:bg-gray-800 transition-colors group relative cursor-pointer"
               title={`Switch to ${theme === "light" ? "dark" : "light"} mode`}
             >
               {theme === "light" ? (
