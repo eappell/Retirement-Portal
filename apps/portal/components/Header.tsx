@@ -57,13 +57,8 @@ export function Header() {
       <div className="max-w-7xl mx-auto px-4 py-4 sm:px-6 lg:px-8">
         <div className="flex items-center">
           {/* Logo/Brand */}
-          <Link href="/dashboard" className="flex items-center gap-3">
-            <img
-              src="/no-tagline-white.png"
-              alt="RetireWise"
-              className="h-8 w-auto"
-            />
-            <span className="text-xl font-bold text-gray-900 dark:text-slate-100">RetireWise</span>
+          <Link href="/dashboard" className="flex items-center gap-2">
+            <img src="/no-tagline-white.png" alt="RetireWise" className="h-8 w-auto" />
           </Link>
 
           {/* Centered App Switcher */}
