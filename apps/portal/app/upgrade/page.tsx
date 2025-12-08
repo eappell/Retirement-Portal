@@ -154,14 +154,14 @@ export default function UpgradePage() {
                     : "bg-gradient-to-br from-amber-50 to-white"
                 }`}
               >
-                <h3 className="text-2xl font-bold text-gray-900 mb-2">{plan.name}</h3>
-                <p className="text-gray-600 text-sm mb-6">{plan.description}</p>
+                <h3 className="text-2xl font-bold text-gray-900 dark:text-gray-900 mb-2">{plan.name}</h3>
+                <p className="text-gray-600 dark:text-gray-900 text-sm mb-6">{plan.description}</p>
 
                 {/* Price */}
                 <div className="mb-6">
                   <div className="flex items-baseline gap-1">
-                    <span className="text-5xl font-bold text-gray-900">{plan.price}</span>
-                    <span className="text-gray-600">{plan.period}</span>
+                    <span className="text-5xl font-bold text-gray-900 dark:text-gray-900">{plan.price}</span>
+                    <span className="text-gray-600 dark:text-gray-900">{plan.period}</span>
                   </div>
                 </div>
 
@@ -180,7 +180,7 @@ export default function UpgradePage() {
                           clipRule="evenodd"
                         />
                       </svg>
-                      <span className="text-gray-700">{feature}</span>
+                      <span className="text-gray-700 dark:text-gray-900">{feature}</span>
                     </li>
                   ))}
                 </ul>
