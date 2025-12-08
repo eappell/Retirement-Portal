@@ -123,7 +123,9 @@ export default function UserInfoDialog({
         <div className="mt-4 flex justify-end gap-2">
           <button className="px-4 py-2 bg-gray-200 dark:bg-slate-700 dark:text-white rounded" onClick={onClose}>Close</button>
           <button className="px-4 py-2 bg-yellow-500 text-white rounded" onClick={handleReset}>Reset Password</button>
-          <button className="px-4 py-2 bg-indigo-600 text-white rounded" onClick={handleSendResetEmail}>Send Reset Email</button>
+          {local.email && local.email !== "anonymous" && (
+            <button className="px-4 py-2 bg-indigo-600 text-white rounded" onClick={handleSendResetEmail}>Send Reset Email</button>
+          )}
           <button className="px-4 py-2 bg-blue-600 text-white rounded" onClick={handleSave}>Save</button>
           <button className="px-4 py-2 bg-red-600 text-white rounded" onClick={handleDelete}>Delete</button>
         </div>

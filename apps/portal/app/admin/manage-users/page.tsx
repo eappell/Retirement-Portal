@@ -32,6 +32,7 @@ export default function ManageUsersPage() {
         const d = doc.data();
         // Skip anonymous / non-email users
         if (!d?.email) return;
+        if (typeof d.email === 'string' && d.email.trim().toLowerCase() === 'anonymous') return;
         rows.push({ id: doc.id, ...d });
       });
       rows.sort((a, b) => {
