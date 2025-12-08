@@ -110,3 +110,10 @@ body {
 /* end of customizations removed to restore original colors */
 
 
+
+/* Ensure pointer cursor for all <button> elements across the portal */
+button {
+  cursor: pointer;
+}
+
+
