@@ -18,6 +18,8 @@ export function Header() {
   const { theme, toggleTheme } = useTheme();
   const [isMenuOpen, setIsMenuOpen] = useState(false);
 
+  const headerBgClass = theme === "light" ? "bg-white shadow" : "bg-slate-800 shadow-lg";
+
   const handleLogout = async () => {
     await trackEvent({
       eventType: "logout",
@@ -54,12 +56,16 @@ export function Header() {
   };
 
   return (
-    <header className="bg-white shadow sticky top-0 z-50 dark:bg-slate-800 dark:shadow-lg">
+    <header className={`${headerBgClass} sticky top-0 z-50`}>
       <div className="max-w-7xl mx-auto px-4 py-4 sm:px-6 lg:px-8">
         <div className="flex items-center">
           {/* Logo/Brand */}
           <Link href="/dashboard" className="flex items-center gap-2">
-            <img src="/no-tagline-white.png" alt="RetireWise" className="h-10 w-auto" />
+            <img
+              src={theme === "light" ? "/no-tagline-black.png" : "/no-tagline-white.png"}
+              alt="RetireWise"
+              className="h-10 w-auto"
+            />
           </Link>
 
           {/* Centered App Switcher */}
