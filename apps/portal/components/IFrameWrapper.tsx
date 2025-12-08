@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
+import { useRouter } from 'next/navigation';
 import { useAuth } from "@/lib/auth";
 import { useUserTier } from "@/lib/useUserTier";
 import { useTheme } from "@/lib/theme";
@@ -24,6 +25,7 @@ export function IFrameWrapper({
   const { tier } = useUserTier();
   const { theme } = useTheme();
   const iframeRef = useRef<HTMLIFrameElement>(null);
+  const router = useRouter();
   const [authToken, setAuthToken] = useState<string>("");
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string>("");
@@ -316,6 +318,15 @@ export function IFrameWrapper({
             },
             "*"
           );
+        }
+      }
+      // Allow iframe to request portal navigation
+      if (event.data?.type === 'NAVIGATE' && event.data?.path) {
+        try {
+          // Use Next router to navigate within the portal
+          router.push(event.data.path);
+        } catch (e) {
+          console.warn('[IFrameWrapper] Failed to navigate to', event.data.path, e);
         }
       }
     };
