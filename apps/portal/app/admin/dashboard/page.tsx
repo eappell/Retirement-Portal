@@ -304,7 +304,7 @@ export default function AdminDashboard() {
             <div className="relative bg-white dark:bg-slate-800 rounded-lg shadow-lg w-full max-w-3xl mx-4 p-6">
               <div className="flex items-center justify-between mb-4">
                 <h3 className="text-lg font-semibold text-gray-900 dark:text-gray-100">User List</h3>
-                <button className="text-sm text-gray-600 dark:text-gray-300" onClick={() => setShowUsers(false)}>Close</button>
+                <button className="text-sm text-gray-600 dark:text-gray-300 cursor-pointer" onClick={() => setShowUsers(false)}>Close</button>
               </div>
               <div className="overflow-auto max-h-96">
                 {usersLoading ? (
@@ -380,7 +380,7 @@ export default function AdminDashboard() {
             <div className="relative bg-white dark:bg-slate-800 rounded-lg shadow-lg w-full max-w-md mx-4 p-6">
               <div className="flex items-center justify-between mb-4">
                 <h3 className="text-lg font-semibold text-gray-900 dark:text-gray-100">Create New User</h3>
-                <button className="text-sm text-gray-600 dark:text-gray-300" onClick={() => setShowCreateModal(false)}>Close</button>
+                <button className="text-sm text-gray-600 dark:text-gray-300 cursor-pointer" onClick={() => setShowCreateModal(false)}>Close</button>
               </div>
               <CreateUserForm
                 onSuccess={(uid) => {
@@ -406,7 +406,7 @@ export default function AdminDashboard() {
             <ArrowDownTrayIcon className="h-5 w-5" />
             {exportLoading ? 'Exporting...' : 'Export User Data'}
           </button>
-          <button
+                              <button
             onClick={async () => {
               if (usersLoading) return;
               setShowUsers(true);
@@ -426,8 +426,8 @@ export default function AdminDashboard() {
                   alert("Failed to load users. See console for details.");
                 } finally {
                   setUsersLoading(false);
-                }
-              }
+                                }}
+                                className="bg-gray-100 hover:bg-gray-200 rounded px-2 py-1 text-sm cursor-pointer"
             }}
             className="inline-flex items-center justify-center gap-2 text-white font-semibold py-3 px-6 rounded-lg transition-colors cursor-pointer"
             style={{backgroundColor: '#6b5e62'}}
