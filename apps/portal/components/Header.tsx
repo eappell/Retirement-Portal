@@ -19,6 +19,11 @@ export function Header() {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
 
   const headerBgClass = theme === "light" ? "bg-white shadow" : "bg-slate-800 shadow-lg";
+  const textPrimary = theme === "light" ? "text-gray-900" : "text-slate-100";
+  const textSecondary = theme === "light" ? "text-gray-600" : "text-slate-400";
+  const linkText = theme === "light" ? "text-gray-700 hover:text-purple-600" : "text-slate-300 hover:text-purple-400";
+  const borderColor = theme === "light" ? "border-gray-200" : "border-slate-700";
+  const dropdownBg = theme === "light" ? "bg-white" : "bg-slate-800";
 
   const handleLogout = async () => {
     await trackEvent({
@@ -77,10 +82,7 @@ export function Header() {
           <nav className="hidden md:flex items-center gap-4">
             {!user?.isAnonymous && !tierLoading && tier !== "paid" && tier !== "admin" && (
               <div className="group relative">
-                <Link
-                  href="/upgrade"
-                  className="text-gray-700 hover:text-purple-600 font-medium transition-colors dark:text-slate-300 dark:hover:text-purple-400"
-                >
+                <Link href="/upgrade" className={`${linkText} font-medium transition-colors`}>
                   Upgrade
                 </Link>
                 <div className="absolute top-full left-0 mt-2 px-2 py-1 bg-gray-900 text-white text-xs rounded opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all whitespace-nowrap">
@@ -104,7 +106,7 @@ export function Header() {
             {/* Theme Toggle Button */}
             <button
               onClick={toggleTheme}
-              className="hidden sm:inline-flex items-center justify-center p-2 rounded-lg text-gray-700 hover:bg-gray-100 dark:text-gray-300 dark:hover:bg-gray-800 transition-colors group relative cursor-pointer"
+              className={`hidden sm:inline-flex items-center justify-center p-2 rounded-lg ${theme === 'light' ? 'text-gray-700 hover:bg-gray-100' : 'text-gray-300 hover:bg-gray-800'} transition-colors group relative cursor-pointer`}
               title={`Switch to ${theme === "light" ? "dark" : "light"} mode`}
             >
               {theme === "light" ? (
@@ -120,7 +122,7 @@ export function Header() {
             {/* Mobile Menu Button */}
             <button
               onClick={() => setIsMenuOpen(!isMenuOpen)}
-              className="md:hidden inline-flex items-center justify-center p-2 rounded-md text-gray-700 hover:bg-gray-100 dark:text-slate-300 dark:hover:bg-slate-700"
+              className={`md:hidden inline-flex items-center justify-center p-2 rounded-md ${theme === 'light' ? 'text-gray-700 hover:bg-gray-100' : 'text-slate-300 hover:bg-slate-700'}`}
             >
               <svg
                 className="h-6 w-6"
@@ -147,45 +149,45 @@ export function Header() {
             </button>
 
             {/* Desktop User Menu */}
-            <div className="hidden md:flex items-center gap-4 border-l border-gray-200 dark:border-slate-700 pl-4">
+            <div className={`hidden md:flex items-center gap-4 border-l ${borderColor} pl-4`}>
               <div className="text-right group relative">
-                <p className="text-sm font-semibold text-gray-900 dark:text-slate-100 cursor-help">
+                <p className={`text-sm font-semibold ${textPrimary} cursor-help`}>
                   {user?.email || "Guest User"}
                 </p>
-                <p className="text-xs text-gray-600 dark:text-slate-400">
+                <p className={`text-xs ${textSecondary}`}>
                   {tierLoading ? "Loading..." : getTierLabel()}
                 </p>
-                <div className="absolute top-full right-0 mt-2 px-3 py-2 bg-gray-900 text-white text-xs rounded opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all whitespace-nowrap z-50 dark:bg-gray-800">
+                <div className="absolute top-full right-0 mt-2 px-3 py-2 bg-gray-900 text-white text-xs rounded opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all whitespace-nowrap z-50">
                   {user?.metadata?.creationTime
                     ? `Member since ${new Date(user.metadata.creationTime).toLocaleDateString()}`
                     : "Account information"}
                 </div>
               </div>
               <div className="relative group">
-                <button className="w-10 h-10 rounded-full text-white flex items-center justify-center font-semibold transition-colors" style={{backgroundColor: '#0B5394'}} onMouseEnter={(e) => e.currentTarget.style.backgroundColor = '#094170'} onMouseLeave={(e) => e.currentTarget.style.backgroundColor = '#0B5394'}>
+                <button className={`w-10 h-10 rounded-full flex items-center justify-center font-semibold transition-colors ${theme === 'light' ? 'text-gray-900' : 'text-white'}`} style={{backgroundColor: '#0B5394'}} onMouseEnter={(e) => e.currentTarget.style.backgroundColor = '#094170'} onMouseLeave={(e) => e.currentTarget.style.backgroundColor = '#0B5394'}>
                   {user?.email ? user.email[0].toUpperCase() : "G"}
                 </button>
-                <div className="absolute top-full right-0 mt-2 px-2 py-1 bg-gray-900 text-white text-xs rounded opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all whitespace-nowrap z-50 dark:bg-gray-800">
+                <div className={`absolute top-full right-0 mt-2 px-2 py-1 ${dropdownBg} ${theme === 'light' ? 'text-black' : 'text-white'} text-xs rounded opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all whitespace-nowrap z-50`}>
                   Click for menu
                 </div>
-                <div className="absolute right-0 mt-2 w-48 bg-white rounded-lg shadow-lg opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all dark:bg-slate-800 dark:shadow-2xl z-50">
+                <div className={`absolute right-0 mt-2 w-48 ${dropdownBg} rounded-lg shadow-lg opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all z-50`}>
                   <button
                     onClick={() => handleNavClick("/profile")}
-                    className="block w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 rounded-t-lg dark:text-slate-200 dark:hover:bg-slate-700"
+                    className={`block w-full text-left px-4 py-2 text-sm ${theme === 'light' ? 'text-gray-700 hover:bg-gray-100' : 'text-slate-200 hover:bg-slate-700'} rounded-t-lg`}
                   >
                     My Profile
                   </button>
                   {tier === "admin" && (
                     <button
                       onClick={() => handleNavClick("/admin/dashboard")}
-                      className="block w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 dark:text-slate-200 dark:hover:bg-slate-700"
+                      className={`block w-full text-left px-4 py-2 text-sm ${theme === 'light' ? 'text-gray-700 hover:bg-gray-100' : 'text-slate-200 hover:bg-slate-700'}`}
                     >
                       Admin Dashboard
                     </button>
                   )}
                   <button
                     onClick={handleLogout}
-                    className="block w-full text-left px-4 py-2 text-sm text-red-600 hover:bg-red-50 rounded-b-lg border-t border-gray-200 dark:text-red-400 dark:hover:bg-slate-700 dark:border-slate-700"
+                    className={`block w-full text-left px-4 py-2 text-sm ${theme === 'light' ? 'text-red-600 hover:bg-red-50 border-t border-gray-200 rounded-b-lg' : 'text-red-400 hover:bg-slate-700 border-t border-slate-700 rounded-b-lg'}`}
                   >
                     Logout
                   </button>
