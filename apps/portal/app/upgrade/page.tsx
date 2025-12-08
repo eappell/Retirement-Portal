@@ -109,7 +109,7 @@ export default function UpgradePage() {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100 py-12 px-4">
+    <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100 dark:bg-gradient-to-br dark:from-slate-900 dark:to-slate-800 py-12 px-4">
       {/* Header */}
       <div className="max-w-7xl mx-auto mb-12">
         <div className="flex justify-between items-center mb-8">
@@ -146,22 +146,22 @@ export default function UpgradePage() {
               )}
 
               <div
-                className={`bg-white p-8 ${
+                className={`p-8 bg-white dark:bg-slate-800 ${
                   plan.color === "blue"
-                    ? "bg-gradient-to-br from-blue-50 to-white"
+                    ? "bg-gradient-to-br from-blue-50 to-white dark:from-slate-800 dark:to-slate-700"
                     : plan.color === "purple"
-                    ? "bg-gradient-to-br from-purple-50 to-white"
-                    : "bg-gradient-to-br from-amber-50 to-white"
+                    ? "bg-gradient-to-br from-purple-50 to-white dark:from-slate-800 dark:to-slate-700"
+                    : "bg-gradient-to-br from-amber-50 to-white dark:from-slate-800 dark:to-slate-700"
                 }`}
               >
-                <h3 className="text-2xl font-bold text-gray-900 dark:text-gray-900 mb-2">{plan.name}</h3>
-                <p className="text-gray-600 dark:text-gray-900 text-sm mb-6">{plan.description}</p>
+                <h3 className="text-2xl font-bold text-gray-900 dark:text-slate-100 mb-2">{plan.name}</h3>
+                <p className="text-gray-600 dark:text-slate-200 text-sm mb-6">{plan.description}</p>
 
                 {/* Price */}
                 <div className="mb-6">
                   <div className="flex items-baseline gap-1">
-                    <span className="text-5xl font-bold text-gray-900 dark:text-gray-900">{plan.price}</span>
-                    <span className="text-gray-600 dark:text-gray-900">{plan.period}</span>
+                    <span className="text-5xl font-bold text-gray-900 dark:text-slate-100">{plan.price}</span>
+                    <span className="text-gray-600 dark:text-slate-200">{plan.period}</span>
                   </div>
                 </div>
 
@@ -180,7 +180,7 @@ export default function UpgradePage() {
                           clipRule="evenodd"
                         />
                       </svg>
-                      <span className="text-gray-700 dark:text-gray-900">{feature}</span>
+                      <span className="text-gray-700 dark:text-slate-200">{feature}</span>
                     </li>
                   ))}
                 </ul>
