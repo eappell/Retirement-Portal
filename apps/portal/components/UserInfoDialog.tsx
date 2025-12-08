@@ -36,7 +36,7 @@ export default function UserInfoDialog({
     try {
       const fn = httpsCallable(firebaseFunctions, "adminResetUserPassword");
       const res = await fn({ uid: local.id });
-      const temp = res.data?.tempPassword;
+      const temp = (res.data as any)?.tempPassword;
       if (temp) {
         try {
           await navigator.clipboard.writeText(temp);
