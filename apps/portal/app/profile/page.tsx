@@ -8,13 +8,18 @@ import {
   updatePassword,
   EmailAuthProvider,
   reauthenticateWithCredential,
+  updateEmail,
+  updateProfile,
 } from "firebase/auth";
+import { sendEmailVerification } from "firebase/auth";
 import { auth, db } from "@/lib/firebase";
 import { doc, updateDoc } from "firebase/firestore";
+import { useToast } from "@/components/ToastProvider";
 
 export default function ProfilePage() {
   const router = useRouter();
   const { user } = useAuth();
+  const toast = useToast();
   const [mounted, setMounted] = useState(false);
   const [loading, setLoading] = useState(false);
   const [success, setSuccess] = useState("");
@@ -32,6 +37,12 @@ export default function ProfilePage() {
     marketingEmails: false,
     twoFactorEnabled: false,
   });
+
+  // Editable profile fields
+  const [editingProfile, setEditingProfile] = useState(false);
+  const [editableName, setEditableName] = useState(user?.displayName || "");
+  const [editableEmail, setEditableEmail] = useState(user?.email || "");
+  const [currentPasswordForEmail, setCurrentPasswordForEmail] = useState("");
 
   useEffect(() => {
     setMounted(true);
@@ -151,13 +162,21 @@ export default function ProfilePage() {
               <label className="block text-sm font-semibold text-gray-700 dark:text-slate-200 mb-2">
                 Email Address
               </label>
-              <input
-                type="email"
-                value={user.email || ""}
-                disabled
-                className="w-full px-4 py-3 border border-gray-300 dark:border-slate-700 rounded-lg bg-gray-50 dark:bg-slate-700 text-gray-700 dark:text-slate-100"
-              />
-              <p className="text-xs text-gray-500 mt-1">Email cannot be changed</p>
+              {editingProfile ? (
+                <input
+                  type="email"
+                  value={editableEmail}
+                  onChange={(e) => setEditableEmail(e.target.value)}
+                  className="w-full px-4 py-3 border border-gray-300 dark:border-slate-700 rounded-lg bg-white dark:bg-slate-700 text-gray-700 dark:text-slate-100"
+                />
+              ) : (
+                <input
+                  type="email"
+                  value={user.email || ""}
+                  disabled
+                  className="w-full px-4 py-3 border border-gray-300 dark:border-slate-700 rounded-lg bg-gray-50 dark:bg-slate-700 text-gray-700 dark:text-slate-100"
+                />
+              )}
             </div>
 
             <div>
@@ -184,6 +203,87 @@ export default function ProfilePage() {
               />
             </div>
           </div>
+        </div>
+
+        {/* Edit profile (name / email) */}
+        <div className="bg-white dark:bg-slate-800 rounded-lg shadow-lg p-8 mb-8">
+          <div className="flex items-center justify-between mb-4">
+            <h2 className="text-xl font-bold text-gray-900 dark:text-slate-100">Profile</h2>
+            {!editingProfile ? (
+              <button className="text-indigo-600" onClick={() => setEditingProfile(true)}>Edit</button>
+            ) : (
+              <button className="text-gray-600" onClick={() => { setEditingProfile(false); setEditableName(user.displayName || ""); setEditableEmail(user.email || ""); setCurrentPasswordForEmail(""); }}>Cancel</button>
+            )}
+          </div>
+
+          {editingProfile ? (
+            <form onSubmit={async (e) => {
+              e.preventDefault();
+              setError("");
+              setSuccess("");
+              setLoading(true);
+              try {
+                // If email changed, require current password for reauth
+                if (editableEmail !== user.email) {
+                  if (!currentPasswordForEmail) throw new Error('Provide current password to change email');
+                  const credential = EmailAuthProvider.credential(user.email || '', currentPasswordForEmail);
+                  await reauthenticateWithCredential(auth.currentUser!, credential);
+                  await updateEmail(auth.currentUser!, editableEmail);
+                  // Send verification link to the new email
+                  try {
+                    await sendEmailVerification(auth.currentUser!);
+                    toast.showToast('Verification email sent to new address', 'success');
+                  } catch (err) {
+                    console.error(err);
+                    toast.showToast('Failed to send verification email', 'error');
+                  }
+                }
+
+                // Update display name
+                if (editableName !== user.displayName) {
+                  await updateProfile(auth.currentUser!, { displayName: editableName });
+                }
+
+                // Update Firestore user doc
+                await updateDoc(doc(db, 'users', user.uid), { name: editableName, email: editableEmail });
+
+                setSuccess('Profile updated');
+                setEditingProfile(false);
+                setCurrentPasswordForEmail("");
+              } catch (err) {
+                setError(err instanceof Error ? err.message : 'Failed to update profile');
+              } finally {
+                setLoading(false);
+              }
+            }}>
+              <div className="space-y-4">
+                <div>
+                  <label className="block text-sm font-semibold text-gray-700 dark:text-slate-200 mb-2">Name</label>
+                  <input value={editableName} onChange={(e) => setEditableName(e.target.value)} className="w-full px-4 py-3 border border-gray-300 rounded-lg bg-white dark:bg-slate-700 text-gray-700 dark:text-slate-100" />
+                </div>
+                <div>
+                  <label className="block text-sm font-semibold text-gray-700 dark:text-slate-200 mb-2">Email</label>
+                  <input value={editableEmail} onChange={(e) => setEditableEmail(e.target.value)} className="w-full px-4 py-3 border border-gray-300 rounded-lg bg-white dark:bg-slate-700 text-gray-700 dark:text-slate-100" />
+                </div>
+                {editableEmail !== user.email && (
+                  <div>
+                    <label className="block text-sm font-semibold text-gray-700 dark:text-slate-200 mb-2">Current Password (required to change email)</label>
+                    <input type="password" value={currentPasswordForEmail} onChange={(e) => setCurrentPasswordForEmail(e.target.value)} className="w-full px-4 py-3 border border-gray-300 rounded-lg bg-white dark:bg-slate-700 text-gray-700 dark:text-slate-100" />
+                  </div>
+                )}
+
+                <div className="flex gap-3">
+                  <button type="submit" disabled={loading} className="bg-indigo-600 hover:bg-indigo-700 disabled:bg-gray-400 text-white font-semibold py-2 px-6 rounded-lg">Save</button>
+                  <button type="button" onClick={() => { setEditingProfile(false); setEditableName(user.displayName || ''); setEditableEmail(user.email || ''); setCurrentPasswordForEmail(''); }} className="bg-gray-300 hover:bg-gray-400 text-gray-900 font-semibold py-2 px-6 rounded-lg">Cancel</button>
+                </div>
+              </div>
+            </form>
+          ) : (
+            <div>
+              <p className="text-sm text-gray-700 dark:text-slate-200">Name: {user.displayName || '(no name)'}</p>
+              <p className="text-sm text-gray-700 dark:text-slate-200">Email: {user.email}</p>
+            </div>
+          )}
         </div>
 
         {/* Password Management */}

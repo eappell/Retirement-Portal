@@ -57,7 +57,14 @@ export function ThemeProvider({ children }: { children: ReactNode }) {
 export function useTheme() {
   const context = useContext(ThemeContext);
   if (!context) {
-    throw new Error("useTheme must be used within ThemeProvider");
+    // Return a safe fallback so components calling useTheme don't crash
+    // when rendered outside the provider (e.g. during certain hydration paths).
+    return {
+      theme: "light" as Theme,
+      toggleTheme: () => {
+        /* no-op fallback */
+      },
+    };
   }
   return context;
 }
