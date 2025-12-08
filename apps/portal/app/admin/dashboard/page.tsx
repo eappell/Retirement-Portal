@@ -7,6 +7,7 @@ import { useUserTier } from "@/lib/useUserTier";
 import { Header } from "@/components/Header";
 import { db, functions as firebaseFunctions } from "@/lib/firebase";
 import { httpsCallable } from "firebase/functions";
+import { useToast } from "@/components/ToastProvider";
 import {
   collection,
   query,
@@ -52,7 +53,7 @@ function CreateUserForm({ onSuccess, onError }: { onSuccess: (uid: string) => vo
       if (!email || !password) throw new Error('Email and password are required');
       const fn = httpsCallable(firebaseFunctions, 'adminCreateUser');
       const res = await fn({ email, password, name, tier });
-      const uid = res?.data?.uid;
+      const uid = (res?.data as any)?.uid;
       onSuccess(uid);
     } catch (err: any) {
       console.error('create user failed', err);
@@ -113,6 +114,7 @@ export default function AdminDashboard() {
   const [createLoading, setCreateLoading] = useState(false);
   const [createError, setCreateError] = useState<string | null>(null);
   const [createSuccess, setCreateSuccess] = useState<string | null>(null);
+  const toast = useToast();
 
   // Per-user tier selection map
   const [tierSelections, setTierSelections] = useState<Record<string, string>>({});
@@ -269,7 +271,7 @@ export default function AdminDashboard() {
       URL.revokeObjectURL(url);
     } catch (err) {
       console.error("Error exporting users:", err);
-      alert("Failed to export users. Check console for details.");
+      toast.showToast("Failed to export users. Check console for details.", "error");
     } finally {
       setExportLoading(false);
     }
@@ -351,10 +353,10 @@ export default function AdminDashboard() {
                                     await fn({ uid: u.id, tier: newTier });
                                     // update UI
                                     setUsersList(prev => prev.map(row => row.id === u.id ? { ...row, tier: newTier } : row));
-                                    alert('Tier updated');
+                                    toast.showToast('Tier updated', 'success');
                                   } catch (err) {
                                     console.error('Failed to set tier', err);
-                                    alert('Failed to set tier. See console.');
+                                    toast.showToast('Failed to set tier. See console.', 'error');
                                   }
                                 }}
                                 className="bg-gray-100 hover:bg-gray-200 rounded px-2 py-1 text-sm"
