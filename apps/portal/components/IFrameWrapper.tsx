@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
+import { useRouter } from 'next/navigation';
 import { useAuth } from "@/lib/auth";
 import { useUserTier } from "@/lib/useUserTier";
 import { useTheme } from "@/lib/theme";
@@ -24,6 +25,7 @@ export function IFrameWrapper({
   const { tier } = useUserTier();
   const { theme } = useTheme();
   const iframeRef = useRef<HTMLIFrameElement>(null);
+  const router = useRouter();
   const [authToken, setAuthToken] = useState<string>("");
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string>("");
@@ -79,15 +81,20 @@ export function IFrameWrapper({
   // Listen for storage events (other windows) and forward role changes
   useEffect(() => {
     const handleStorage = (e: StorageEvent) => {
-      if (e.key === "userRole") {
-        const newRole = e.newValue;
+      // Forward known app keys to the iframe so embedded apps can restore state
+      const forwardKeys = ["userRole", "selectedCountries", "monthlyBudget", "yearsAbroad", "priorityWeights"];
+      if (forwardKeys.includes(e.key || '')) {
+        const payloadKey = e.key === 'userRole' ? 'role' : e.key;
+        const value = e.newValue;
         if (iframeRef.current) {
           iframeRef.current.contentWindow?.postMessage(
             {
-              type: "USER_ROLE_UPDATE",
-              role: newRole,
+              type: 'APP_STATE_UPDATE',
+              payload: {
+                [payloadKey as string]: value,
+              },
             },
-            "*"
+            '*'
           );
         }
       }
@@ -158,6 +165,46 @@ export function IFrameWrapper({
             },
             "*"
           );
+        }
+        return;
+      }
+
+      // Allow iframe to request saved app state (selected countries, retirement data)
+      if (event.data?.type === 'REQUEST_APP_STATE') {
+        try {
+          const stored = {
+            selectedCountries: localStorage.getItem('selectedCountries') ? JSON.parse(localStorage.getItem('selectedCountries') as string) : undefined,
+            monthlyBudget: localStorage.getItem('monthlyBudget') || undefined,
+            yearsAbroad: localStorage.getItem('yearsAbroad') || undefined,
+            priorityWeights: localStorage.getItem('priorityWeights') ? JSON.parse(localStorage.getItem('priorityWeights') as string) : undefined,
+          };
+          if (iframeRef.current) {
+            iframeRef.current.contentWindow?.postMessage({ type: 'APP_STATE_RESTORE', payload: stored }, '*');
+          }
+        } catch (e) {
+          console.warn('[IFrameWrapper] Failed to respond to REQUEST_APP_STATE', e);
+        }
+        return;
+      }
+
+      // Persist app state updates coming from embedded apps
+      if (event.data?.type === 'APP_STATE_UPDATE') {
+        try {
+          const payload = event.data.payload || {};
+          if (payload.selectedCountries) {
+            try { localStorage.setItem('selectedCountries', JSON.stringify(payload.selectedCountries)); } catch (e) {}
+          }
+          if (payload.monthlyBudget) {
+            try { localStorage.setItem('monthlyBudget', payload.monthlyBudget); } catch (e) {}
+          }
+          if (payload.yearsAbroad) {
+            try { localStorage.setItem('yearsAbroad', payload.yearsAbroad); } catch (e) {}
+          }
+          if (payload.priorityWeights) {
+            try { localStorage.setItem('priorityWeights', JSON.stringify(payload.priorityWeights)); } catch (e) {}
+          }
+        } catch (e) {
+          console.warn('[IFrameWrapper] Failed to persist APP_STATE_UPDATE', e);
         }
         return;
       }
@@ -316,6 +363,15 @@ export function IFrameWrapper({
             },
             "*"
           );
+        }
+      }
+      // Allow iframe to request portal navigation
+      if (event.data?.type === 'NAVIGATE' && event.data?.path) {
+        try {
+          // Use Next router to navigate within the portal
+          router.push(event.data.path);
+        } catch (e) {
+          console.warn('[IFrameWrapper] Failed to navigate to', event.data.path, e);
         }
       }
     };
