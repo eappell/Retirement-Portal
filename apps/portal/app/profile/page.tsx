@@ -121,7 +121,7 @@ export default function ProfilePage() {
   }
 
   return (
-    <div className="min-h-screen bg-gray-50">
+    <div className="min-h-screen bg-gray-50 dark:bg-slate-900">
       <Header />
 
       <main className="max-w-2xl mx-auto px-4 py-12 sm:px-6 lg:px-8">
@@ -143,44 +143,44 @@ export default function ProfilePage() {
         )}
 
         {/* Account Information */}
-        <div className="bg-white rounded-lg shadow-lg p-8 mb-8">
-          <h2 className="text-xl font-bold text-gray-900 mb-6">Account Information</h2>
+        <div className="bg-white dark:bg-slate-800 rounded-lg shadow-lg p-8 mb-8">
+          <h2 className="text-xl font-bold text-gray-900 dark:text-slate-100 mb-6">Account Information</h2>
 
           <div className="space-y-6">
             <div>
-              <label className="block text-sm font-semibold text-gray-700 mb-2">
+              <label className="block text-sm font-semibold text-gray-700 dark:text-slate-200 mb-2">
                 Email Address
               </label>
               <input
                 type="email"
                 value={user.email || ""}
                 disabled
-                className="w-full px-4 py-3 border border-gray-300 rounded-lg bg-gray-50 text-gray-700"
+                className="w-full px-4 py-3 border border-gray-300 dark:border-slate-700 rounded-lg bg-gray-50 dark:bg-slate-700 text-gray-700 dark:text-slate-100"
               />
               <p className="text-xs text-gray-500 mt-1">Email cannot be changed</p>
             </div>
 
             <div>
-              <label className="block text-sm font-semibold text-gray-700 mb-2">
+              <label className="block text-sm font-semibold text-gray-700 dark:text-slate-200 mb-2">
                 Account ID
               </label>
               <input
                 type="text"
                 value={user.uid}
                 disabled
-                className="w-full px-4 py-3 border border-gray-300 rounded-lg bg-gray-50 text-gray-700 font-mono text-xs"
+                className="w-full px-4 py-3 border border-gray-300 dark:border-slate-700 rounded-lg bg-gray-50 dark:bg-slate-700 text-gray-700 dark:text-slate-100 font-mono text-xs"
               />
             </div>
 
             <div>
-              <label className="block text-sm font-semibold text-gray-700 mb-2">
+              <label className="block text-sm font-semibold text-gray-700 dark:text-slate-200 mb-2">
                 Account Created
               </label>
               <input
                 type="text"
                 value={new Date(user.metadata?.creationTime || "").toLocaleDateString()}
                 disabled
-                className="w-full px-4 py-3 border border-gray-300 rounded-lg bg-gray-50 text-gray-700"
+                className="w-full px-4 py-3 border border-gray-300 dark:border-slate-700 rounded-lg bg-gray-50 dark:bg-slate-700 text-gray-700 dark:text-slate-100"
               />
             </div>
           </div>
@@ -189,8 +189,8 @@ export default function ProfilePage() {
         {/* Password Management */}
         {!user.isAnonymous && (
           <div className="bg-white rounded-lg shadow-lg p-8 mb-8">
-            <div className="flex justify-between items-center mb-6">
-              <h2 className="text-xl font-bold text-gray-900">Security</h2>
+              <div className="flex justify-between items-center mb-6">
+                <h2 className="text-xl font-bold text-gray-900 dark:text-slate-100">Security</h2>
               {!showPasswordForm && (
                 <button
                   onClick={() => setShowPasswordForm(true)}
@@ -265,7 +265,7 @@ export default function ProfilePage() {
                 </div>
               </form>
             ) : (
-              <div className="text-gray-600">
+                <div className="text-gray-600 dark:text-slate-300">
                 <p className="mb-4">Secure your account with a strong password.</p>
                 <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
                   <p className="text-sm text-blue-900">
@@ -280,14 +280,14 @@ export default function ProfilePage() {
         )}
 
         {/* Preferences */}
-        <div className="bg-white rounded-lg shadow-lg p-8">
-          <h2 className="text-xl font-bold text-gray-900 mb-6">Preferences</h2>
+        <div className="bg-white dark:bg-slate-800 rounded-lg shadow-lg p-8">
+          <h2 className="text-xl font-bold text-gray-900 dark:text-slate-100 mb-6">Preferences</h2>
 
           <div className="space-y-4">
-            <div className="flex items-center justify-between p-4 border border-gray-200 rounded-lg hover:bg-gray-50">
+            <div className="flex items-center justify-between p-4 border border-gray-200 dark:border-slate-700 rounded-lg hover:bg-gray-50 dark:hover:bg-slate-700">
               <div>
-                <p className="font-semibold text-gray-900">Email Notifications</p>
-                <p className="text-sm text-gray-600">Receive notifications about your account</p>
+                <p className="font-semibold text-gray-900 dark:text-slate-100">Email Notifications</p>
+                <p className="text-sm text-gray-600 dark:text-slate-300">Receive notifications about your account</p>
               </div>
               <button
                 onClick={() => handlePreferencesChange("emailNotifications")}
@@ -304,10 +304,10 @@ export default function ProfilePage() {
               </button>
             </div>
 
-            <div className="flex items-center justify-between p-4 border border-gray-200 rounded-lg hover:bg-gray-50">
+            <div className="flex items-center justify-between p-4 border border-gray-200 dark:border-slate-700 rounded-lg hover:bg-gray-50 dark:hover:bg-slate-700">
               <div>
-                <p className="font-semibold text-gray-900">Marketing Emails</p>
-                <p className="text-sm text-gray-600">Hear about new features and updates</p>
+                <p className="font-semibold text-gray-900 dark:text-slate-100">Marketing Emails</p>
+                <p className="text-sm text-gray-600 dark:text-slate-300">Hear about new features and updates</p>
               </div>
               <button
                 onClick={() => handlePreferencesChange("marketingEmails")}
@@ -324,10 +324,10 @@ export default function ProfilePage() {
               </button>
             </div>
 
-            <div className="flex items-center justify-between p-4 border border-gray-200 rounded-lg hover:bg-gray-50 opacity-50">
+            <div className="flex items-center justify-between p-4 border border-gray-200 dark:border-slate-700 rounded-lg hover:bg-gray-50 dark:hover:bg-slate-700 opacity-50">
               <div>
-                <p className="font-semibold text-gray-900">Two-Factor Authentication</p>
-                <p className="text-sm text-gray-600">Coming soon</p>
+                <p className="font-semibold text-gray-900 dark:text-slate-100">Two-Factor Authentication</p>
+                <p className="text-sm text-gray-600 dark:text-slate-300">Coming soon</p>
               </div>
               <div className="relative inline-flex h-6 w-11 items-center rounded-full bg-gray-300">
                 <span className="inline-block h-4 w-4 transform rounded-full bg-white translate-x-1" />
