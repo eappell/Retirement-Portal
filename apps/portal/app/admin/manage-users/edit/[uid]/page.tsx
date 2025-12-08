@@ -73,7 +73,7 @@ export default function EditUserPage() {
     try {
       const fn = httpsCallable(firebaseFunctions, "adminResetUserPassword");
       const res = await fn({ uid });
-      const temp = res.data?.tempPassword;
+      const temp = (res.data as any)?.tempPassword;
       if (temp) {
         try {
           await navigator.clipboard.writeText(temp);
