@@ -116,4 +116,20 @@ button {
   cursor: pointer;
 }
 
+/* Portal app name/description overrides to ensure correct contrast */
+.portal-app-name {
+  color: #1c283c !important;
+  font-weight: 700 !important;
+}
+.portal-app-desc {
+  color: #6B7280 !important; /* text-gray-500 */
+}
+.dark .portal-app-name {
+  color: #1c283c !important;
+  font-weight: 700 !important;
+}
+.dark .portal-app-desc {
+  color: #D1D5DB !important; /* slate-300 */
+}
+
 

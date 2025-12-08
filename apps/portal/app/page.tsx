@@ -1,6 +1,7 @@
 "use client";
 
 import Link from "next/link";
+import { useTheme } from "@/lib/theme";
 import {useAuth} from "@/lib/auth";
 import {redirect} from "next/navigation";
 import {useEffect, useState} from "react";
@@ -8,6 +9,7 @@ import {useEffect, useState} from "react";
 export default function Home() {
   const {user, loading} = useAuth();
   const [mounted, setMounted] = useState(false);
+  const { theme } = useTheme();
 
   useEffect(() => {
     setMounted(true);
@@ -85,9 +87,10 @@ export default function Home() {
         <div className="mt-8 text-center text-gray-600 text-sm">
           <p className="mb-4 font-semibold">Available Tools:</p>
           <div className="space-y-2">
-            <p>• Monthly Retirement Income Estimator</p>
-            <p>• Retire Abroad AI Recommendations</p>
-            <p>• Plus more coming soon...</p>
+            <p className="portal-app-name">Monthly Retirement Income Estimator</p>
+            <p className="portal-app-name">Retire Abroad AI Recommendations</p>
+            <p className="portal-app-name">Social Security Optimization</p>
+            <p className="portal-app-name">Healthcare Cost Calculator</p>
           </div>
         </div>
       </div>

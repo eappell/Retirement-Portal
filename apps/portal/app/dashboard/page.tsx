@@ -9,6 +9,7 @@ import {db} from "@/lib/firebase";
 import {collection, getDocs} from "firebase/firestore";
 import Link from "next/link";
 import {Header} from "@/components/Header";
+import { useTheme } from "@/lib/theme";
 import { CubeIcon } from "@heroicons/react/24/outline";
 import { getIconComponent } from "@/components/icon-map";
 
@@ -123,6 +124,7 @@ export default function DashboardPage() {
   const isGuest = user.isAnonymous;
   const isAdmin = tier === "admin";
   const isPaid = tier === "paid";
+  const { theme } = useTheme();
   const daysUntilExpiry = subscriptionExpiry
     ? Math.ceil((new Date(subscriptionExpiry).getTime() - Date.now()) / (1000 * 60 * 60 * 24))
     : null;
@@ -181,8 +183,8 @@ export default function DashboardPage() {
 
           {!isPaid && !isAdmin && !isGuest && (
             <div className="mt-6 bg-gradient-to-r from-purple-50 to-indigo-50 dark:from-purple-900/30 dark:to-indigo-900/30 border border-purple-200 dark:border-purple-700 rounded-lg p-4">
-              <h4 className="font-semibold mb-2 text-gray-900 dark:text-purple-100">Upgrade to Premium</h4>
-              <p className="text-sm mb-4 text-gray-800 dark:text-purple-200">
+              <h4 className="font-semibold mb-2" style={{ color: theme === 'dark' ? '#ffffff' : '#111827' }}>Upgrade to Premium</h4>
+              <p className="text-sm mb-4" style={{ color: theme === 'dark' ? '#ffffff' : '#111827' }}>
                 Get unlimited access to all tools and remove daily query limits.
               </p>
                             <Link

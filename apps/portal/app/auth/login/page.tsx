@@ -1,6 +1,7 @@
 "use client";
 
 import {useState} from "react";
+import { useTheme } from "@/lib/theme";
 import Link from "next/link";
 import {useRouter} from "next/navigation";
 import {useAuth} from "@/lib/auth";
@@ -14,6 +15,7 @@ export default function LoginPage() {
   const [password, setPassword] = useState("");
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
+  const { theme } = useTheme();
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -105,6 +107,43 @@ export default function LoginPage() {
             <Link href="/" className="text-gray-500 hover:text-gray-700">
               Back to home
             </Link>
+          </div>
+        </div>
+        {/* Apps list under the login card (non-clickable for unauthenticated users) */}
+        <div className="mt-6">
+          <h3 className="text-sm font-semibold text-gray-500 uppercase mb-3">Available Tools</h3>
+          <div className="grid grid-cols-2 gap-3">
+            <div className="flex items-center gap-3 bg-white rounded-lg p-3 border border-gray-200">
+              <div className="text-2xl">📊</div>
+              <div>
+                <div className="font-medium portal-app-name">Income Estimator</div>
+                <div className="text-xs portal-app-desc">Estimate retirement income</div>
+              </div>
+            </div>
+
+            <div className="flex items-center gap-3 bg-white rounded-lg p-3 border border-gray-200">
+              <div className="text-2xl">🌍</div>
+              <div>
+                <div className="font-medium portal-app-name">Retire Abroad</div>
+                <div className="text-xs portal-app-desc">Plan retirement in another country</div>
+              </div>
+            </div>
+
+            <div className="flex items-center gap-3 bg-white rounded-lg p-3 border border-gray-200">
+              <div className="text-2xl">🧾</div>
+              <div>
+                <div className="font-medium portal-app-name">Social Security Optimization</div>
+                <div className="text-xs portal-app-desc">Find an optimal claiming strategy</div>
+              </div>
+            </div>
+
+            <div className="flex items-center gap-3 bg-white rounded-lg p-3 border border-gray-200">
+              <div className="text-2xl">🏥</div>
+              <div>
+                <div className="font-medium portal-app-name">Healthcare Cost Calculator</div>
+                <div className="text-xs portal-app-desc">Estimate healthcare expenses</div>
+              </div>
+            </div>
           </div>
         </div>
       </div>
