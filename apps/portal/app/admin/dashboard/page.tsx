@@ -5,7 +5,8 @@ import { useRouter } from "next/navigation";
 import { useAuth } from "@/lib/auth";
 import { useUserTier } from "@/lib/useUserTier";
 import { Header } from "@/components/Header";
-import { db } from "@/lib/firebase";
+import { db, functions as firebaseFunctions } from "@/lib/firebase";
+import { httpsCallable } from "firebase/functions";
 import {
   collection,
   query,
@@ -37,6 +38,67 @@ interface Analytics {
   recentEvents: Array<{ type: string; count: number; timestamp: Date }>;
 }
 
+function CreateUserForm({ onSuccess, onError }: { onSuccess: (uid: string) => void; onError: (msg: string) => void }) {
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
+  const [name, setName] = useState("");
+  const [tier, setTier] = useState("free");
+  const [loading, setLoading] = useState(false);
+
+  const handleSubmit = async (e?: any) => {
+    e?.preventDefault();
+    setLoading(true);
+    try {
+      if (!email || !password) throw new Error('Email and password are required');
+      const fn = httpsCallable(firebaseFunctions, 'adminCreateUser');
+      const res = await fn({ email, password, name, tier });
+      const uid = res?.data?.uid;
+      onSuccess(uid);
+    } catch (err: any) {
+      console.error('create user failed', err);
+      const msg = err?.message || String(err);
+      onError(msg);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  return (
+    <form onSubmit={handleSubmit} className="space-y-4">
+      <div>
+        <label className="block text-sm font-medium text-gray-700 dark:text-gray-200">Email</label>
+        <input className="mt-1 block w-full border rounded px-3 py-2" value={email} onChange={(e) => setEmail(e.target.value)} />
+      </div>
+
+      <div>
+        <label className="block text-sm font-medium text-gray-700 dark:text-gray-200">Password</label>
+        <input type="password" className="mt-1 block w-full border rounded px-3 py-2" value={password} onChange={(e) => setPassword(e.target.value)} />
+      </div>
+
+      <div>
+        <label className="block text-sm font-medium text-gray-700 dark:text-gray-200">Name</label>
+        <input className="mt-1 block w-full border rounded px-3 py-2" value={name} onChange={(e) => setName(e.target.value)} />
+      </div>
+
+      <div>
+        <label className="block text-sm font-medium text-gray-700 dark:text-gray-200">Tier</label>
+        <select value={tier} onChange={(e) => setTier(e.target.value)} className="mt-1 block w-full border rounded px-3 py-2">
+          <option value="free">free</option>
+          <option value="paid">paid</option>
+          <option value="admin">admin</option>
+        </select>
+      </div>
+
+      <div className="flex items-center justify-end gap-2">
+        <button type="button" onClick={() => { setEmail(''); setPassword(''); setName(''); setTier('free'); }} className="px-4 py-2 rounded border">Reset</button>
+        <button type="submit" disabled={loading} className="px-4 py-2 rounded bg-blue-600 text-white">
+          {loading ? 'Creating...' : 'Create User'}
+        </button>
+      </div>
+    </form>
+  );
+}
+
 export default function AdminDashboard() {
   const router = useRouter();
   const { user } = useAuth();
@@ -47,6 +109,13 @@ export default function AdminDashboard() {
   const [showUsers, setShowUsers] = useState(false);
   const [usersLoading, setUsersLoading] = useState(false);
   const [usersList, setUsersList] = useState<Array<Record<string, any>>>([]);
+  const [showCreateModal, setShowCreateModal] = useState(false);
+  const [createLoading, setCreateLoading] = useState(false);
+  const [createError, setCreateError] = useState<string | null>(null);
+  const [createSuccess, setCreateSuccess] = useState<string | null>(null);
+
+  // Per-user tier selection map
+  const [tierSelections, setTierSelections] = useState<Record<string, string>>({});
   const [stats, setStats] = useState<UserStats>({
     totalUsers: 0,
     freeUsers: 0,
@@ -251,6 +320,7 @@ export default function AdminDashboard() {
                         <th className="py-2 pr-4">Name</th>
                         <th className="py-2 pr-4">Tier</th>
                         <th className="py-2 pr-4">Queries</th>
+                        <th className="py-2 pr-4">Actions</th>
                       </tr>
                     </thead>
                     <tbody>
@@ -261,12 +331,64 @@ export default function AdminDashboard() {
                           <td className="py-2 pr-4 text-gray-700 dark:text-gray-200">{u.name}</td>
                           <td className="py-2 pr-4 text-gray-700 dark:text-gray-200">{u.tier}</td>
                           <td className="py-2 pr-4 text-gray-700 dark:text-gray-200">{u.queryCount}</td>
+                          <td className="py-2 pr-4">
+                            <div className="flex items-center gap-2">
+                              <select
+                                value={tierSelections[u.id] ?? u.tier}
+                                onChange={(e) => setTierSelections(prev => ({ ...prev, [u.id]: e.target.value }))}
+                                className="border rounded px-2 py-1 text-sm"
+                              >
+                                <option value="free">free</option>
+                                <option value="paid">paid</option>
+                                <option value="admin">admin</option>
+                              </select>
+                              <button
+                                onClick={async () => {
+                                  const newTier = tierSelections[u.id] ?? u.tier;
+                                  if (!newTier || newTier === u.tier) return;
+                                  try {
+                                    const fn = httpsCallable(firebaseFunctions, 'adminSetUserTier');
+                                    await fn({ uid: u.id, tier: newTier });
+                                    // update UI
+                                    setUsersList(prev => prev.map(row => row.id === u.id ? { ...row, tier: newTier } : row));
+                                    alert('Tier updated');
+                                  } catch (err) {
+                                    console.error('Failed to set tier', err);
+                                    alert('Failed to set tier. See console.');
+                                  }
+                                }}
+                                className="bg-gray-100 hover:bg-gray-200 rounded px-2 py-1 text-sm"
+                              >
+                                Set
+                              </button>
+                            </div>
+                          </td>
                         </tr>
                       ))}
                     </tbody>
                   </table>
                 )}
               </div>
+            </div>
+          </div>
+        )}
+
+        {/* Create User Modal */}
+        {showCreateModal && (
+          <div className="fixed inset-0 z-50 flex items-center justify-center">
+            <div className="fixed inset-0 bg-black/50" onClick={() => setShowCreateModal(false)} />
+            <div className="relative bg-white dark:bg-slate-800 rounded-lg shadow-lg w-full max-w-md mx-4 p-6">
+              <div className="flex items-center justify-between mb-4">
+                <h3 className="text-lg font-semibold text-gray-900 dark:text-gray-100">Create New User</h3>
+                <button className="text-sm text-gray-600 dark:text-gray-300" onClick={() => setShowCreateModal(false)}>Close</button>
+              </div>
+              <CreateUserForm
+                onSuccess={(uid) => {
+                  setCreateSuccess(`Created ${uid}`);
+                  setShowCreateModal(false);
+                }}
+                onError={(msg) => setCreateError(msg)}
+              />
             </div>
           </div>
         )}
@@ -314,6 +436,16 @@ export default function AdminDashboard() {
           >
             <UsersIcon className="h-5 w-5" />
             {usersLoading ? 'Loading...' : 'View User List'}
+          </button>
+          <button
+            onClick={() => setShowCreateModal(true)}
+            className="inline-flex items-center justify-center gap-2 text-white font-semibold py-3 px-6 rounded-lg transition-colors cursor-pointer"
+            style={{backgroundColor: '#16A34A'}}
+            onMouseEnter={(e) => e.currentTarget.style.backgroundColor = '#13843d'}
+            onMouseLeave={(e) => e.currentTarget.style.backgroundColor = '#16A34A'}
+          >
+            <UsersIcon className="h-5 w-5" />
+            Create User
           </button>
           <button 
             className="inline-flex items-center justify-center gap-2 text-white font-semibold py-3 px-6 rounded-lg transition-colors cursor-pointer"
