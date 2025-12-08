@@ -148,7 +148,7 @@ export default function ManageUsersPage() {
                     <tr
                       key={u.id}
                       onClick={() => setSelectedUser(u)}
-                      className="border-b border-gray-100 cursor-pointer hover:bg-gray-50 dark:hover:bg-slate-700"
+                      className="cursor-pointer hover:bg-gray-50 dark:hover:bg-slate-700"
                     >
                       <td className="py-2 pr-4">{u.name || '(no name)'}</td>
                       <td className="py-2 pr-4">{u.email}</td>
