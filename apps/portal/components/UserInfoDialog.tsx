@@ -25,6 +25,7 @@ export default function UserInfoDialog({
 }) {
   const toast = useToast();
   const [local, setLocal] = React.useState<UserDoc | null>(user);
+  const [saving, setSaving] = React.useState(false);
 
   React.useEffect(() => setLocal(user), [user]);
 
@@ -67,6 +68,8 @@ export default function UserInfoDialog({
   };
 
   const handleSave = async () => {
+    if (saving) return;
+    setSaving(true);
     try {
       const fn = httpsCallable(firebaseFunctions, "adminUpdateUser");
       await fn({ uid: local.id, email: local.email, name: local.name });
@@ -77,6 +80,8 @@ export default function UserInfoDialog({
     } catch (err) {
       console.error(err);
       toast.showToast("Failed to update user", "error");
+    } finally {
+      setSaving(false);
     }
   };
 
@@ -126,7 +131,13 @@ export default function UserInfoDialog({
           {local.email && local.email !== "anonymous" && (
             <button className="px-4 py-2 bg-indigo-600 text-white rounded" onClick={handleSendResetEmail}>Send Reset Email</button>
           )}
-          <button className="px-4 py-2 bg-blue-600 text-white rounded" onClick={handleSave}>Save</button>
+          <button
+            disabled={saving}
+            onClick={handleSave}
+            className={`px-4 py-2 text-white rounded ${saving ? 'bg-blue-400 opacity-60 cursor-not-allowed' : 'bg-blue-600 hover:bg-blue-700'}`}
+          >
+            {saving ? 'Saving...' : 'Save'}
+          </button>
           <button className="px-4 py-2 bg-red-600 text-white rounded" onClick={handleDelete}>Delete</button>
         </div>
       </div>
