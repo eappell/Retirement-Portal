@@ -6,6 +6,8 @@ import { Header } from "@/components/Header";
 import { db, functions as firebaseFunctions } from "@/lib/firebase";
 import { collection, getDocs } from "firebase/firestore";
 import { httpsCallable } from "firebase/functions";
+import { useToast } from "@/components/ToastProvider";
+import UserInfoDialog from "@/components/UserInfoDialog";
 
 export default function ManageUsersPage() {
   const router = useRouter();
@@ -13,6 +15,8 @@ export default function ManageUsersPage() {
   const [users, setUsers] = useState<Array<any>>([]);
   const [refreshKey, setRefreshKey] = useState(0);
   const [creating, setCreating] = useState(false);
+  const [selectedUser, setSelectedUser] = useState<any | null>(null);
+  const toast = useToast();
 
   useEffect(() => {
     fetchUsers();
@@ -26,6 +30,8 @@ export default function ManageUsersPage() {
       const rows: Array<any> = [];
       snap.forEach((doc) => {
         const d = doc.data();
+        // Skip anonymous / non-email users
+        if (!d?.email) return;
         rows.push({ id: doc.id, ...d });
       });
       rows.sort((a, b) => {
@@ -38,7 +44,7 @@ export default function ManageUsersPage() {
       setUsers(rows);
     } catch (err) {
       console.error("Failed to load users", err);
-      alert("Failed to load users. See console.");
+      toast.showToast("Failed to load users. See console.", "error");
     } finally {
       setLoading(false);
     }
@@ -49,11 +55,11 @@ export default function ManageUsersPage() {
     try {
       const fn = httpsCallable(firebaseFunctions, "adminDeleteUser");
       await fn({ uid });
-      alert("User deleted");
+      toast.showToast("User deleted", "success");
       setRefreshKey((k) => k + 1);
     } catch (err) {
       console.error(err);
-      alert("Failed to delete user. See console.");
+      toast.showToast("Failed to delete user. See console.", "error");
     }
   };
 
@@ -64,19 +70,18 @@ export default function ManageUsersPage() {
       const res = await fn({ uid });
       const temp = res.data?.tempPassword;
       if (temp) {
-        // Copy to clipboard if available
         try {
           await navigator.clipboard.writeText(temp);
-          alert("Temporary password copied to clipboard: " + temp);
+          toast.showToast("Temporary password copied to clipboard", "success");
         } catch (e) {
-          alert("Temporary password: " + temp);
+          toast.showToast("Temporary password: " + temp, "info");
         }
       } else {
-        alert("Password reset but no temp password returned.");
+        toast.showToast("Password reset but no temp password returned.", "info");
       }
     } catch (err) {
       console.error(err);
-      alert("Failed to reset password. See console.");
+      toast.showToast("Failed to reset password. See console.", "error");
     }
   };
 
@@ -84,11 +89,11 @@ export default function ManageUsersPage() {
     try {
       const fn = httpsCallable(firebaseFunctions, "adminSetUserTier");
       await fn({ uid, tier });
-      alert("Tier updated");
+      toast.showToast("Tier updated", "success");
       setRefreshKey((k) => k + 1);
     } catch (err) {
       console.error(err);
-      alert("Failed to set tier. See console.");
+      toast.showToast("Failed to set tier. See console.", "error");
     }
   };
 
@@ -104,13 +109,13 @@ export default function ManageUsersPage() {
           <div className="flex items-center gap-2">
             <button
               onClick={() => setRefreshKey((k) => k + 1)}
-              className="px-4 py-2 bg-gray-200 rounded cursor-pointer"
+              className="px-4 py-2 bg-gray-200 dark:bg-slate-700 dark:text-white rounded cursor-pointer"
             >
               Refresh
             </button>
             <button
               onClick={() => router.push('/admin/dashboard')}
-              className="px-4 py-2 bg-gray-200 rounded cursor-pointer"
+              className="px-4 py-2 bg-gray-200 dark:bg-slate-700 dark:text-white rounded cursor-pointer"
             >
               Back
             </button>
@@ -135,18 +140,22 @@ export default function ManageUsersPage() {
                     <th className="py-2 pr-4">Name</th>
                     <th className="py-2 pr-4">Email</th>
                     <th className="py-2 pr-4">Tier</th>
-                    <th className="py-2 pr-4">Actions</th>
                   </tr>
                 </thead>
                 <tbody>
                   {users.map((u) => (
-                    <tr key={u.id} className="border-b border-gray-100">
+                    <tr
+                      key={u.id}
+                      onClick={() => setSelectedUser(u)}
+                      className="border-b border-gray-100 cursor-pointer hover:bg-gray-50 dark:hover:bg-slate-700"
+                    >
                       <td className="py-2 pr-4">{u.name || '(no name)'}</td>
                       <td className="py-2 pr-4">{u.email}</td>
                       <td className="py-2 pr-4">
                         <select
                           defaultValue={u.tier || 'free'}
                           onChange={(e) => handleSetTier(u.id, e.target.value)}
+                          onClick={(e) => e.stopPropagation()}
                           className="border rounded px-2 py-1"
                         >
                           <option value="free">free</option>
@@ -154,13 +163,7 @@ export default function ManageUsersPage() {
                           <option value="admin">admin</option>
                         </select>
                       </td>
-                      <td className="py-2 pr-4">
-                        <div className="flex items-center gap-2">
-                          <button className="px-2 py-1 bg-gray-100 rounded cursor-pointer" onClick={() => router.push(`/admin/manage-users/edit/${u.id}`)}>Edit</button>
-                          <button className="px-2 py-1 bg-yellow-100 rounded cursor-pointer" onClick={() => handleResetPassword(u.id)}>Reset Password</button>
-                          <button className="px-2 py-1 bg-red-100 rounded cursor-pointer" onClick={() => handleDelete(u.id)}>Delete</button>
-                        </div>
-                      </td>
+                      {/* actions column removed — row is clickable to open details */}
                     </tr>
                   ))}
                 </tbody>
@@ -169,6 +172,16 @@ export default function ManageUsersPage() {
           )}
         </div>
       </main>
+      {selectedUser && (
+        <UserInfoDialog
+          user={selectedUser}
+          onClose={() => setSelectedUser(null)}
+          onSaved={() => {
+            setSelectedUser(null);
+            setRefreshKey((k) => k + 1);
+          }}
+        />
+      )}
     </div>
   );
 }
@@ -179,6 +192,7 @@ function CreateUserInline({ onCreated }: { onCreated: () => void }) {
   const [name, setName] = useState("");
   const [tier, setTier] = useState("free");
   const [loading, setLoading] = useState(false);
+  const toast = useToast();
 
   const handleCreate = async (e?: any) => {
     e?.preventDefault();
@@ -186,7 +200,7 @@ function CreateUserInline({ onCreated }: { onCreated: () => void }) {
     try {
       const fn = httpsCallable(firebaseFunctions, "adminCreateUser");
       await fn({ email, password, name, tier });
-      alert("User created");
+      toast.showToast("User created", "success");
       setEmail("");
       setPassword("");
       setName("");
@@ -194,7 +208,7 @@ function CreateUserInline({ onCreated }: { onCreated: () => void }) {
       onCreated();
     } catch (err) {
       console.error(err);
-      alert("Failed to create user. See console.");
+      toast.showToast("Failed to create user. See console.", "error");
     } finally {
       setLoading(false);
     }

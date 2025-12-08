@@ -41,6 +41,130 @@ export const onUserCreated = onDocumentCreated(
 );
 
 /**
+ * Admin callable: update a user's profile (email, display name)
+ * request.data: { uid, email?, name? }
+ */
+export const adminUpdateUser = onCall(
+  {enforceAppCheck: false},
+  async (request) => {
+    const callerUid = request.auth?.uid;
+    if (!callerUid) throw new Error("Authentication required");
+
+    const caller = await admin.auth().getUser(callerUid);
+    const isAdmin = caller.customClaims?.isAdmin || caller.customClaims?.admin;
+    if (!isAdmin) throw new Error("Admin access required");
+
+    const {uid, email, name} = request.data || {};
+    if (!uid) throw new Error("uid is required");
+
+    try {
+      const updateAuth: Record<string, unknown> = {};
+      if (email) updateAuth.email = email;
+      if (name) updateAuth.displayName = name;
+
+      if (Object.keys(updateAuth).length > 0) {
+        await admin.auth().updateUser(
+          uid,
+            updateAuth as admin.auth.UpdateRequest
+        );
+      }
+
+      const updateData: Record<string, unknown> = {};
+      if (email) updateData.email = email;
+      if (name) updateData.name = name;
+      if (Object.keys(updateData).length > 0) {
+        await db
+          .collection("users")
+          .doc(uid)
+          .set(updateData, {merge: true});
+      }
+
+      return {success: true};
+    } catch (error) {
+      logger.error("Error updating user via adminUpdateUser:", error);
+      throw new Error("Failed to update user");
+    }
+  }
+);
+
+/**
+ * Admin callable: delete a user (auth + firestore)
+ * request.data: { uid }
+ */
+export const adminDeleteUser = onCall(
+  {enforceAppCheck: false},
+  async (request) => {
+    const callerUid = request.auth?.uid;
+    if (!callerUid) throw new Error("Authentication required");
+
+    const caller = await admin.auth().getUser(callerUid);
+    const isAdmin = caller.customClaims?.isAdmin || caller.customClaims?.admin;
+    if (!isAdmin) throw new Error("Admin access required");
+
+    const {uid} = request.data || {};
+    if (!uid) throw new Error("uid is required");
+
+    try {
+      // Delete auth user if exists
+      try {
+        await admin.auth().deleteUser(uid);
+      } catch (err: unknown) {
+        // if user not found, log and continue
+        const warnMsg = "Auth deleteUser failed for uid=" + uid + ".";
+        logger.warn(warnMsg, err as Error);
+      }
+
+      // Delete Firestore user document
+      await db.collection("users").doc(uid).delete();
+
+      return {success: true};
+    } catch (error) {
+      logger.error("Error deleting user via adminDeleteUser:", error);
+      throw new Error("Failed to delete user");
+    }
+  }
+);
+
+/**
+ * Admin callable: reset a user's password to a random temporary password
+ * request.data: { uid }
+ * Returns: { success: true, tempPassword }
+ */
+export const adminResetUserPassword = onCall(
+  {enforceAppCheck: false},
+  async (request) => {
+    const callerUid = request.auth?.uid;
+    if (!callerUid) throw new Error("Authentication required");
+
+    const caller = await admin.auth().getUser(callerUid);
+    const isAdmin = caller.customClaims?.isAdmin || caller.customClaims?.admin;
+    if (!isAdmin) throw new Error("Admin access required");
+
+    const {uid} = request.data || {};
+    if (!uid) throw new Error("uid is required");
+
+    // Generate a random temp password
+    const tempPassword = Math.random().toString(36).slice(-12) + "A1!";
+
+    try {
+      await admin.auth().updateUser(
+        uid,
+        {password: tempPassword}
+      );
+
+      return {
+        success: true,
+        tempPassword,
+      };
+    } catch (error) {
+      const errMsg = "Error resetting password via adminResetUserPassword:";
+      logger.error(errMsg, error);
+      throw new Error("Failed to reset password");
+    }
+  }
+);
+
+/**
  * Callable function to update user tier
  * Can be called from the client to upgrade to paid tier
  */
@@ -243,6 +367,149 @@ export const getAnalyticsReport = onCall(
     } catch (error) {
       logger.error("Error fetching analytics report:", error);
       throw new Error("Failed to fetch analytics report");
+    }
+  }
+);
+
+/**
+ * Admin callable: create a new user (admin only)
+ * request.data: { email, password, tier, name }
+ */
+export const adminCreateUser = onCall(
+  {enforceAppCheck: false},
+  async (request) => {
+    const callerUid = request.auth?.uid;
+    if (!callerUid) throw new Error("Authentication required");
+
+    // Only allow callers with isAdmin claim
+    const caller = await admin.auth().getUser(callerUid);
+    const isAdmin = caller.customClaims?.isAdmin || caller.customClaims?.admin;
+    if (!isAdmin) throw new Error("Admin access required");
+
+    const {
+      email,
+      password,
+      tier = "free",
+      name,
+    } = request.data || {};
+    if (!email || !password) {
+      throw new Error("email and password are required");
+    }
+
+    const allowedTiers = ["free", "paid", "admin"];
+    if (!allowedTiers.includes(tier)) {
+      throw new Error("Invalid tier");
+    }
+
+    try {
+      const userRecord = await admin.auth().createUser({
+        email,
+        password,
+        displayName: name || undefined,
+        emailVerified: false,
+      });
+
+      const subscriptionExpiry =
+        tier === "paid" ?
+          new Date(Date.now() + 365 * 24 * 60 * 60 * 1000) :
+          null;
+
+      await db.collection("users").doc(userRecord.uid).set({
+        email,
+        name: name || null,
+        tier,
+        createdAt: admin.firestore.FieldValue.serverTimestamp(),
+        lastLogin: admin.firestore.FieldValue.serverTimestamp(),
+        subscriptionExpiry,
+        isAdmin: tier === "admin",
+      });
+
+      // Set custom claims for admin
+      if (tier === "admin") {
+        await admin.auth().setCustomUserClaims(userRecord.uid, {
+          isAdmin: true,
+          admin: true,
+        });
+      }
+
+      return {success: true, uid: userRecord.uid};
+    } catch (error) {
+      logger.error("Error creating user via adminCreateUser:", error);
+      throw new Error("Failed to create user");
+    }
+  }
+);
+
+/**
+ * Admin callable: set another user's tier (admin only)
+ * request.data: { uid, tier }
+ */
+export const adminSetUserTier = onCall(
+  {enforceAppCheck: false},
+  async (request) => {
+    const callerUid = request.auth?.uid;
+    if (!callerUid) throw new Error("Authentication required");
+
+    const caller = await admin.auth().getUser(callerUid);
+    const isAdmin = caller.customClaims?.isAdmin || caller.customClaims?.admin;
+    if (!isAdmin) throw new Error("Admin access required");
+
+    const {
+      uid,
+      tier,
+    } = request.data || {};
+    if (!uid || !tier) {
+      throw new Error("uid and tier are required");
+    }
+
+    const allowedTiers = ["free", "paid", "admin"];
+    if (!allowedTiers.includes(tier)) {
+      throw new Error("Invalid tier");
+    }
+
+    try {
+      const updateData: Record<string, unknown> = {
+        tier,
+        isAdmin: tier === "admin",
+        lastUpdated: admin.firestore.FieldValue.serverTimestamp(),
+      };
+
+      if (tier === "paid") {
+        updateData.subscriptionExpiry =
+          new Date(Date.now() + 365 * 24 * 60 * 60 * 1000);
+      } else {
+        updateData.subscriptionExpiry = null;
+      }
+
+      await db.collection("users").doc(uid).set(updateData, {merge: true});
+
+      // Attempt to update custom claims.
+      // If the auth user doesn't exist, skip claims update and continue.
+      try {
+        const user = await admin.auth().getUser(uid);
+        const existingClaims = user.customClaims || {};
+        if (tier === "admin") {
+          existingClaims.isAdmin = true;
+        } else {
+          if (Object.prototype.hasOwnProperty.call(existingClaims, "isAdmin")) {
+            delete existingClaims.isAdmin;
+          }
+          if (Object.prototype.hasOwnProperty.call(existingClaims, "admin")) {
+            delete existingClaims.admin;
+          }
+        }
+
+        await admin.auth().setCustomUserClaims(uid, existingClaims);
+      } catch (err: unknown) {
+        // If the user isn't found in Auth, log and continue.
+        const msg = "Unable to update custom claims for uid=" + uid + ".";
+        logger.warn(msg, err as Error);
+      }
+
+      return {success: true};
+    } catch (error) {
+      logger.error("Error setting user tier via adminSetUserTier:", error);
+      throw new Error("Failed to set user tier");
     }
   }
 );
