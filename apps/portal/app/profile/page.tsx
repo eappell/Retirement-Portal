@@ -11,12 +11,15 @@ import {
   updateEmail,
   updateProfile,
 } from "firebase/auth";
+import { sendEmailVerification } from "firebase/auth";
 import { auth, db } from "@/lib/firebase";
 import { doc, updateDoc } from "firebase/firestore";
+import { useToast } from "@/components/ToastProvider";
 
 export default function ProfilePage() {
   const router = useRouter();
   const { user } = useAuth();
+  const toast = useToast();
   const [mounted, setMounted] = useState(false);
   const [loading, setLoading] = useState(false);
   const [success, setSuccess] = useState("");
@@ -226,6 +229,14 @@ export default function ProfilePage() {
                   const credential = EmailAuthProvider.credential(user.email || '', currentPasswordForEmail);
                   await reauthenticateWithCredential(auth.currentUser!, credential);
                   await updateEmail(auth.currentUser!, editableEmail);
+                  // Send verification link to the new email
+                  try {
+                    await sendEmailVerification(auth.currentUser!);
+                    toast.showToast('Verification email sent to new address', 'success');
+                  } catch (err) {
+                    console.error(err);
+                    toast.showToast('Failed to send verification email', 'error');
+                  }
                 }
 
                 // Update display name
