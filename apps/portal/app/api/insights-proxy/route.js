@@ -27,8 +27,32 @@ export async function POST(req) {
     });
 
     const text = await resp.text();
-    if (!resp.ok) return new Response(text, { status: resp.status });
-    try { return NextResponse.json(JSON.parse(text)); } catch (e) { return new Response(text, { status: 200 }); }
+    // If the remote returned HTML (e.g. Vercel "Authentication Required" page), surface a helpful error
+    const contentType = resp.headers.get('content-type') || '';
+    if (!resp.ok) {
+      console.error('[insights-proxy] upstream error', resp.status, contentType, text.slice(0, 200));
+      // If it's HTML, return a clear JSON error to guide configuration
+      if (contentType.includes('text/html')) {
+        return NextResponse.json({ error: 'Upstream authentication required or returned HTML. Ensure RETIREMENT_APP_URL and VERCEL_BYPASS_TOKEN are configured in the portal.' }, { status: 502 });
+      }
+      try {
+        return NextResponse.json(JSON.parse(text), { status: resp.status });
+      } catch (e) {
+        return new Response(text, { status: resp.status });
+      }
+    }
+
+    // Successful upstream response: try to parse JSON, otherwise return raw text
+    try {
+      return NextResponse.json(JSON.parse(text));
+    } catch (e) {
+      // If upstream returned HTML unexpectedly, surface guidance
+      if (contentType.includes('text/html')) {
+        console.warn('[insights-proxy] upstream returned HTML on 200; possible protection page');
+        return NextResponse.json({ error: 'Upstream returned HTML. Check planner deployment protection and bypass token.' }, { status: 502 });
+      }
+      return new Response(text, { status: 200 });
+    }
   } catch (err) {
     console.error('insights-proxy route error', err);
     return NextResponse.json({ error: 'proxy error' }, { status: 500 });
