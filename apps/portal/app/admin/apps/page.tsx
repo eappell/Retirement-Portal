@@ -46,7 +46,6 @@ import {
   ClipboardDocumentIcon,
   CodeBracketIcon,
   Cog6ToothIcon,
-  ArrowLeftIcon,
 } from "@heroicons/react/24/outline";
 
 // Available HeroIcons for app selection
@@ -300,29 +299,28 @@ export default function AdminAppsPage() {
         )}
 
         <div className="mb-8 flex items-center justify-between">
-          <div className="flex items-center gap-4">
+          <div>
+            <h1 className="text-3xl font-bold text-gray-900">Application Manager</h1>
+            <p className="text-gray-600 mt-2">Manage available applications and their settings</p>
+          </div>
+          <div className="flex items-center gap-2">
             <button
               onClick={() => router.push('/admin/dashboard')}
-              className="inline-flex items-center gap-2 text-gray-600 hover:text-gray-900 font-medium py-2 px-3 rounded-lg transition-colors hover:bg-gray-100"
+              className="px-4 py-2 bg-gray-200 dark:bg-slate-700 dark:text-white rounded cursor-pointer"
             >
-              <ArrowLeftIcon className="h-5 w-5" />
-              Back to Dashboard
+              Back
             </button>
-            <div>
-              <h1 className="text-3xl font-bold text-gray-900">Application Manager</h1>
-              <p className="text-gray-600 mt-2">Manage available applications and their settings</p>
-            </div>
+            <button
+              onClick={() => setShowNewForm(true)}
+              className="inline-flex items-center gap-2 text-white font-semibold py-2 px-4 rounded-lg transition-colors"
+              style={{backgroundColor: '#0B5394'}}
+              onMouseEnter={(e) => e.currentTarget.style.backgroundColor = '#094170'}
+              onMouseLeave={(e) => e.currentTarget.style.backgroundColor = '#0B5394'}
+            >
+              <PlusIcon className="h-5 w-5" />
+              Add Application
+            </button>
           </div>
-          <button
-            onClick={() => setShowNewForm(true)}
-            className="inline-flex items-center gap-2 text-white font-semibold py-2 px-4 rounded-lg transition-colors"
-            style={{backgroundColor: '#0B5394'}}
-            onMouseEnter={(e) => e.currentTarget.style.backgroundColor = '#094170'}
-            onMouseLeave={(e) => e.currentTarget.style.backgroundColor = '#0B5394'}
-          >
-            <PlusIcon className="h-5 w-5" />
-            Add Application
-          </button>
         </div>
 
         {/* New App Form */}
