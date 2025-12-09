@@ -204,7 +204,8 @@ export default function AppPage() {
   }
 
   // Use app URL from query params if provided, otherwise use config
-  const finalAppUrl = appUrl || appConfig.url;
+  const baseAppUrl = appUrl || appConfig.url;
+  const finalAppUrl = `${baseAppUrl}${baseAppUrl.includes('?') ? '&' : '?'}embedded=true`;
   const finalAppName = appName || appConfig.name;
 
   return (

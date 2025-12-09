@@ -145,7 +145,7 @@ export default function AppPageContent() {
         <IFrameWrapper
           appId={appId}
           appName={app.name}
-          appUrl={app.url}
+          appUrl={`${app.url}${app.url.includes('?') ? '&' : '?'}embedded=true`}
           description={app.description}
         />
       </div>
