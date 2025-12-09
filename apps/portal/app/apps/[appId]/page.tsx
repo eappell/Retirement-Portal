@@ -66,6 +66,12 @@ const DEFAULT_APPS: Record<string, any> = {
     description: "Analyze tax impacts in retirement with detailed projections",
     freeAllowed: true,
   },
+  "healthcare-cost": {
+    name: "Healthcare Cost Estimator",
+    url: "https://healthcare-cost.vercel.app/",
+    description: "Plan for your retirement healthcare expenses with personalized projections",
+    freeAllowed: true,
+  },
 };
 
 export default function AppPage() {

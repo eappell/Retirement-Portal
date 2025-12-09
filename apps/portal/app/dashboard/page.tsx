@@ -49,6 +49,14 @@ const DEFAULT_APPS: App[] = [
     url: "http://localhost:3001/",
     freeAllowed: true,
   },
+  {
+    id: "healthcare-cost",
+    name: "Healthcare Cost Estimator",
+    description: "Plan for your retirement healthcare expenses",
+    icon: "❤️",
+    url: "https://healthcare-cost.vercel.app/",
+    freeAllowed: true,
+  },
 ];
 
 export default function DashboardPage() {
