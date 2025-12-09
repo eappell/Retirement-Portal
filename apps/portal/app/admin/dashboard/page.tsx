@@ -683,7 +683,7 @@ export default function AdminDashboard() {
             {analytics.recentEvents.map((event, index) => (
               <div
                 key={index}
-                className="p-4 bg-gray-50 dark:bg-slate-700 rounded-lg border border-gray-200 dark:border-slate-600"
+                className="p-4 bg-gray-50 dark:bg-gradient-to-br dark:from-slate-700 dark:to-black rounded-lg border border-gray-200 dark:border-slate-600"
               >
                 <p className="text-sm font-medium text-gray-600 dark:text-gray-300 capitalize">{event.type}</p>
                 <p className="text-2xl font-bold text-gray-900 dark:text-gray-100 mt-2">{event.count}</p>
