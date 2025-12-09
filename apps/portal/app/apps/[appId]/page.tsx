@@ -60,6 +60,12 @@ const DEFAULT_APPS: Record<string, any> = {
     description: "Plan your retirement in another country with AI recommendations",
     freeAllowed: true,
   },
+  "tax-impact-analyzer": {
+    name: "Tax Impact Analyzer",
+    url: "http://localhost:3001/",
+    description: "Analyze tax impacts in retirement with detailed projections",
+    freeAllowed: true,
+  },
 };
 
 export default function AppPage() {

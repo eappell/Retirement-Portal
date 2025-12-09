@@ -13,6 +13,10 @@ import {
   ClipboardDocumentIcon,
   CodeBracketIcon,
   Cog6ToothIcon,
+  ChartBarIcon,
+  ChartBarSquareIcon,
+  DocumentChartBarIcon,
+  PresentationChartBarIcon,
 } from "@heroicons/react/24/outline";
 
 export const ICON_MAP: Record<string, React.ComponentType<{ className?: string }>> = {
@@ -39,6 +43,15 @@ export const ICON_MAP: Record<string, React.ComponentType<{ className?: string }
   BellIcon: BellIcon,
   "Chart Pie": ChartPieIcon,
   ChartPieIcon: ChartPieIcon,
+  Chart: ChartBarIcon,
+  ChartBar: ChartBarIcon,
+  ChartBarIcon: ChartBarIcon,
+  ChartBarSquare: ChartBarSquareIcon,
+  ChartBarSquareIcon: ChartBarSquareIcon,
+  DocumentChartBar: DocumentChartBarIcon,
+  DocumentChartBarIcon: DocumentChartBarIcon,
+  PresentationChartBar: PresentationChartBarIcon,
+  PresentationChartBarIcon: PresentationChartBarIcon,
   Calendar: CalendarIcon,
   CalendarIcon: CalendarIcon,
   Bookmark: BookmarkIcon,

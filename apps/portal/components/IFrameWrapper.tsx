@@ -39,7 +39,7 @@ export function IFrameWrapper({
           setAuthToken(token);
           setLoading(false);
 
-          // Send token to iframe when it's ready
+          // Send token and theme to iframe when it's ready
           if (iframeRef.current) {
             iframeRef.current.onload = () => {
               iframeRef.current?.contentWindow?.postMessage(
@@ -49,6 +49,14 @@ export function IFrameWrapper({
                   userId: user.uid,
                   email: user.email,
                   tier: tier || user.tier || "free",
+                },
+                "*"
+              );
+              // Also send the current theme
+              iframeRef.current?.contentWindow?.postMessage(
+                {
+                  type: "THEME_CHANGE",
+                  theme: theme,
                 },
                 "*"
               );

@@ -41,6 +41,14 @@ const DEFAULT_APPS: App[] = [
     url: "https://retire-abroad-ai.vercel.app/",
     freeAllowed: true,
   },
+  {
+    id: "tax-impact-analyzer",
+    name: "Tax Impact Analyzer",
+    description: "Analyze tax impacts in retirement with detailed projections",
+    icon: "💰",
+    url: "http://localhost:3001/",
+    freeAllowed: true,
+  },
 ];
 
 export default function DashboardPage() {
