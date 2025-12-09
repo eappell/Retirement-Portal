@@ -13,8 +13,6 @@ import {
   query,
   where,
   getDocs,
-  orderBy,
-  limit,
 } from "firebase/firestore";
 import {
   ArrowDownTrayIcon,
@@ -280,43 +278,6 @@ export default function AdminDashboard() {
     }
   };
 
-  const [recentEventsLoading, setRecentEventsLoading] = useState(false);
-
-  const fetchRecentEventsFromFirestore = async () => {
-    setRecentEventsLoading(true);
-    try {
-      const eventsRef = collection(db, "analytics");
-      const q = query(eventsRef, orderBy("timestamp", "desc"), limit(200));
-      const snapshot = await getDocs(q);
-      const items = snapshot.docs.map((doc) => {
-        const data = doc.data() as any;
-        let ts: any = data.timestamp;
-        if (ts && typeof ts.toDate === "function") {
-          ts = ts.toDate();
-        } else if (ts && typeof ts.seconds === "number") {
-          ts = new Date(ts.seconds * 1000);
-        } else if (ts) {
-          ts = new Date(ts);
-        } else {
-          ts = new Date();
-        }
-
-        return {
-          type: data.eventType || data.type || "event",
-          count: data.count || 1,
-          timestamp: ts,
-        };
-      });
-
-      setAnalytics((prev) => ({ ...prev, recentEvents: items }));
-    } catch (err) {
-      console.error("Error fetching analytics events:", err);
-      toast.showToast("Failed to fetch analytics events. See console.", "error");
-    } finally {
-      setRecentEventsLoading(false);
-    }
-  };
-
   if (!mounted || tierLoading || loading) {
     return (
       <div className="flex min-h-screen items-center justify-center">
@@ -446,9 +407,7 @@ export default function AdminDashboard() {
               </div>
 
                   <div className="overflow-auto max-h-96">
-                    {recentEventsLoading ? (
-                      <p className="text-gray-600 dark:text-gray-300">Loading recent events...</p>
-                    ) : analytics.recentEvents.length === 0 ? (
+                    {analytics.recentEvents.length === 0 ? (
                       <p className="text-gray-600 dark:text-gray-300">No recent events.</p>
                     ) : (
                   <table className="w-full text-left text-sm">
@@ -501,7 +460,7 @@ export default function AdminDashboard() {
           </button>
 
           <button
-            onClick={async () => { setShowAnalyticsModal(true); await fetchRecentEventsFromFirestore(); }}
+            onClick={() => setShowAnalyticsModal(true)}
             className="inline-flex items-center justify-center gap-2 text-white font-semibold py-3 px-6 rounded-lg transition-colors cursor-pointer"
             style={{ backgroundColor: '#0B5394' }}
             onMouseEnter={(e) => (e.currentTarget.style.backgroundColor = '#094170')}
