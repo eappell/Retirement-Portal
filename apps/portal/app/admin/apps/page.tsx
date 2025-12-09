@@ -46,6 +46,7 @@ import {
   ClipboardDocumentIcon,
   CodeBracketIcon,
   Cog6ToothIcon,
+  ArrowLeftIcon,
 } from "@heroicons/react/24/outline";
 
 // Available HeroIcons for app selection
@@ -299,9 +300,18 @@ export default function AdminAppsPage() {
         )}
 
         <div className="mb-8 flex items-center justify-between">
-          <div>
-            <h1 className="text-3xl font-bold text-gray-900">Application Manager</h1>
-            <p className="text-gray-600 mt-2">Manage available applications and their settings</p>
+          <div className="flex items-center gap-4">
+            <button
+              onClick={() => router.push('/admin/dashboard')}
+              className="inline-flex items-center gap-2 text-gray-600 hover:text-gray-900 font-medium py-2 px-3 rounded-lg transition-colors hover:bg-gray-100"
+            >
+              <ArrowLeftIcon className="h-5 w-5" />
+              Back to Dashboard
+            </button>
+            <div>
+              <h1 className="text-3xl font-bold text-gray-900">Application Manager</h1>
+              <p className="text-gray-600 mt-2">Manage available applications and their settings</p>
+            </div>
           </div>
           <button
             onClick={() => setShowNewForm(true)}
