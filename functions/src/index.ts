@@ -600,14 +600,17 @@ export const incrementQueryCount = onCall(
 
       // Only track for free tier
       if (tier === "free") {
-        await db
-          .collection("users")
-          .doc(userId)
-          .collection("usage")
-          .doc("queries")
-          .update({
-            count: admin.firestore.FieldValue.increment(1),
-          });
+        // Ensure usage doc exists and increment atomically (use set merge to avoid update failure)
+        const usageRef = db.collection("users").doc(userId).collection("usage").doc("queries");
+        await usageRef.set({
+          count: admin.firestore.FieldValue.increment(1),
+          resetDate: admin.firestore.FieldValue.serverTimestamp(),
+        }, { merge: true });
+
+        // Also denormalize to top-level user document for dashboard/export convenience
+        await db.collection("users").doc(userId).set({
+          queryCount: admin.firestore.FieldValue.increment(1),
+        }, { merge: true });
       }
 
       return {success: true};
