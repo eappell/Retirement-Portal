@@ -114,6 +114,7 @@ export default function AdminDashboard() {
   const [createLoading, setCreateLoading] = useState(false);
   const [createError, setCreateError] = useState<string | null>(null);
   const [createSuccess, setCreateSuccess] = useState<string | null>(null);
+  const [showAnalyticsModal, setShowAnalyticsModal] = useState(false);
   const toast = useToast();
 
   // Per-user tier selection map
@@ -395,6 +396,44 @@ export default function AdminDashboard() {
           </div>
         )}
 
+        {/* Analytics Events Modal */}
+        {showAnalyticsModal && (
+          <div className="fixed inset-0 z-50 flex items-center justify-center">
+            <div className="fixed inset-0 bg-black/50" onClick={() => setShowAnalyticsModal(false)} />
+            <div className="relative bg-white dark:bg-slate-800 rounded-lg shadow-lg w-full max-w-3xl mx-4 p-6">
+              <div className="flex items-center justify-between mb-4">
+                <h3 className="text-lg font-semibold text-gray-900 dark:text-gray-100">Analytics Events</h3>
+                <button className="text-sm text-gray-600 dark:text-gray-300 cursor-pointer" onClick={() => setShowAnalyticsModal(false)}>Close</button>
+              </div>
+
+              <div className="overflow-auto max-h-96">
+                {analytics.recentEvents.length === 0 ? (
+                  <p className="text-gray-600 dark:text-gray-300">No recent events.</p>
+                ) : (
+                  <table className="w-full text-left text-sm">
+                    <thead>
+                      <tr className="border-b border-gray-200 dark:border-slate-700">
+                        <th className="py-2 pr-4">Type</th>
+                        <th className="py-2 pr-4">Count</th>
+                        <th className="py-2 pr-4">Timestamp</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {analytics.recentEvents.map((ev, idx) => (
+                        <tr key={idx} className="border-b border-gray-100 dark:border-slate-700">
+                          <td className="py-2 pr-4 text-gray-700 dark:text-gray-200">{ev.type}</td>
+                          <td className="py-2 pr-4 text-gray-700 dark:text-gray-200">{ev.count}</td>
+                          <td className="py-2 pr-4 text-gray-700 dark:text-gray-200">{ev.timestamp?.toString?.() ?? String(ev.timestamp)}</td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                )}
+              </div>
+            </div>
+          </div>
+        )}
+
         {/* Admin Actions */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
           <button
@@ -421,6 +460,7 @@ export default function AdminDashboard() {
           </button>
 
           <button
+            onClick={() => setShowAnalyticsModal(true)}
             className="inline-flex items-center justify-center gap-2 text-white font-semibold py-3 px-6 rounded-lg transition-colors cursor-pointer"
             style={{ backgroundColor: '#0B5394' }}
             onMouseEnter={(e) => (e.currentTarget.style.backgroundColor = '#094170')}
