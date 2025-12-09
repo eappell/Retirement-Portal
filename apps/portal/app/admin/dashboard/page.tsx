@@ -562,47 +562,47 @@ export default function AdminDashboard() {
 
         {/* Key Metrics */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
-          <div className="bg-white rounded-lg shadow-lg p-6">
-            <h3 className="text-gray-600 text-sm font-semibold uppercase">Total Users</h3>
+          <div className="bg-white dark:bg-slate-800 rounded-lg shadow-lg p-6">
+            <h3 className="text-gray-600 dark:text-gray-300 text-sm font-semibold uppercase">Total Users</h3>
             <p className="text-3xl font-bold mt-2" style={{color: '#0B5394'}}>{stats.totalUsers}</p>
-            <p className="text-xs text-gray-500 mt-2">
+            <p className="text-xs text-gray-500 dark:text-gray-400 mt-2">
               {stats.paidUsers} paid • {stats.freeUsers} free
             </p>
           </div>
 
-          <div className="bg-white rounded-lg shadow-lg p-6">
-            <h3 className="text-gray-600 text-sm font-semibold uppercase">Active Users</h3>
+          <div className="bg-white dark:bg-slate-800 rounded-lg shadow-lg p-6">
+            <h3 className="text-gray-600 dark:text-gray-300 text-sm font-semibold uppercase">Active Users</h3>
             <p className="text-3xl font-bold mt-2" style={{color: '#0B5394'}}>{analytics.monthlyActiveUsers}</p>
-            <p className="text-xs text-gray-500 mt-2">
+            <p className="text-xs text-gray-500 dark:text-gray-400 mt-2">
               {analytics.dailyActiveUsers} daily • {analytics.weeklyActiveUsers} weekly
             </p>
           </div>
 
-          <div className="bg-white rounded-lg shadow-lg p-6">
-            <h3 className="text-gray-600 text-sm font-semibold uppercase">Total Queries</h3>
+          <div className="bg-white dark:bg-slate-800 rounded-lg shadow-lg p-6">
+            <h3 className="text-gray-600 dark:text-gray-300 text-sm font-semibold uppercase">Total Queries</h3>
             <p className="text-3xl font-bold mt-2" style={{color: '#0B5394'}}>{stats.totalQueries}</p>
-            <p className="text-xs text-gray-500 mt-2">
+            <p className="text-xs text-gray-500 dark:text-gray-400 mt-2">
               Avg {stats.averageQueriesPerUser} per user
             </p>
           </div>
 
-          <div className="bg-white rounded-lg shadow-lg p-6">
-            <h3 className="text-gray-600 text-sm font-semibold uppercase">Total Events</h3>
+          <div className="bg-white dark:bg-slate-800 rounded-lg shadow-lg p-6">
+            <h3 className="text-gray-600 dark:text-gray-300 text-sm font-semibold uppercase">Total Events</h3>
             <p className="text-3xl font-bold text-orange-600 mt-2">{stats.totalEvents}</p>
-            <p className="text-xs text-gray-500 mt-2">Tracked analytics events</p>
+            <p className="text-xs text-gray-500 dark:text-gray-400 mt-2">Tracked analytics events</p>
           </div>
         </div>
 
         {/* Charts Section */}
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 mb-8">
           {/* User Tier Distribution */}
-          <div className="bg-white rounded-lg shadow-lg p-8">
-            <h2 className="text-xl font-bold text-gray-900 mb-6">User Distribution by Tier</h2>
+          <div className="bg-white dark:bg-slate-800 rounded-lg shadow-lg p-8">
+            <h2 className="text-xl font-bold text-gray-900 dark:text-gray-100 mb-6">User Distribution by Tier</h2>
             <div className="space-y-4">
               <div>
                 <div className="flex justify-between mb-2">
-                  <span className="text-sm font-medium text-gray-700">Free Tier</span>
-                  <span className="text-sm font-semibold text-gray-900">
+                  <span className="text-sm font-medium text-gray-700 dark:text-gray-300">Free Tier</span>
+                  <span className="text-sm font-semibold text-gray-900 dark:text-gray-100">
                     {stats.freeUsers} ({Math.round((stats.freeUsers / stats.totalUsers) * 100)}%)
                   </span>
                 </div>
@@ -619,8 +619,8 @@ export default function AdminDashboard() {
 
               <div>
                 <div className="flex justify-between mb-2">
-                  <span className="text-sm font-medium text-gray-700">Paid Tier</span>
-                  <span className="text-sm font-semibold text-gray-900">
+                  <span className="text-sm font-medium text-gray-700 dark:text-gray-300">Paid Tier</span>
+                  <span className="text-sm font-semibold text-gray-900 dark:text-gray-100">
                     {stats.paidUsers} ({Math.round((stats.paidUsers / stats.totalUsers) * 100)}%)
                   </span>
                 </div>
@@ -637,8 +637,8 @@ export default function AdminDashboard() {
 
               <div>
                 <div className="flex justify-between mb-2">
-                  <span className="text-sm font-medium text-gray-700">Admin Users</span>
-                  <span className="text-sm font-semibold text-gray-900">
+                  <span className="text-sm font-medium text-gray-700 dark:text-gray-300">Admin Users</span>
+                  <span className="text-sm font-semibold text-gray-900 dark:text-gray-100">
                     {stats.adminUsers} ({Math.round((stats.adminUsers / stats.totalUsers) * 100)}%)
                   </span>
                 </div>
@@ -655,13 +655,13 @@ export default function AdminDashboard() {
           </div>
 
           {/* Top Applications */}
-          <div className="bg-white rounded-lg shadow-lg p-8">
-            <h2 className="text-xl font-bold text-gray-900 mb-6">Most Used Applications</h2>
+          <div className="bg-white dark:bg-slate-800 rounded-lg shadow-lg p-8">
+            <h2 className="text-xl font-bold text-gray-900 dark:text-gray-100 mb-6">Most Used Applications</h2>
             <div className="space-y-3">
               {analytics.topApps.length > 0 ? (
                 analytics.topApps.map((app, index) => (
                   <div key={index} className="flex items-center justify-between">
-                    <span className="text-gray-700">
+                    <span className="text-gray-700 dark:text-gray-300">
                       {index + 1}. {app.name}
                     </span>
                     <span className="px-3 py-1 rounded-full text-sm font-semibold" style={{backgroundColor: '#BFCDE0', color: '#6b5e62'}}>
@@ -670,7 +670,7 @@ export default function AdminDashboard() {
                   </div>
                 ))
               ) : (
-                <p className="text-gray-500">No data available yet</p>
+                <p className="text-gray-500 dark:text-gray-400">No data available yet</p>
               )}
             </div>
           </div>
@@ -683,7 +683,7 @@ export default function AdminDashboard() {
             {analytics.recentEvents.map((event, index) => (
               <div
                 key={index}
-                className="p-4 bg-gradient-to-br from-gray-50 to-gray-100 dark:from-slate-700 dark:to-slate-800 rounded-lg border border-gray-200 dark:border-slate-700"
+                className="p-4 bg-gradient-to-br from-gray-50 to-gray-100 dark:from-slate-600 dark:to-slate-700 rounded-lg border border-gray-200 dark:border-slate-600"
               >
                 <p className="text-sm font-medium text-gray-600 dark:text-gray-300 capitalize">{event.type}</p>
                 <p className="text-2xl font-bold text-gray-900 dark:text-gray-100 mt-2">{event.count}</p>
