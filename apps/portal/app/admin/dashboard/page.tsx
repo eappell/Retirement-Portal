@@ -99,7 +99,9 @@ function CreateUserForm({ onSuccess, onError }: { onSuccess: (uid: string) => vo
       </div>
     </form>
   );
+}
 
+export default function AdminDashboard() {
   const router = useRouter();
   const { user } = useAuth();
   const { tier, loading: tierLoading } = useUserTier();
