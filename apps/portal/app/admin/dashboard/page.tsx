@@ -95,13 +95,41 @@ function CreateUserForm({ onSuccess, onError }: { onSuccess: (uid: string) => vo
         <button type="button" onClick={() => { setEmail(''); setPassword(''); setName(''); setTier('free'); }} className="px-4 py-2 rounded border">Reset</button>
         <button type="submit" disabled={loading} className="px-4 py-2 rounded bg-blue-600 text-white">
           {loading ? 'Creating...' : 'Create User'}
-        </button>
-      </div>
-    </form>
-  );
-}
-
-export default function AdminDashboard() {
+          <button
+            className="inline-flex items-center justify-center gap-2 text-white font-semibold py-3 px-6 rounded-lg transition-colors cursor-pointer"
+            style={{ backgroundColor: '#0B5394' }}
+            onMouseEnter={(e) => e.currentTarget.style.backgroundColor = '#094170'}
+            onMouseLeave={(e) => e.currentTarget.style.backgroundColor = '#0B5394'}
+            onClick={async () => {
+              if (analyticsLoadingEvents) return;
+              setShowAnalyticsModal(true);
+              if (analyticsEventsList.length === 0) {
+                setAnalyticsLoadingEvents(true);
+                try {
+                  const eventsRef = collection(db, "analytics");
+                  const q = query(eventsRef, orderBy("timestamp", "desc"));
+                  const snapshot = await getDocs(q);
+                  const rows: Array<Record<string, any>> = [];
+                  snapshot.forEach((doc) => {
+                    const d = doc.data();
+                    rows.push({
+                      id: doc.id,
+                      eventType: d.eventType || "",
+                      application: d.application || d.metadata?.appId || "",
+                      metadata: d.metadata || {},
+                      timestamp: d.timestamp && d.timestamp.toDate ? d.timestamp.toDate().toISOString() : (d.timestamp ? String(d.timestamp) : ""),
+                    });
+                  });
+                  setAnalyticsEventsList(rows);
+                } catch (err) {
+                  console.error("Error fetching analytics events:", err);
+                  alert("Failed to load analytics events. See console for details.");
+                } finally {
+                  setAnalyticsLoadingEvents(false);
+                }
+              }
+            }}
+          >
   const router = useRouter();
   const { user } = useAuth();
   const { tier, loading: tierLoading } = useUserTier();
@@ -510,19 +538,13 @@ export default function AdminDashboard() {
           </button>
 
           <button
-            onClick={() => setShowAnalyticsModal(true)}
             className="inline-flex items-center justify-center gap-2 text-white font-semibold py-3 px-6 rounded-lg transition-colors cursor-pointer"
-<<<<<<< HEAD
             style={{ backgroundColor: '#0B5394' }}
-            onMouseEnter={(e) => (e.currentTarget.style.backgroundColor = '#094170')}
-            onMouseLeave={(e) => (e.currentTarget.style.backgroundColor = '#0B5394')}
-=======
-            style={{backgroundColor: '#0B5394'}}
             onMouseEnter={(e) => e.currentTarget.style.backgroundColor = '#094170'}
             onMouseLeave={(e) => e.currentTarget.style.backgroundColor = '#0B5394'}
             onClick={async () => {
               if (analyticsLoadingEvents) return;
-              setShowAnalytics(true);
+              setShowAnalyticsModal(true);
               if (analyticsEventsList.length === 0) {
                 setAnalyticsLoadingEvents(true);
                 try {
@@ -549,7 +571,6 @@ export default function AdminDashboard() {
                 }
               }
             }}
->>>>>>> WIP: save local changes before pulling origin/main
           >
             <ChartBarIcon className="h-5 w-5" />
             {analyticsLoadingEvents ? 'Loading...' : 'View Analytics Events'}
