@@ -4,6 +4,7 @@ import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { useAuth } from "@/lib/auth";
 import { useUserTier } from "@/lib/useUserTier";
+import { useTheme } from "@/lib/theme";
 import { Header } from "@/components/Header";
 import { db, functions as firebaseFunctions } from "@/lib/firebase";
 import { httpsCallable } from "firebase/functions";
@@ -105,6 +106,7 @@ export default function AdminDashboard() {
   const router = useRouter();
   const { user } = useAuth();
   const { tier, loading: tierLoading } = useUserTier();
+  const { theme } = useTheme();
   const [mounted, setMounted] = useState(false);
   const [loading, setLoading] = useState(true);
   const [exportLoading, setExportLoading] = useState(false);
@@ -677,17 +679,17 @@ export default function AdminDashboard() {
         </div>
 
         {/* Activity Summary */}
-        <div className="bg-white dark:bg-slate-800 rounded-lg shadow-lg p-8 mb-8">
-          <h2 className="text-xl font-bold text-gray-900 dark:text-gray-100 mb-6">Event Activity</h2>
+        <div className={`rounded-lg shadow-lg p-8 mb-8 ${theme === 'dark' ? 'bg-slate-800' : 'bg-white'}`}>
+          <h2 className={`text-xl font-bold mb-6 ${theme === 'dark' ? 'text-gray-100' : 'text-gray-900'}`}>Event Activity</h2>
           <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
             {analytics.recentEvents.map((event, index) => (
               <div
                 key={index}
-                className="p-4 bg-gradient-to-br from-gray-50 to-gray-100 rounded-lg border border-gray-200 dark:bg-slate-800 dark:border-slate-600"
+                className={`p-4 rounded-lg border ${theme === 'dark' ? 'bg-gradient-to-br from-slate-600 to-slate-700 border-slate-600' : 'bg-gradient-to-br from-gray-50 to-gray-100 border-gray-200'}`}
               >
-                <p className="text-sm font-medium text-gray-600 dark:text-gray-300 capitalize">{event.type}</p>
-                <p className="text-2xl font-bold text-gray-900 dark:text-gray-100 mt-2">{event.count}</p>
-                <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">events</p>
+                <p className={`text-sm font-medium capitalize ${theme === 'dark' ? 'text-gray-300' : 'text-gray-600'}`}>{event.type}</p>
+                <p className={`text-2xl font-bold mt-2 ${theme === 'dark' ? 'text-gray-100' : 'text-gray-900'}`}>{event.count}</p>
+                <p className={`text-xs mt-1 ${theme === 'dark' ? 'text-gray-400' : 'text-gray-500'}`}>events</p>
               </div>
             ))}
           </div>
