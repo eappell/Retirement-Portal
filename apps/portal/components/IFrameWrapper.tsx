@@ -270,6 +270,46 @@ export function IFrameWrapper({
         }
         return;
       }
+
+      // Handle AI insights request from embedded app: proxy via portal server
+      if (event.data?.type === 'REQUEST_INSIGHTS') {
+        const { requestId, plan, result } = event.data;
+        (async () => {
+          try {
+            // Call portal server proxy which enforces role and uses bypass token
+            const resp = await fetch('/api/insights-proxy', {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify({ plan, result }),
+            });
+            const json = await resp.json();
+            // Forward response back to iframe
+            if (iframeRef.current) {
+              iframeRef.current.contentWindow?.postMessage(
+                {
+                  type: 'INSIGHTS_RESPONSE',
+                  requestId,
+                  text: json.text || json || null,
+                },
+                '*'
+              );
+            }
+          } catch (err: any) {
+            console.error('Portal insights proxy error', err);
+            if (iframeRef.current) {
+              iframeRef.current.contentWindow?.postMessage(
+                {
+                  type: 'INSIGHTS_RESPONSE',
+                  requestId,
+                  error: String(err),
+                },
+                '*'
+              );
+            }
+          }
+        })();
+        return;
+      }
       
       // Handle GET_SCENARIOS_RESPONSE - forward back to requesting iframe
       if (event.data?.type === "GET_SCENARIOS_RESPONSE") {

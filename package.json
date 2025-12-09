@@ -3,6 +3,10 @@
     "build": "npm install --prefix apps/portal && npm --prefix apps/portal run build"
   },
   "dependencies": {
+    "firebase": "^12.6.0",
     "firebase-admin": "^13.6.0"
+  },
+  "devDependencies": {
+    "vercel": "^49.1.2"
   }
 }

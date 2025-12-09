@@ -13,6 +13,7 @@ import {
   query,
   where,
   getDocs,
+  orderBy,
 } from "firebase/firestore";
 import {
   ArrowDownTrayIcon,
@@ -110,6 +111,7 @@ export default function AdminDashboard() {
   const [showUsers, setShowUsers] = useState(false);
   const [usersLoading, setUsersLoading] = useState(false);
   const [usersList, setUsersList] = useState<Array<Record<string, any>>>([]);
+  // Create user modal state
   const [showCreateModal, setShowCreateModal] = useState(false);
   const [createLoading, setCreateLoading] = useState(false);
   const [createError, setCreateError] = useState<string | null>(null);
@@ -119,6 +121,11 @@ export default function AdminDashboard() {
 
   // Per-user tier selection map
   const [tierSelections, setTierSelections] = useState<Record<string, string>>({});
+
+  // Analytics UI state (merged from remote and local changes)
+  const [showAnalytics, setShowAnalytics] = useState(false);
+  const [analyticsLoadingEvents, setAnalyticsLoadingEvents] = useState(false);
+  const [analyticsEventsList, setAnalyticsEventsList] = useState<Array<Record<string, any>>>([]);
   const [stats, setStats] = useState<UserStats>({
     totalUsers: 0,
     freeUsers: 0,
@@ -434,6 +441,49 @@ export default function AdminDashboard() {
           </div>
         )}
 
+        {/* Analytics Events Modal */}
+        {showAnalytics && (
+          <div className="fixed inset-0 z-50 flex items-center justify-center">
+            <div className="fixed inset-0 bg-black/50" onClick={() => setShowAnalytics(false)} />
+            <div className="relative bg-white dark:bg-slate-800 rounded-lg shadow-lg w-full max-w-4xl mx-4 p-6">
+              <div className="flex items-center justify-between mb-4">
+                <h3 className="text-lg font-semibold text-gray-900 dark:text-gray-100">Analytics Events</h3>
+                <button className="text-sm text-gray-600 dark:text-gray-300" onClick={() => setShowAnalytics(false)}>Close</button>
+              </div>
+              <div className="overflow-auto max-h-96">
+                {analyticsLoadingEvents ? (
+                  <p className="text-gray-600 dark:text-gray-300">Loading events...</p>
+                ) : analyticsEventsList.length === 0 ? (
+                  <p className="text-gray-600 dark:text-gray-300">No events found.</p>
+                ) : (
+                  <table className="w-full text-left text-sm">
+                    <thead>
+                      <tr className="border-b border-gray-200 dark:border-slate-700">
+                        <th className="py-2 pr-4">ID</th>
+                        <th className="py-2 pr-4">Type</th>
+                        <th className="py-2 pr-4">Application</th>
+                        <th className="py-2 pr-4">Timestamp</th>
+                        <th className="py-2 pr-4">Metadata</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {analyticsEventsList.map((e) => (
+                        <tr key={e.id} className="border-b border-gray-100 dark:border-slate-700">
+                          <td className="py-2 pr-4 text-xs text-gray-600 dark:text-gray-300">{e.id}</td>
+                          <td className="py-2 pr-4 text-gray-700 dark:text-gray-200">{e.eventType}</td>
+                          <td className="py-2 pr-4 text-gray-700 dark:text-gray-200">{e.application}</td>
+                          <td className="py-2 pr-4 text-gray-700 dark:text-gray-200">{e.timestamp}</td>
+                          <td className="py-2 pr-4 text-gray-700 dark:text-gray-200"><pre className="text-xs whitespace-pre-wrap">{JSON.stringify(e.metadata || {}, null, 2)}</pre></td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                )}
+              </div>
+            </div>
+          </div>
+        )}
+
         {/* Admin Actions */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
           <button
@@ -462,12 +512,47 @@ export default function AdminDashboard() {
           <button
             onClick={() => setShowAnalyticsModal(true)}
             className="inline-flex items-center justify-center gap-2 text-white font-semibold py-3 px-6 rounded-lg transition-colors cursor-pointer"
+<<<<<<< HEAD
             style={{ backgroundColor: '#0B5394' }}
             onMouseEnter={(e) => (e.currentTarget.style.backgroundColor = '#094170')}
             onMouseLeave={(e) => (e.currentTarget.style.backgroundColor = '#0B5394')}
+=======
+            style={{backgroundColor: '#0B5394'}}
+            onMouseEnter={(e) => e.currentTarget.style.backgroundColor = '#094170'}
+            onMouseLeave={(e) => e.currentTarget.style.backgroundColor = '#0B5394'}
+            onClick={async () => {
+              if (analyticsLoadingEvents) return;
+              setShowAnalytics(true);
+              if (analyticsEventsList.length === 0) {
+                setAnalyticsLoadingEvents(true);
+                try {
+                  const eventsRef = collection(db, "analytics");
+                  const q = query(eventsRef, orderBy("timestamp", "desc"));
+                  const snapshot = await getDocs(q);
+                  const rows: Array<Record<string, any>> = [];
+                  snapshot.forEach((doc) => {
+                    const d = doc.data();
+                    rows.push({
+                      id: doc.id,
+                      eventType: d.eventType || "",
+                      application: d.application || d.metadata?.appId || "",
+                      metadata: d.metadata || {},
+                      timestamp: d.timestamp && d.timestamp.toDate ? d.timestamp.toDate().toISOString() : (d.timestamp ? String(d.timestamp) : ""),
+                    });
+                  });
+                  setAnalyticsEventsList(rows);
+                } catch (err) {
+                  console.error("Error fetching analytics events:", err);
+                  alert("Failed to load analytics events. See console for details.");
+                } finally {
+                  setAnalyticsLoadingEvents(false);
+                }
+              }
+            }}
+>>>>>>> WIP: save local changes before pulling origin/main
           >
             <ChartBarIcon className="h-5 w-5" />
-            View Analytics Events
+            {analyticsLoadingEvents ? 'Loading...' : 'View Analytics Events'}
           </button>
 
           <a
