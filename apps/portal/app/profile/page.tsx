@@ -18,7 +18,7 @@ import { useToast } from "@/components/ToastProvider";
 
 export default function ProfilePage() {
   const router = useRouter();
-  const { user } = useAuth();
+  const { user, updateUserProfile } = useAuth();
   const toast = useToast();
   const [mounted, setMounted] = useState(false);
   const [loading, setLoading] = useState(false);
@@ -43,10 +43,19 @@ export default function ProfilePage() {
   const [editableName, setEditableName] = useState(user?.displayName || "");
   const [editableEmail, setEditableEmail] = useState(user?.email || "");
   const [currentPasswordForEmail, setCurrentPasswordForEmail] = useState("");
+  const [editableDob, setEditableDob] = useState<string | null>(user?.dob || null);
+  const [editableRetirementAge, setEditableRetirementAge] = useState<number | null>(user?.retirementAge || null);
+  const [editableCurrentAnnualIncome, setEditableCurrentAnnualIncome] = useState<number | null>(user?.currentAnnualIncome || null);
 
   useEffect(() => {
     setMounted(true);
   }, []);
+
+  useEffect(() => {
+    setEditableDob(user?.dob || null);
+    setEditableRetirementAge(user?.retirementAge || null);
+    setEditableCurrentAnnualIncome(user?.currentAnnualIncome || null);
+  }, [user]);
 
   useEffect(() => {
     if (mounted && !user) {
@@ -245,7 +254,13 @@ export default function ProfilePage() {
                 }
 
                 // Update Firestore user doc
-                await updateDoc(doc(db, 'users', user.uid), { name: editableName, email: editableEmail });
+                await updateDoc(doc(db, 'users', user.uid), { name: editableName, email: editableEmail, dob: editableDob, retirementAge: editableRetirementAge, currentAnnualIncome: editableCurrentAnnualIncome });
+                // Update AuthProvider managed profile too
+                try {
+                  await updateUserProfile({ dob: editableDob, retirementAge: editableRetirementAge, currentAnnualIncome: editableCurrentAnnualIncome });
+                } catch (e) {
+                  console.warn('Failed to update user profile in context', e);
+                }
 
                 setSuccess('Profile updated');
                 setEditingProfile(false);
@@ -260,6 +275,18 @@ export default function ProfilePage() {
                 <div>
                   <label className="block text-sm font-semibold text-gray-700 dark:text-slate-200 mb-2">Name</label>
                   <input value={editableName} onChange={(e) => setEditableName(e.target.value)} className="w-full px-4 py-3 border border-gray-300 rounded-lg bg-white dark:bg-slate-700 text-gray-700 dark:text-slate-100" />
+                </div>
+                <div>
+                  <label className="block text-sm font-semibold text-gray-700 dark:text-slate-200 mb-2">Date of Birth</label>
+                  <input type="date" value={editableDob || ''} onChange={(e) => setEditableDob(e.target.value || null)} className="w-full px-4 py-3 border border-gray-300 rounded-lg bg-white dark:bg-slate-700 text-gray-700 dark:text-slate-100" />
+                </div>
+                <div>
+                  <label className="block text-sm font-semibold text-gray-700 dark:text-slate-200 mb-2">Retirement Age</label>
+                  <input type="number" min={40} max={100} value={editableRetirementAge ?? ''} onChange={(e) => setEditableRetirementAge(e.target.value ? Number(e.target.value) : null)} className="w-full px-4 py-3 border border-gray-300 rounded-lg bg-white dark:bg-slate-700 text-gray-700 dark:text-slate-100" />
+                </div>
+                <div>
+                  <label className="block text-sm font-semibold text-gray-700 dark:text-slate-200 mb-2">Current Annual Income</label>
+                  <input type="number" step="0.01" value={editableCurrentAnnualIncome ?? ''} onChange={(e) => setEditableCurrentAnnualIncome(e.target.value ? Number(e.target.value) : null)} className="w-full px-4 py-3 border border-gray-300 rounded-lg bg-white dark:bg-slate-700 text-gray-700 dark:text-slate-100" />
                 </div>
                 <div>
                   <label className="block text-sm font-semibold text-gray-700 dark:text-slate-200 mb-2">Email</label>

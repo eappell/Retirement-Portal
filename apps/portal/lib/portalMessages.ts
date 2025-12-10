@@ -16,6 +16,10 @@ export interface AuthTokenMessage {
   email: string;
   // Use 'paid' to match portal-wide tier naming (was 'premium' in older docs)
   tier: 'free' | 'paid' | 'admin';
+  // Optional user profile fields
+  dob?: string | null;
+  retirementAge?: number | null;
+  currentAnnualIncome?: number | null;
 }
 
 export interface ThemeChangeMessage {
@@ -130,6 +134,13 @@ export interface GetScenariosResponse {
   }>;
 }
 
+export interface UserProfileUpdate {
+  type: 'USER_PROFILE_UPDATE';
+  dob?: string | null;
+  retirementAge?: number | null;
+  currentAnnualIncome?: number | null;
+}
+
 // ============================================================================
 // Union type of all portal messages
 // ============================================================================
@@ -139,6 +150,7 @@ export type PortalMessage =
   | ThemeChangeMessage
   | ToolbarButtonsMessage
   | ToolbarButtonClickedMessage
+  | UserProfileUpdate
   | AppDataTransferRequest
   | AppDataTransferResponse
   | GetScenariosRequest

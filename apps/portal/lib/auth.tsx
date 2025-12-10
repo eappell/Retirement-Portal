@@ -11,7 +11,11 @@ import {setDoc, doc, getDoc} from "firebase/firestore";
 import {auth, db} from "@/lib/firebase";
 
 export interface User extends FirebaseUser {
-  tier?: "free" | "paid";
+  tier?: "free" | "paid" | "admin";
+  // Optional profile fields available to apps
+  dob?: string | null;
+  retirementAge?: number | null;
+  currentAnnualIncome?: number | null;
 }
 
 interface AuthContextType {
@@ -22,6 +26,7 @@ interface AuthContextType {
   signup: (email: string, password: string) => Promise<void>;
   loginAnonymously: () => Promise<void>;
   logout: () => Promise<void>;
+  updateUserProfile: (profile: { dob?: string | null; retirementAge?: number | null; currentAnnualIncome?: number | null; }) => Promise<void>;
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
@@ -52,12 +57,36 @@ export const AuthProvider = ({children}: {children: ReactNode}) => {
               const userDocSnap = await getDoc(userDocRef);
 
               const userData = userDocSnap.data();
-              const tier = (userData?.tier as "free" | "paid") || "free";
+              const tier = (userData?.tier as "free" | "paid" | "admin") || "free";
 
-              setUser({
+              const dob = (userData?.dob as string) || null;
+              const retirementAge = (userData?.retirementAge as number) || null;
+              const currentAnnualIncome = (userData?.currentAnnualIncome as number) || null;
+
+              const newUser = {
                 ...firebaseUser,
                 tier,
-              });
+                dob,
+                retirementAge,
+                currentAnnualIncome,
+              } as User;
+              setUser(newUser);
+              // Persist a compact portal user object for same-origin read
+              try {
+                localStorage.setItem(
+                  'portalUser',
+                  JSON.stringify({
+                    userId: firebaseUser.uid,
+                    email: firebaseUser.email,
+                    tier,
+                    dob,
+                    retirementAge,
+                    currentAnnualIncome,
+                  })
+                );
+              } catch (err) {
+                console.warn('Could not write portalUser to localStorage', err);
+              }
               // Persist the role for child apps and other windows
               try {
                 localStorage.setItem("userRole", tier);
@@ -67,10 +96,29 @@ export const AuthProvider = ({children}: {children: ReactNode}) => {
             } catch (firestoreErr) {
               console.error("Error fetching user tier from Firestore:", firestoreErr);
               // Set user anyway, but with default tier
-              setUser({
+              const newUser2 = {
                 ...firebaseUser,
                 tier: "free",
-              });
+                dob: null,
+                retirementAge: null,
+                currentAnnualIncome: null,
+              } as User;
+              setUser(newUser2);
+              try {
+                localStorage.setItem(
+                  'portalUser',
+                  JSON.stringify({
+                    userId: firebaseUser.uid,
+                    email: firebaseUser.email,
+                    tier: 'free',
+                    dob: null,
+                    retirementAge: null,
+                    currentAnnualIncome: null,
+                  })
+                );
+              } catch (err) {
+                console.warn('Could not write portalUser to localStorage', err);
+              }
               try {
                 localStorage.setItem("userRole", "free");
               } catch (err) {
@@ -83,6 +131,11 @@ export const AuthProvider = ({children}: {children: ReactNode}) => {
               localStorage.removeItem("userRole");
             } catch (err) {
               console.warn("Could not remove userRole from localStorage", err);
+            }
+            try {
+              localStorage.removeItem('portalUser');
+            } catch (err) {
+              console.warn('Could not remove portalUser from localStorage', err);
             }
           }
         } catch (err) {
@@ -112,9 +165,25 @@ export const AuthProvider = ({children}: {children: ReactNode}) => {
         tier: "free",
         createdAt: new Date(),
         subscriptionExpiry: null,
+        dob: null,
+        retirementAge: null,
+        currentAnnualIncome: null,
       });
 
-      setUser({...userCredential.user, tier: "free"});
+      const newUserSignup = {...userCredential.user, tier: "free", dob: null, retirementAge: null, currentAnnualIncome: null} as User;
+      setUser(newUserSignup);
+      try {
+        localStorage.setItem('portalUser', JSON.stringify({
+          userId: newUserSignup.uid,
+          email: newUserSignup.email,
+          tier: newUserSignup.tier,
+          dob: newUserSignup.dob,
+          retirementAge: newUserSignup.retirementAge,
+          currentAnnualIncome: newUserSignup.currentAnnualIncome,
+        }));
+      } catch (err) {
+        console.warn('Could not write portalUser to localStorage', err);
+      }
     } catch (err) {
       const errorMessage = err instanceof Error ? err.message : "Signup failed";
       setError(errorMessage);
@@ -149,10 +218,26 @@ export const AuthProvider = ({children}: {children: ReactNode}) => {
           tier: "free",
           createdAt: new Date(),
           subscriptionExpiry: null,
+          dob: null,
+          retirementAge: null,
+          currentAnnualIncome: null,
         });
       }
 
-      setUser({...userCredential.user, tier: "free"});
+      const newUserAnon = {...userCredential.user, tier: "free", dob: null, retirementAge: null, currentAnnualIncome: null} as User;
+      setUser(newUserAnon);
+      try {
+        localStorage.setItem('portalUser', JSON.stringify({
+          userId: newUserAnon.uid,
+          email: newUserAnon.email,
+          tier: newUserAnon.tier,
+          dob: newUserAnon.dob,
+          retirementAge: newUserAnon.retirementAge,
+          currentAnnualIncome: newUserAnon.currentAnnualIncome,
+        }));
+      } catch (err) {
+        console.warn('Could not write portalUser to localStorage', err);
+      }
     } catch (err) {
       const errorMessage = err instanceof Error ? err.message : "Anonymous login failed";
       setError(errorMessage);
@@ -172,6 +257,38 @@ export const AuthProvider = ({children}: {children: ReactNode}) => {
     }
   }, []);
 
+  const updateUserProfile = useCallback(async (profile: { dob?: string | null; retirementAge?: number | null; currentAnnualIncome?: number | null; }) => {
+    setError(null);
+    try {
+      if (!auth.currentUser) throw new Error('Not authenticated');
+      const uid = auth.currentUser.uid;
+      await setDoc(doc(db, 'users', uid), profile, { merge: true });
+
+      // Update local state and localStorage (portalUser)
+      setUser((prev) => {
+        const next = prev ? { ...prev, ...profile } as User : prev;
+        try {
+          const portalUser = {
+            userId: next?.uid,
+            email: next?.email,
+            tier: next?.tier,
+            dob: next?.dob || null,
+            retirementAge: next?.retirementAge || null,
+            currentAnnualIncome: next?.currentAnnualIncome || null,
+          };
+          localStorage.setItem('portalUser', JSON.stringify(portalUser));
+        } catch (err) {
+          console.warn('Could not persist portalUser to localStorage', err);
+        }
+        return next;
+      });
+    } catch (err) {
+      const errorMessage = err instanceof Error ? err.message : 'Failed to update profile';
+      setError(errorMessage);
+      throw err;
+    }
+  }, []);
+
   return (
     <AuthContext.Provider
       value={{
@@ -182,6 +299,7 @@ export const AuthProvider = ({children}: {children: ReactNode}) => {
         signup,
         loginAnonymously,
         logout,
+        updateUserProfile,
       }}
     >
       {children}

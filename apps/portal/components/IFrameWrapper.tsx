@@ -49,6 +49,9 @@ export function IFrameWrapper({
                   userId: user.uid,
                   email: user.email,
                   tier: tier || user.tier || "free",
+                  dob: user.dob || null,
+                  retirementAge: user.retirementAge || null,
+                  currentAnnualIncome: user.currentAnnualIncome || null,
                 },
                 "*"
               );
@@ -80,11 +83,32 @@ export function IFrameWrapper({
         {
           type: "USER_ROLE_UPDATE",
           role,
+          dob: user?.dob || null,
+          retirementAge: user?.retirementAge || null,
+          currentAnnualIncome: user?.currentAnnualIncome || null,
         },
         "*"
       );
     }
   }, [tier, user, loading]);
+
+  // Send explicit profile updates to iframe when any profile field changes
+  useEffect(() => {
+    if (iframeRef.current && !loading) {
+      const dob = user?.dob || null;
+      const retirementAge = user?.retirementAge || null;
+      const currentAnnualIncome = user?.currentAnnualIncome || null;
+      iframeRef.current.contentWindow?.postMessage(
+        {
+          type: 'USER_PROFILE_UPDATE',
+          dob,
+          retirementAge,
+          currentAnnualIncome,
+        },
+        '*'
+      );
+    }
+  }, [user?.dob, user?.retirementAge, user?.currentAnnualIncome, loading]);
 
   // Listen for storage events (other windows) and forward role changes
   useEffect(() => {
@@ -104,6 +128,24 @@ export function IFrameWrapper({
             },
             '*'
           );
+        }
+      }
+      if (e.key === "portalUser") {
+        try {
+          const parsed = JSON.parse(e.newValue || 'null');
+          if (iframeRef.current) {
+            iframeRef.current.contentWindow?.postMessage(
+              {
+                type: 'USER_PROFILE_UPDATE',
+                dob: parsed?.dob || null,
+                retirementAge: parsed?.retirementAge || null,
+                currentAnnualIncome: parsed?.currentAnnualIncome || null,
+              },
+              '*'
+            );
+          }
+        } catch (err) {
+          // ignore parse errors
         }
       }
     };
@@ -170,6 +212,21 @@ export function IFrameWrapper({
             {
               type: "USER_ROLE_UPDATE",
               role: tier || user?.tier || "free",
+            },
+            "*"
+          );
+        }
+        return;
+      }
+      // Request the current profile only
+      if (event.data?.type === "REQUEST_PROFILE") {
+        if (iframeRef.current) {
+          iframeRef.current.contentWindow?.postMessage(
+            {
+              type: "USER_PROFILE_UPDATE",
+              dob: user?.dob || null,
+              retirementAge: user?.retirementAge || null,
+              currentAnnualIncome: user?.currentAnnualIncome || null,
             },
             "*"
           );

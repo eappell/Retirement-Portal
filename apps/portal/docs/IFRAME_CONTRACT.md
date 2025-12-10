@@ -11,12 +11,19 @@ Messages sent from Portal -> Iframe
     - userId: string
     - email: string | null
     - tier: string ("free" | "paid" | "admin")
+    - dob: string | null (ISO date string)
+    - retirementAge: number | null
+    - currentAnnualIncome: number | null
   - Sent when the iframe loads with current auth token and role.
 
 - USER_ROLE_UPDATE
   - type: "USER_ROLE_UPDATE"
   - payload:
     - role: string | null (new role, e.g. "free", "paid", "admin")
+  - Also includes (optionally) the user's profile fields:
+    - dob: string | null
+    - retirementAge: number | null
+    - currentAnnualIncome: number | null
   - Sent whenever the portal detects a change in the resolved role (login, logout, subscription update) or when `localStorage.userRole` changes.
 
 - THEME_CHANGE
@@ -36,6 +43,9 @@ Messages sent from Iframe -> Portal
   - payload: { ... } - portal will persist to localStorage for cross-app transfer
 
 - REQUEST_HEALTHCARE_DATA
+  - REQUEST_PROFILE
+    - type: "REQUEST_PROFILE"
+    - Request the portal to respond with the current user profile via `USER_PROFILE_UPDATE`.
   - type: "REQUEST_HEALTHCARE_DATA"
   - portal will respond with `HEALTHCARE_DATA_RESPONSE` if present
 
@@ -53,13 +63,22 @@ window.addEventListener('message', (ev) => {
       handleRoleChange(data.tier);
       break;
     case 'USER_ROLE_UPDATE':
-      handleRoleChange(data.role);
+        handleRoleChange(data.role);
+        // apply other profile fields if present
+        if (data.dob || data.retirementAge || data.currentAnnualIncome) {
+          applyProfile({ dob: data.dob, retirementAge: data.retirementAge, currentAnnualIncome: data.currentAnnualIncome });
+        }
       break;
     case 'THEME_CHANGE':
       applyTheme(data.theme);
       break;
     case 'HEALTHCARE_DATA_RESPONSE':
       // handle cross-app data
+      break;
+    case 'USER_PROFILE_UPDATE':
+      if (data.dob || data.retirementAge || data.currentAnnualIncome) {
+        applyProfile({ dob: data.dob, retirementAge: data.retirementAge, currentAnnualIncome: data.currentAnnualIncome });
+      }
       break;
     // other message types...
   }
