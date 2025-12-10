@@ -1,4 +1,5 @@
-import { generateWithClaude, generateWithGoogle } from '../../../../../lib/ai.js';
+// Portal will forward requests to Planner when `RETIREMENT_APP_URL` is configured.
+// If Planner is not configured, we return a helpful fallback rather than attempting local AI generation in the portal.
 
 export async function POST(req) {
   try {
@@ -41,14 +42,9 @@ export async function POST(req) {
       try { return new Response(JSON.stringify(JSON.parse(ttext)), { status: 200, headers: { 'Content-Type': 'application/json', 'X-AI-Provider': providerLower } }); } catch (e) { return new Response(ttext, { status: 200 }); }
     }
 
-    // Fall back to running locally in the Portal if Planner is not configured.
-    let text;
-    if (providerLower === 'claude') {
-      const claudePrompt = `Human: Please read the following retirement plan summary and provide a short Overview and three Actionable Tips in Markdown.\n\n${planSummary}\n\nAssistant:`;
-      text = await generateWithClaude(claudePrompt);
-    } else {
-      text = await generateWithGoogle(prompt);
-    }
+    // If Planner is not configured, return a helpful fallback text instructing configuration.
+    const fallback = `Overview:\nThis is a fallback response summarizing the plan. The portal is not configured with a Planner backend (RETIREMENT_APP_URL).\n\nTips:\n1. Configure the Planner by setting RETIREMENT_APP_URL in your Portal environment variables.\n2. If you want the portal to perform AI generation, install and configure @google/genai and @anthropic-ai/sdk within the Portal project.`;
+    return new Response(JSON.stringify({ text: fallback, _fallback: true, _fallbackReason: 'Planner not configured' }), { status: 200, headers: { 'Content-Type': 'application/json', 'X-AI-Provider': (process.env.AI_PROVIDER || 'google') } });
 
     if (typeof text !== 'string') text = String(text);
     try { text = text.replace(/\n---\n/g, '\n<hr />\n'); } catch (e) { /* ignore */ }
