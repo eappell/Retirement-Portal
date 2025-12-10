@@ -5,11 +5,11 @@
   },
   "dependencies": {
     "firebase": "^12.6.0",
-    "firebase-admin": "^13.6.0"
+    "firebase-admin": "^13.6.0",
+    "@google/genai": "^1.31.0",
+    "@anthropic-ai/sdk": "^0.71.1"
   },
-  "optionalDependencies": {
-    "@google/genai": "^1.31.0"
-  },
+  "optionalDependencies": {},
   "devDependencies": {
     "@firebase/rules-unit-testing": "^3.0.3",
     "vercel": "^49.1.2"
