@@ -355,6 +355,8 @@ export function IFrameWrapper({
                   type: 'INSIGHTS_RESPONSE',
                   requestId,
                   text: json.text || json || null,
+                  upstreamFallbackReason: json._upstreamFallbackReason || null,
+                  provider: json._aiProvider || json.provider || null,
                 },
                 '*'
               );
