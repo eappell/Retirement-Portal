@@ -14,4 +14,8 @@
     "@firebase/rules-unit-testing": "^3.0.3",
     "vercel": "^49.1.2"
   }
+  ,
+  "engines": {
+    "node": "20.x"
+  }
 }
