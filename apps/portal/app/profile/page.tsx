@@ -15,6 +15,8 @@ import { sendEmailVerification } from "firebase/auth";
 import { auth, db } from "@/lib/firebase";
 import { doc, updateDoc } from "firebase/firestore";
 import { useToast } from "@/components/ToastProvider";
+import { useAnalytics } from "@/lib/useAnalytics";
+import { validateDob, validateRetirementAge, validateCurrentAnnualIncome } from '@/lib/profileValidation';
 
 export default function ProfilePage() {
   const router = useRouter();
@@ -47,6 +49,11 @@ export default function ProfilePage() {
   const [editableDob, setEditableDob] = useState<string | null>(user?.dob || null);
   const [editableRetirementAge, setEditableRetirementAge] = useState<number | null>(user?.retirementAge || null);
   const [editableCurrentAnnualIncome, setEditableCurrentAnnualIncome] = useState<number | null>(user?.currentAnnualIncome || null);
+  // Validation errors
+  const [dobError, setDobError] = useState<string | null>(null);
+  const [retirementAgeError, setRetirementAgeError] = useState<string | null>(null);
+  const [incomeError, setIncomeError] = useState<string | null>(null);
+  const { trackEvent } = useAnalytics();
 
   useEffect(() => {
     setMounted(true);
@@ -64,6 +71,13 @@ export default function ProfilePage() {
     setEditableRetirementAge(user?.retirementAge || null);
     setEditableCurrentAnnualIncome(user?.currentAnnualIncome || null);
   }, [user]);
+
+  // Validate fields when edited
+  useEffect(() => {
+    setDobError(validateDob(editableDob));
+    setRetirementAgeError(validateRetirementAge(editableRetirementAge, editableDob));
+    setIncomeError(validateCurrentAnnualIncome(editableCurrentAnnualIncome));
+  }, [editableDob, editableRetirementAge, editableCurrentAnnualIncome]);
 
   useEffect(() => {
     if (mounted && !user) {
@@ -293,6 +307,16 @@ export default function ProfilePage() {
                 setEditingProfile(false);
                 setCurrentPasswordForEmail("");
                 if (onboarding) {
+                  try {
+                    const fieldsCompleted = [] as string[];
+                    if (editableDob) fieldsCompleted.push('dob');
+                    if (editableRetirementAge) fieldsCompleted.push('retirementAge');
+                    if (editableCurrentAnnualIncome) fieldsCompleted.push('currentAnnualIncome');
+                    await trackEvent({ eventType: 'onboarding_complete', application: 'portal', metadata: { fields_completed: fieldsCompleted, userId: user.uid } });
+                  } catch (e) {
+                    // Analytics failure shouldn't prevent navigation
+                    console.warn('Failed to track onboarding event', e);
+                  }
                   // Redirect to dashboard now that onboarding profile is complete
                   router.push('/dashboard');
                 }
@@ -310,14 +334,17 @@ export default function ProfilePage() {
                 <div>
                   <label className="block text-sm font-semibold text-gray-700 dark:text-slate-200 mb-2">Date of Birth</label>
                   <input type="date" value={editableDob || ''} onChange={(e) => setEditableDob(e.target.value || null)} className="w-full px-4 py-3 border border-gray-300 rounded-lg bg-white dark:bg-slate-700 text-gray-700 dark:text-slate-100" />
+                  {dobError && <p className="text-xs text-red-600 mt-1">{dobError}</p>}
                 </div>
                 <div>
                   <label className="block text-sm font-semibold text-gray-700 dark:text-slate-200 mb-2">Retirement Age</label>
                   <input type="number" min={40} max={100} value={editableRetirementAge ?? ''} onChange={(e) => setEditableRetirementAge(e.target.value ? Number(e.target.value) : null)} className="w-full px-4 py-3 border border-gray-300 rounded-lg bg-white dark:bg-slate-700 text-gray-700 dark:text-slate-100" />
+                  {retirementAgeError && <p className="text-xs text-red-600 mt-1">{retirementAgeError}</p>}
                 </div>
                 <div>
                   <label className="block text-sm font-semibold text-gray-700 dark:text-slate-200 mb-2">Current Annual Income</label>
                   <input type="number" step="0.01" value={editableCurrentAnnualIncome ?? ''} onChange={(e) => setEditableCurrentAnnualIncome(e.target.value ? Number(e.target.value) : null)} className="w-full px-4 py-3 border border-gray-300 rounded-lg bg-white dark:bg-slate-700 text-gray-700 dark:text-slate-100" />
+                  {incomeError && <p className="text-xs text-red-600 mt-1">{incomeError}</p>}
                 </div>
                 <div>
                   <label className="block text-sm font-semibold text-gray-700 dark:text-slate-200 mb-2">Email</label>
@@ -331,7 +358,7 @@ export default function ProfilePage() {
                 )}
 
                 <div className="flex gap-3">
-                  <button type="submit" disabled={loading} className="bg-indigo-600 hover:bg-indigo-700 disabled:bg-gray-400 text-white font-semibold py-2 px-6 rounded-lg">Save</button>
+                  <button type="submit" disabled={loading || !!dobError || !!retirementAgeError || !!incomeError} className="bg-indigo-600 hover:bg-indigo-700 disabled:bg-gray-400 text-white font-semibold py-2 px-6 rounded-lg">Save</button>
                   <button type="button" onClick={() => { setEditingProfile(false); setEditableName(user.displayName || ''); setEditableEmail(user.email || ''); setCurrentPasswordForEmail(''); }} className="bg-gray-300 hover:bg-gray-400 text-gray-900 font-semibold py-2 px-6 rounded-lg">Cancel</button>
                 </div>
               </div>

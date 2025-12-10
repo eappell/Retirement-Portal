@@ -25,8 +25,30 @@ service cloud.firestore {
     // User profiles - only authenticated users can read their own profile, admins can read all
     match /users/{userId} {
       allow read: if isOwner(userId) || isAdmin();
-      allow create: if isAuthenticated() && request.resource.data.tier in ['free', 'paid', 'admin'];
-      allow update: if isOwner(userId) || isAdmin();
+      function isIsoDateString(value) {
+        return (value is string) && value.matches('^[0-9]{4}-[0-9]{2}-[0-9]{2}$');
+      }
+
+      function validDob(value) {
+        return value == null || isIsoDateString(value) || (value is timestamp && value <= request.time);
+      }
+
+      function validRetirementAge(age) {
+        return age == null || (age is int && age >= 40 && age <= 100);
+      }
+
+      function validIncome(income) {
+        return income == null || (income is number && income >= 0);
+      }
+
+      function validProfileFields() {
+        return validDob(request.resource.data.dob) &&
+               validRetirementAge(request.resource.data.retirementAge) &&
+               validIncome(request.resource.data.currentAnnualIncome);
+      }
+
+      allow create: if isAuthenticated() && request.resource.data.tier in ['free', 'paid', 'admin'] && validProfileFields();
+      allow update: if (isOwner(userId) || isAdmin()) && validProfileFields();
       allow delete: if isOwner(userId) || isAdmin();
 
       // User profile sub-collection
