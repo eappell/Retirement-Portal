@@ -19,8 +19,15 @@ export async function POST(req) {
   }
 
   try {
+    // If this request already came from the planner, avoid forwarding back to it to prevent loops.
+    const incomingSource = req.headers.get('x-report-source');
+    if (incomingSource === 'retirement-planner') {
+      console.warn('[report] received forwarded request from planner; not forwarding to avoid loop');
+      return new Response(JSON.stringify({ ok: true, forwarded: false, reason: 'received from planner' }), { status: 200, headers: { 'Content-Type': 'application/json' } });
+    }
+
     console.log('[report] forwarding to', trackUrl, 'body=', body);
-    const resp = await fetch(trackUrl, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(body) });
+    const resp = await fetch(trackUrl, { method: 'POST', headers: { 'Content-Type': 'application/json', 'X-Report-Source': 'retire-portal' }, body: JSON.stringify(body) });
     const text = await resp.text();
     console.log('[report] remote responded', resp.status, text);
     if (!resp.ok) return new Response(text, { status: resp.status });
