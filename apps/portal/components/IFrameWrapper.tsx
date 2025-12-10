@@ -340,7 +340,7 @@ export function IFrameWrapper({
       if (event.data?.type === 'REQUEST_INSIGHTS') {
         const { requestId, plan, result } = event.data;
         (async () => {
-          try {
+            try {
             // Call portal server proxy which enforces role and uses bypass token
             const resp = await fetch('/api/insights-proxy', {
               method: 'POST',
@@ -348,6 +348,24 @@ export function IFrameWrapper({
               body: JSON.stringify({ plan, result }),
             });
             const json = await resp.json();
+            // If upstream returned a clearly identified fallback, try to use portal's own AI endpoint as a fallback
+            if (json && (json._upstreamFallbackReason || json.error)) {
+              try {
+                const fallbackResp = await fetch('/api/insights', {
+                  method: 'POST',
+                  headers: { 'Content-Type': 'application/json' },
+                  body: JSON.stringify({ plan, result }),
+                });
+                const fallbackJson = await fallbackResp.json().catch(() => null);
+                // prefer fallbackJson.text if present, otherwise keep original json
+                if (fallbackJson && (fallbackJson.text || !json.text)) {
+                  json.text = fallbackJson.text || json.text;
+                  json._aiProvider = fallbackJson._aiProvider || fallbackJson.aiProvider || json._aiProvider;
+                }
+              } catch (e) {
+                console.warn('[Portal] fallback to /api/insights failed', e);
+              }
+            }
             // Forward response back to iframe
             if (iframeRef.current) {
               iframeRef.current.contentWindow?.postMessage(
