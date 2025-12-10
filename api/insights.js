@@ -1,4 +1,4 @@
-import { generateWithClaude, generateWithGoogle } from '../lib/ai.js';
+// No direct AI SDK usage here; prefer forwarding to a dedicated Planner app if configured.
 
 export default async function handler(req, res) {
   if (req.method !== 'POST') {
@@ -30,13 +30,19 @@ export default async function handler(req, res) {
   const prompt = `You are a friendly financial advisor. Read the plan summary and give a short Overview and three Actionable Tips in Markdown.\n\n${planSummary}`;
 
   try {
-    let text;
-    if (providerLower === 'claude') {
-      const claudePrompt = `Human: Please read the following retirement plan summary and provide a short Overview and three Actionable Tips in Markdown.\n\n${planSummary}\n\nAssistant:`;
-      text = await generateWithClaude(claudePrompt);
-    } else {
-      text = await generateWithGoogle(prompt);
+    // Prefer forwarding to Planner if environment points to it (centralized AI handling)
+    const targetApp = process.env.RETIREMENT_APP_URL || process.env.VERCEL_RETIREMENT_URL;
+    if (targetApp) {
+      const base = targetApp.replace(/\/$/, '');
+      const resp = await fetch(`${base}/api/insights`, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(req.body) });
+      const text = await resp.text();
+      if (!resp.ok) {
+        return res.status(resp.status).send(text);
+      }
+      try { const parsed = JSON.parse(text); if (parsed) return res.status(200).json(parsed); } catch(e) { return res.status(200).send(text); }
     }
+    // If Planner not configured, return an informative message (or optionally fallback)
+    return res.status(400).json({ error: 'Planner AI not configured. Set RETIREMENT_APP_URL or configure local SDKs in the portal.' });
 
     if (typeof text !== 'string') text = String(text);
     try { text = text.replace(/\n---\n/g, '\n<hr />\n'); } catch (e) { /* ignore */ }
