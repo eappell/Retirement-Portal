@@ -44,7 +44,17 @@ export async function POST(req) {
 
     // Successful upstream response: try to parse JSON, otherwise return raw text
     try {
-      return NextResponse.json(JSON.parse(text));
+      const parsed = JSON.parse(text);
+      // If upstream returned a fallback response, surface a helpful header and include diagnostics
+      if (parsed && parsed._fallback) {
+        const reason = parsed._fallbackReason || parsed._fallbackReason || null;
+        if (reason) {
+          console.warn('[insights-proxy] upstream returned fallback reason:', reason);
+        }
+        // Attach the upstream fallback reason to response JSON for client visibility (non-sensitive)
+        parsed._upstreamFallbackReason = reason || null;
+      }
+      return NextResponse.json(parsed);
     } catch (e) {
       // If upstream returned HTML unexpectedly, surface guidance
       if (contentType.includes('text/html')) {
