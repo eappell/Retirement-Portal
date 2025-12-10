@@ -25,6 +25,23 @@ export async function POST(req) {
 
     const prompt = `You are a friendly financial advisor. Read the plan summary and give a short Overview and three Actionable Tips in Markdown.\n\n${planSummary}`;
 
+    // If the Planner app is configured, prefer forwarding to it so AI calls are centralized.
+    const targetApp = process.env.RETIREMENT_APP_URL || process.env.VERCEL_RETIREMENT_URL;
+    if (targetApp) {
+      const bypass = process.env.VERCEL_BYPASS_TOKEN || process.env.VERCEL_PROTECTION_BYPASS;
+      const base = targetApp.replace(/\/$/, '');
+      const targetUrl = bypass ? `${base}/api/insights?x-vercel-set-bypass-cookie=true&x-vercel-protection-bypass=${bypass}` : `${base}/api/insights`;
+      const upstreamResp = await fetch(targetUrl, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(body) });
+      const ttext = await upstreamResp.text();
+      const contentType = upstreamResp.headers.get('content-type') || '';
+      if (!upstreamResp.ok) {
+        console.error('[insights route] upstream error', upstreamResp.status, contentType, ttext.slice(0, 200));
+        try { return new Response(ttext, { status: upstreamResp.status, headers: { 'Content-Type': contentType || 'application/json' } }); } catch (e) { return new Response(JSON.stringify({ error: 'Upstream error' }), { status: 502 }); }
+      }
+      try { return new Response(JSON.stringify(JSON.parse(ttext)), { status: 200, headers: { 'Content-Type': 'application/json', 'X-AI-Provider': providerLower } }); } catch (e) { return new Response(ttext, { status: 200 }); }
+    }
+
+    // Fall back to running locally in the Portal if Planner is not configured.
     let text;
     if (providerLower === 'claude') {
       const claudePrompt = `Human: Please read the following retirement plan summary and provide a short Overview and three Actionable Tips in Markdown.\n\n${planSummary}\n\nAssistant:`;
