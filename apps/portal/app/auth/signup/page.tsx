@@ -43,7 +43,7 @@ export default function SignupPage() {
         metadata: {action: "signup"},
       });
 
-      router.push("/dashboard");
+      router.push("/profile?onboard=true");
     } catch (err) {
       setError(err instanceof Error ? err.message : "Signup failed");
     } finally {

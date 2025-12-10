@@ -18,6 +18,7 @@ import { useToast } from "@/components/ToastProvider";
 
 export default function ProfilePage() {
   const router = useRouter();
+  const [onboarding, setOnboarding] = useState(false);
   const { user, updateUserProfile } = useAuth();
   const toast = useToast();
   const [mounted, setMounted] = useState(false);
@@ -49,6 +50,13 @@ export default function ProfilePage() {
 
   useEffect(() => {
     setMounted(true);
+    // Check onboarding query param in the client
+    try {
+      const params = new URLSearchParams(window.location.search);
+      setOnboarding(params.get('onboard') === 'true');
+    } catch (_) {
+      // ignore
+    }
   }, []);
 
   useEffect(() => {
@@ -62,6 +70,19 @@ export default function ProfilePage() {
       router.push("/");
     }
   }, [user, mounted, router]);
+
+  // If user landed here as part of onboarding, and missing profile fields, open edit mode
+  useEffect(() => {
+    if (!mounted) return;
+    if (onboarding) {
+      if (!user?.dob || !user?.retirementAge || !user?.currentAnnualIncome) {
+        setEditingProfile(true);
+      } else {
+        // If profile already complete, move to dashboard
+        router.push('/dashboard');
+      }
+    }
+  }, [onboarding, mounted, user, router]);
 
   const handlePasswordChange = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -215,6 +236,12 @@ export default function ProfilePage() {
         </div>
 
         {/* Edit profile (name / email) */}
+        {onboarding && editingProfile && (
+          <div className="mb-4 rounded-lg border-l-4 border-indigo-600 bg-indigo-50 p-4 text-indigo-900">
+            <p className="font-semibold">Complete your profile</p>
+            <p className="text-sm">Tell us your Date of Birth, Retirement Age and Current Annual Income so we can tailor recommendations for you.</p>
+          </div>
+        )}
         <div className="bg-white dark:bg-slate-800 rounded-lg shadow-lg p-8 mb-8">
           <div className="flex items-center justify-between mb-4">
             <h2 className="text-xl font-bold text-gray-900 dark:text-slate-100">Profile</h2>
@@ -265,6 +292,10 @@ export default function ProfilePage() {
                 setSuccess('Profile updated');
                 setEditingProfile(false);
                 setCurrentPasswordForEmail("");
+                if (onboarding) {
+                  // Redirect to dashboard now that onboarding profile is complete
+                  router.push('/dashboard');
+                }
               } catch (err) {
                 setError(err instanceof Error ? err.message : 'Failed to update profile');
               } finally {
