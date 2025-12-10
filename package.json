@@ -1,6 +1,7 @@
 {
   "scripts": {
-    "build": "npm install --prefix apps/portal && npm --prefix apps/portal run build"
+    "build": "npm install --prefix apps/portal && npm --prefix apps/portal run build",
+    "test:rules": "node ./scripts/test-firestore-rules.js"
   },
   "dependencies": {
     "firebase": "^12.6.0",
@@ -10,6 +11,7 @@
     "@google/genai": "^1.31.0"
   },
   "devDependencies": {
+    "@firebase/rules-unit-testing": "^3.0.3",
     "vercel": "^49.1.2"
   }
 }
