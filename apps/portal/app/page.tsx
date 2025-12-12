@@ -15,6 +15,8 @@ export default function Home() {
     setMounted(true);
   }, []);
 
+  
+
   if (!mounted || loading) {
     return (
       <div className="flex min-h-screen items-center justify-center bg-gradient-to-br from-blue-50 to-indigo-100">
@@ -100,10 +102,27 @@ export default function Home() {
                 default: 'linear-gradient(135deg, #a78bfa 0%, #8b5cf6 100%)',
               } as Record<string, string>;
 
-              const gradient = gradients[app.id] || gradients.default;
+              // Use id or name keywords for robust matching against Firestore values
+              const key = `${app.id || ''} ${app.name || ''}`.toLowerCase();
+              const gradient = key.includes('health') || key.includes('healthcare')
+                ? gradients['healthcare-cost']
+                : key.includes('income') || key.includes('estimator')
+                ? gradients['income-estimator']
+                : key.includes('retire') || key.includes('abroad')
+                ? gradients['retire-abroad']
+                : gradients.default;
 
+              const appGradientClass = key.includes('health') || key.includes('healthcare')
+                ? 'app-gradient-healthcare'
+                : key.includes('income') || key.includes('estimator')
+                ? 'app-gradient-income-estimator'
+                : key.includes('retire') || key.includes('abroad')
+                ? 'app-gradient-retire-abroad'
+                : '';
+
+              
               return (
-                <div key={app.id} className="flex items-center justify-between rounded-lg overflow-hidden" style={{background: gradient}}>
+                <div key={app.id} className={`flex items-center justify-between rounded-lg overflow-hidden ${appGradientClass}`} style={{background: gradient}}>
                   <div className="px-3 py-2 text-sm font-medium text-white">{app.name}</div>
                 </div>
               );

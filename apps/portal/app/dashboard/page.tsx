@@ -76,6 +76,8 @@ export default function DashboardPage() {
     }
   }, [user, mounted, router]);
 
+  
+
   // Load apps from Firestore
   useEffect(() => {
     const loadApps = async () => {
@@ -161,21 +163,32 @@ export default function DashboardPage() {
               const blueGradient = 'linear-gradient(135deg, #60a5fa 0%, #3b82f6 100%)';
               const greenGradient = 'linear-gradient(135deg, #34d399 0%, #10b981 100%)';
 
-              // Specific overrides: healthcare gets red, income-estimator should be green, retire-abroad should be blue
-              const gradient = app.id === 'healthcare-cost'
+              // Determine gradient robustly using id or name keywords (handles Firestore variations)
+              const key = `${app.id || ''} ${app.name || ''}`.toLowerCase();
+              const gradient = key.includes('health') || key.includes('healthcare')
                 ? redGradient
-                : app.id === 'income-estimator'
+                : key.includes('income') || key.includes('estimator')
                 ? greenGradient
-                : app.id === 'retire-abroad'
+                : key.includes('retire') || key.includes('abroad')
                 ? blueGradient
                 : gradients[index % gradients.length];
+
+              // Choose a robust classname to apply the gradient via CSS so it persists
+              const appGradientClass = key.includes('health') || key.includes('healthcare')
+                ? 'app-gradient-healthcare'
+                : key.includes('income') || key.includes('estimator')
+                ? 'app-gradient-income-estimator'
+                : key.includes('retire') || key.includes('abroad')
+                ? 'app-gradient-retire-abroad'
+                : '';
+              
               
               return (
                 <Link
                   key={app.id}
                   href={`/apps/${app.id}?name=${encodeURIComponent(app.name)}&url=${encodeURIComponent(app.url)}`}
                   onClick={() => handleAppClick(app)}
-                  className="rounded-lg shadow-lg hover:shadow-xl transition-shadow p-6 block group"
+                  className={`rounded-lg shadow-lg hover:shadow-xl transition-shadow p-6 block group ${appGradientClass}`}
                   style={{background: gradient}}
                 >
                   <div className="flex items-start justify-between">
