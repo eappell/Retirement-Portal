@@ -17,6 +17,15 @@ import {
   ChartBarSquareIcon,
   DocumentChartBarIcon,
   PresentationChartBarIcon,
+  CreditCardIcon,
+  RocketLaunchIcon,
+  HomeIcon,
+  UserGroupIcon,
+  DocumentTextIcon,
+  ChatBubbleLeftIcon,
+  ShoppingCartIcon,
+  SparklesIcon,
+  BoltIcon,
 } from "@heroicons/react/24/outline";
 
 export const ICON_MAP: Record<string, React.ComponentType<{ className?: string }>> = {
@@ -36,6 +45,40 @@ export const ICON_MAP: Record<string, React.ComponentType<{ className?: string }
 
   Cube: CubeIcon,
   CubeIcon: CubeIcon,
+
+  CreditCard: CreditCardIcon,
+  CreditCardIcon: CreditCardIcon,
+
+  Rocket: RocketLaunchIcon,
+  RocketLaunch: RocketLaunchIcon,
+  RocketLaunchIcon: RocketLaunchIcon,
+
+  Home: HomeIcon,
+  HomeIcon: HomeIcon,
+
+  "User Group": UserGroupIcon,
+  UserGroup: UserGroupIcon,
+  UserGroupIcon: UserGroupIcon,
+
+  Document: DocumentTextIcon,
+  "Document Text": DocumentTextIcon,
+  DocumentText: DocumentTextIcon,
+  DocumentTextIcon: DocumentTextIcon,
+
+  Chat: ChatBubbleLeftIcon,
+  ChatBubbleLeft: ChatBubbleLeftIcon,
+  ChatBubbleLeftIcon: ChatBubbleLeftIcon,
+
+  Shopping: ShoppingCartIcon,
+  "Shopping Cart": ShoppingCartIcon,
+  ShoppingCart: ShoppingCartIcon,
+  ShoppingCartIcon: ShoppingCartIcon,
+
+  Sparkles: SparklesIcon,
+  SparklesIcon: SparklesIcon,
+
+  Bolt: BoltIcon,
+  BoltIcon: BoltIcon,
 
   Heart: HeartIcon,
   HeartIcon: HeartIcon,
