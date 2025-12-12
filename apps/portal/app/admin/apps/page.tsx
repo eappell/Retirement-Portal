@@ -22,6 +22,7 @@ import {
   TrashIcon,
   CheckIcon,
   XMarkIcon,
+  PowerIcon,
   CubeIcon,
   SparklesIcon,
   BoltIcon,
@@ -114,6 +115,7 @@ export default function AdminAppsPage() {
   const [newGradientEnd, setNewGradientEnd] = useState('#10b981');
   const [error, setError] = useState<string>("");
   const [success, setSuccess] = useState<string>("");
+  const [updateLoadingAppId, setUpdateLoadingAppId] = useState<string | null>(null);
 
   useEffect(() => {
     setMounted(true);
@@ -230,6 +232,26 @@ export default function AdminAppsPage() {
         console.error("Error deleting app:", err);
         setError("Failed to delete application");
       }
+    }
+  };
+
+  const handleToggleDisabled = async (appId: string, firestoreId?: string, currentDisabled?: boolean) => {
+    setError("");
+    setUpdateLoadingAppId(appId);
+    try {
+      if (firestoreId) {
+        const appDocRef = doc(db, "apps", firestoreId);
+        await updateDoc(appDocRef, { disabled: !currentDisabled });
+      }
+
+      setApps((prev) => prev.map((app) => (app.id === appId ? { ...app, disabled: !currentDisabled } : app)));
+      setSuccess(`Application ${currentDisabled ? 're-enabled' : 'taken offline'} successfully`);
+      setTimeout(() => setSuccess(''), 3000);
+    } catch (err) {
+      console.error("Error toggling app status:", err);
+      setError("Failed to update application status");
+    } finally {
+      setUpdateLoadingAppId(null);
     }
   };
 
@@ -742,8 +764,35 @@ export default function AdminAppsPage() {
                       >
                         <TrashIcon className="h-5 w-5" />
                         Delete
-                      </button>
-                    </div>
+                      </button>                    <button
+                      onClick={() => handleToggleDisabled(app.id, app.firestoreId, !!app.disabled)}
+                      disabled={updateLoadingAppId === app.id}
+                      aria-label={app.disabled ? `Bring ${app.name} online` : `Take ${app.name} offline`}
+                      title={app.disabled ? `Bring ${app.name} online` : `Take ${app.name} offline`}
+                      data-testid={`toggle-disabled-${app.id}`}
+                      className={`inline-flex items-center gap-2 ${app.disabled ? 'bg-red-600 hover:bg-red-700' : 'bg-green-600 hover:bg-green-700'} text-white font-semibold py-2 px-4 rounded-lg transition-colors`}
+                    >
+                      {updateLoadingAppId === app.id ? (
+                        'Updating...'
+                      ) : (
+                        <>
+                          {app.disabled ? (
+                            <>
+                              <PowerIcon className="h-5 w-5" aria-hidden="true" />
+                              <span className="sr-only">Offline</span>
+                              <span aria-hidden="true">Offline</span>
+                            </>
+                          ) : (
+                            <>
+                              <CheckCircleIcon className="h-5 w-5" aria-hidden="true" />
+                              <span className="sr-only">Online</span>
+                              <span aria-hidden="true">Online</span>
+                            </>
+                          )}
+                        </>
+                      )}
+                    </button>
+                  </div>
                   </div>
                 </div>
               )}
