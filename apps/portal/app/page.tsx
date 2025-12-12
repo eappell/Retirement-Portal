@@ -87,10 +87,27 @@ export default function Home() {
         <div className="mt-8 text-center text-gray-600 text-sm">
           <p className="mb-4 font-semibold">Available Tools:</p>
           <div className="space-y-2">
-            <p className="portal-app-name">Monthly Retirement Income Estimator</p>
-            <p className="portal-app-name">Retire Abroad AI Recommendations</p>
-            <p className="portal-app-name">Social Security Optimization</p>
-            <p className="portal-app-name">Healthcare Cost Calculator</p>
+            {[
+              { id: 'income-estimator', name: 'Monthly Retirement Income Estimator' },
+              { id: 'retire-abroad', name: 'Retire Abroad AI Recommendations' },
+              { id: 'social-security', name: 'Social Security Optimization' },
+              { id: 'healthcare-cost', name: 'Healthcare Cost Calculator' },
+            ].map((app) => {
+              const gradients = {
+                'healthcare-cost': 'linear-gradient(135deg, #fca5a5 0%, #ef4444 100%)',
+                'income-estimator': 'linear-gradient(135deg, #34d399 0%, #10b981 100%)',
+                'retire-abroad': 'linear-gradient(135deg, #60a5fa 0%, #3b82f6 100%)',
+                default: 'linear-gradient(135deg, #a78bfa 0%, #8b5cf6 100%)',
+              } as Record<string, string>;
+
+              const gradient = gradients[app.id] || gradients.default;
+
+              return (
+                <div key={app.id} className="flex items-center justify-between rounded-lg overflow-hidden" style={{background: gradient}}>
+                  <div className="px-3 py-2 text-sm font-medium text-white">{app.name}</div>
+                </div>
+              );
+            })}
           </div>
         </div>
       </div>
