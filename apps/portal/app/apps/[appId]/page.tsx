@@ -203,6 +203,27 @@ export default function AppPage() {
     );
   }
 
+  // If app is disabled in Firestore, show an offline placeholder page
+  if (appConfig?.disabled) {
+    return (
+      <div className="min-h-screen bg-gray-50">
+        <Header />
+        <div className="max-w-7xl mx-auto px-4 py-12 sm:px-6 lg:px-8">
+          <div className="text-center">
+            <p className="text-red-600 font-semibold mb-4">{appConfig.name || 'This application'} is temporarily offline</p>
+            <p className="text-gray-600 mb-6">We're sorry — this tool is temporarily unavailable. Please check back later.</p>
+            <button
+              onClick={() => router.push('/dashboard')}
+              className="bg-indigo-600 hover:bg-indigo-700 text-white font-semibold py-2 px-6 rounded-lg"
+            >
+              Back to Dashboard
+            </button>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
   // Use app URL from query params if provided, otherwise use config
   const baseAppUrl = appUrl || appConfig.url;
   const finalAppUrl = `${baseAppUrl}${baseAppUrl.includes('?') ? '&' : '?'}embedded=true`;

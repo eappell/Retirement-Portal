@@ -11,7 +11,7 @@ import {useEffect, useState} from "react";
 export default function Home() {
   const {user, loading} = useAuth();
   const [mounted, setMounted] = useState(false);
-  const [apps, setApps] = useState<{id: string, name: string, gradient?: string, url?: string, icon?: string, description?: string}[]>([]);
+  const [apps, setApps] = useState<{id: string, name: string, gradient?: string, url?: string, icon?: string, description?: string, disabled?: boolean}[]>([]);
   const [loadingApps, setLoadingApps] = useState(true);
   const { theme } = useTheme();
 
@@ -25,10 +25,10 @@ export default function Home() {
         setLoadingApps(true);
         const appsRef = collection(db, 'apps');
         const snapshot = await getDocs(appsRef);
-        const loaded: {id: string, name: string, gradient?: string, url?: string, icon?: string, description?: string}[] = [];
+        const loaded: {id: string, name: string, gradient?: string, url?: string, icon?: string, description?: string, disabled?: boolean}[] = [];
         snapshot.forEach((doc) => {
           const data = doc.data();
-          loaded.push({ id: data.id, name: data.name, gradient: data.gradient, url: data.url, icon: data.icon, description: data.description });
+          loaded.push({ id: data.id, name: data.name, gradient: data.gradient, url: data.url, icon: data.icon, description: data.description, disabled: data.disabled });
         });
         if (loaded.length > 0) {
           setApps(loaded);
@@ -43,12 +43,12 @@ export default function Home() {
   }, []);
 
   // Default list of visible apps and their computed default gradients
-  const DEFAULT_APPS: {id: string, name: string, gradient?: string, url?: string, icon?: string}[] = [
-    { id: 'income-estimator', name: 'Monthly Retirement Income Estimator', gradient: 'linear-gradient(135deg, #34d399 0%, #10b981 100%)', url: 'http://localhost:5173/', icon: '📊' },
-    { id: 'retire-abroad', name: 'Retire Abroad AI Recommendations', gradient: 'linear-gradient(135deg, #60a5fa 0%, #3b82f6 100%)', url: 'https://retire-abroad-ai.vercel.app/', icon: '🌍' },
-    { id: 'tax-impact-analyzer', name: 'Tax Impact Analyzer', gradient: 'linear-gradient(135deg, #fbbf24 0%, #f59e0b 100%)', url: 'http://localhost:3001/', icon: '💰' },
-    { id: 'social-security', name: 'Social Security Optimization', gradient: 'linear-gradient(135deg, #a78bfa 0%, #8b5cf6 100%)', url: 'https://social-security.example/', icon: '👥' },
-    { id: 'healthcare-cost', name: 'Healthcare Cost Calculator', gradient: 'linear-gradient(135deg, #fca5a5 0%, #ef4444 100%)', url: 'https://healthcare-cost.vercel.app/', icon: '❤️' },
+  const DEFAULT_APPS: {id: string, name: string, gradient?: string, url?: string, icon?: string, disabled?: boolean}[] = [
+    { id: 'income-estimator', name: 'Monthly Retirement Income Estimator', gradient: 'linear-gradient(135deg, #34d399 0%, #10b981 100%)', url: 'http://localhost:5173/', icon: '📊', disabled: false },
+    { id: 'retire-abroad', name: 'Retire Abroad AI Recommendations', gradient: 'linear-gradient(135deg, #60a5fa 0%, #3b82f6 100%)', url: 'https://retire-abroad-ai.vercel.app/', icon: '🌍', disabled: false },
+    { id: 'tax-impact-analyzer', name: 'Tax Impact Analyzer', gradient: 'linear-gradient(135deg, #fbbf24 0%, #f59e0b 100%)', url: 'http://localhost:3001/', icon: '💰', disabled: false },
+    { id: 'social-security', name: 'Social Security Optimization', gradient: 'linear-gradient(135deg, #a78bfa 0%, #8b5cf6 100%)', url: 'https://social-security.example/', icon: '👥', disabled: false },
+    { id: 'healthcare-cost', name: 'Healthcare Cost Calculator', gradient: 'linear-gradient(135deg, #fca5a5 0%, #ef4444 100%)', url: 'https://healthcare-cost.vercel.app/', icon: '❤️', disabled: false },
   ];
 
   const normalizeText = (s?: string) => (s || '').toLowerCase().replace(/[^a-z0-9 ]/g, ' ');
@@ -74,19 +74,19 @@ export default function Home() {
     return false;
   };
 
-  const displayApps: {id: string, name: string, gradient?: string, url?: string, icon?: string}[] = DEFAULT_APPS.map((d) => {
+  const displayApps: {id: string, name: string, gradient?: string, url?: string, icon?: string, disabled?: boolean}[] = DEFAULT_APPS.map((d) => {
     const override = apps.find((a) => {
       if (!a) return false;
       return matchesDefault(d, a);
     });
     if (override) {
       // prefer the override's fields but fallback to defaults when missing
-      return { id: override.id || d.id, name: override.name || d.name, gradient: override.gradient || d.gradient, url: override.url || d.url || '', icon: override.icon || (d as any).icon || '📦' };
+      return { id: override.id || d.id, name: override.name || d.name, gradient: override.gradient || d.gradient, url: override.url || d.url || '', icon: override.icon || (d as any).icon || '📦', disabled: typeof override.disabled === 'boolean' ? override.disabled : d.disabled };
     }
     return { id: d.id, name: d.name, gradient: d.gradient || '', url: (d as any).url, icon: (d as any).icon };
-  }).concat(apps.filter((a) => !DEFAULT_APPS.some((d) => matchesDefault(d, a))).map(a => ({ id: a.id, name: a.name, gradient: a.gradient || '', url: a.url || '', icon: a.icon || '📦' })));
+  }).concat(apps.filter((a) => !DEFAULT_APPS.some((d) => matchesDefault(d, a))).map(a => ({ id: a.id, name: a.name, gradient: a.gradient || '', url: a.url || '', icon: a.icon || '📦', disabled: a.disabled })));
 
-  const appNodes = displayApps.map((app) => {
+  const appNodes = displayApps.filter(a => !a.disabled).map((app) => {
     const gradients = {
       'healthcare-cost': 'linear-gradient(135deg, #fca5a5 0%, #ef4444 100%)',
       'income-estimator': 'linear-gradient(135deg, #34d399 0%, #10b981 100%)',

@@ -85,6 +85,7 @@ interface App {
   freeAllowed: boolean;
   firestoreId?: string; // Firestore document ID
   gradient?: string;
+  disabled?: boolean;
 }
 
 export default function AdminAppsPage() {
@@ -107,6 +108,7 @@ export default function AdminAppsPage() {
     icon: "Calculator",
     freeAllowed: true,
     gradient: ''
+    , disabled: false,
   });
   const [newGradientStart, setNewGradientStart] = useState('#34d399');
   const [newGradientEnd, setNewGradientEnd] = useState('#10b981');
@@ -152,6 +154,7 @@ export default function AdminAppsPage() {
           icon: data.icon,
           freeAllowed: data.freeAllowed,
           gradient: data.gradient,
+          disabled: data.disabled,
           firestoreId: doc.id,
         });
       });
@@ -191,6 +194,7 @@ export default function AdminAppsPage() {
           icon: editForm.icon,
           freeAllowed: editForm.freeAllowed,
             gradient: editForm.gradient || `linear-gradient(135deg, ${editGradientStart} 0%, ${editGradientEnd} 100%)`,
+            disabled: !!editForm.disabled,
         });
       }
 
@@ -252,6 +256,7 @@ export default function AdminAppsPage() {
         icon: newApp.icon || "📦",
         freeAllowed: newApp.freeAllowed ?? true,
         gradient: newApp.gradient || `linear-gradient(135deg, ${newGradientStart} 0%, ${newGradientEnd} 100%)`,
+        disabled: !!newApp.disabled,
         createdAt: new Date(),
       });
 
@@ -263,6 +268,7 @@ export default function AdminAppsPage() {
         icon: newApp.icon || "📦",
         freeAllowed: newApp.freeAllowed ?? true,
         gradient: newApp.gradient || `linear-gradient(135deg, ${newGradientStart} 0%, ${newGradientEnd} 100%)`,
+        disabled: !!newApp.disabled,
         firestoreId: docRef.id,
       };
 
@@ -444,6 +450,18 @@ export default function AdminAppsPage() {
             </div>
 
             <div className="mb-6">
+              <label className="flex items-center gap-2">
+                <input
+                  type="checkbox"
+                  checked={newApp.disabled ?? false}
+                  onChange={(e) => setNewApp({ ...newApp, disabled: e.target.checked })}
+                  className="rounded border-gray-300 text-indigo-600 focus:ring-indigo-500"
+                />
+                <span className="text-sm font-medium text-gray-700">Disabled (hide from portal)</span>
+              </label>
+            </div>
+
+            <div className="mb-6">
               <label className="block text-sm font-medium text-gray-700 mb-2">Gradient</label>
               <div className="flex items-center gap-3">
                 <input aria-label="Gradient start color" type="color" className="w-10 h-8 p-0 border-0" value={newGradientStart} onChange={(e) => {
@@ -597,6 +615,18 @@ export default function AdminAppsPage() {
                   </div>
 
                   <div className="mb-6">
+                    <label className="flex items-center gap-2">
+                      <input
+                        type="checkbox"
+                        checked={!!editForm.disabled}
+                        onChange={(e) => setEditForm({ ...editForm, disabled: e.target.checked })}
+                        className="rounded border-gray-300 text-indigo-600 focus:ring-indigo-500"
+                      />
+                      <span className="text-sm font-medium text-gray-700">Disabled (hide from portal)</span>
+                    </label>
+                  </div>
+
+                  <div className="mb-6">
                     <label className="block text-sm font-medium text-gray-700 mb-2">Gradient</label>
                     <div className="flex items-center gap-3">
                       <input aria-label="Gradient start color" type="color" className="w-10 h-8 p-0 border-0" value={editGradientStart} onChange={(e) => {
@@ -664,7 +694,12 @@ export default function AdminAppsPage() {
                           })()}
                         </div>
                         <div>
-                          <h3 className="text-lg font-bold text-gray-900">{app.name}</h3>
+                          <div className="flex items-center gap-2">
+                            <h3 className="text-lg font-bold text-gray-900">{app.name}</h3>
+                            {app.disabled && (
+                              <span className="bg-red-100 text-red-800 px-2 py-1 rounded text-xs font-semibold">Disabled</span>
+                            )}
+                          </div>
                           <p className="text-gray-600">{app.description}</p>
                           <div className="mt-2 flex gap-4 text-xs text-gray-500">
                             <span className="font-mono bg-gray-100 px-2 py-1 rounded">
@@ -698,7 +733,7 @@ export default function AdminAppsPage() {
                         <PencilIcon className="h-5 w-5" />
                         Edit
                       </button>
-                      <button
+                          <button
                         onClick={() => handleDelete(app.id, app.firestoreId)}
                         className="inline-flex items-center gap-2 text-white font-semibold py-2 px-4 rounded-lg transition-colors"
                         style={{backgroundColor: '#6b5e62'}}

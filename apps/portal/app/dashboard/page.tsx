@@ -21,6 +21,7 @@ interface App {
   url: string;
   freeAllowed?: boolean;
   gradient?: string;
+  disabled?: boolean;
 }
 
 const DEFAULT_APPS: App[] = [
@@ -32,6 +33,7 @@ const DEFAULT_APPS: App[] = [
     url: "http://localhost:5173/",
     freeAllowed: true,
     gradient: 'linear-gradient(135deg, #34d399 0%, #10b981 100%)',
+    disabled: false,
   },
   {
     id: "retire-abroad",
@@ -41,6 +43,7 @@ const DEFAULT_APPS: App[] = [
     url: "https://retire-abroad-ai.vercel.app/",
     freeAllowed: true,
     gradient: 'linear-gradient(135deg, #60a5fa 0%, #3b82f6 100%)',
+    disabled: false,
   },
   {
     id: "tax-impact-analyzer",
@@ -49,6 +52,7 @@ const DEFAULT_APPS: App[] = [
     icon: "💰",
     url: "http://localhost:3001/",
     freeAllowed: true,
+    disabled: false,
   },
   {
     id: "healthcare-cost",
@@ -58,6 +62,7 @@ const DEFAULT_APPS: App[] = [
     url: "https://healthcare-cost.vercel.app/",
     freeAllowed: true,
     gradient: 'linear-gradient(135deg, #fca5a5 0%, #ef4444 100%)',
+    disabled: false,
   },
 ];
 
@@ -106,6 +111,7 @@ export default function DashboardPage() {
             url: data.url,
             freeAllowed: data.freeAllowed,
             gradient: data.gradient,
+            disabled: data.disabled,
           });
         });
 
@@ -140,11 +146,13 @@ export default function DashboardPage() {
                   url: override.url || d.url || '',
                   freeAllowed: typeof override.freeAllowed === 'boolean' ? override.freeAllowed : d.freeAllowed,
                   gradient: override.gradient || d.gradient,
+                  disabled: typeof override.disabled === 'boolean' ? override.disabled : d.disabled,
                 }
               : d;
-          }).concat(loadedApps.filter((a) => !DEFAULT_APPS.some((d) => matchesDefault(d, a))).map(a => ({ id: a.id, name: a.name, description: a.description, icon: a.icon || '📦', url: a.url || '', freeAllowed: a.freeAllowed, gradient: a.gradient || '' })));
-          // merged apps set
-          setApps(merged);
+          }).concat(loadedApps.filter((a) => !DEFAULT_APPS.some((d) => matchesDefault(d, a))).map(a => ({ id: a.id, name: a.name, description: a.description, icon: a.icon || '📦', url: a.url || '', freeAllowed: a.freeAllowed, gradient: a.gradient || '', disabled: a.disabled })));
+          // Hide disabled apps from the dashboard list
+          const visible = merged.filter(a => !a.disabled);
+          setApps(visible);
         } else {
           setApps(DEFAULT_APPS);
         }
