@@ -99,7 +99,7 @@ export default function ManageUsersPage() {
   };
 
   return (
-    <div className="min-h-screen bg-background">
+    <div className="min-h-0 bg-background">
       <Header />
       <main className="max-w-7xl mx-auto px-4 py-12 sm:px-6 lg:px-8">
         <div className="mb-8 flex items-center justify-between">

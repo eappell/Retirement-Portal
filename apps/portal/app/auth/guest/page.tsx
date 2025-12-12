@@ -36,7 +36,7 @@ export default function GuestPage() {
   };
 
   return (
-    <div className="flex min-h-screen items-center justify-center bg-gradient-to-br from-blue-50 to-indigo-100 px-4">
+    <div className="flex items-center justify-center min-h-0 bg-gradient-to-br from-blue-50 to-indigo-100 px-4">
       <div className="max-w-md w-full">
         <div className="bg-white rounded-lg shadow-lg p-8 space-y-6">
           <div className="text-center">

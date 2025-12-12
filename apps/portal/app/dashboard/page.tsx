@@ -180,7 +180,7 @@ export default function DashboardPage() {
 
   if (!mounted || !user) {
     return (
-      <div className="flex min-h-screen items-center justify-center" style={{background: 'linear-gradient(to bottom right, #E8E3DF, #BFCDE0)'}}>
+      <div className="flex items-center justify-center min-h-0 h-full" style={{background: 'linear-gradient(to bottom right, #E8E3DF, #BFCDE0)'}}>
         <div className="text-center">
           <div className="animate-spin rounded-full h-12 w-12 border-b-2 mx-auto mb-4" style={{borderColor: '#0B5394'}}></div>
           <p className="text-gray-600">Loading dashboard...</p>
@@ -192,7 +192,7 @@ export default function DashboardPage() {
   
 
   return (
-    <div className="min-h-screen bg-background portal-dashboard">
+    <div className="min-h-0 bg-background portal-dashboard">
       <Header />
 
       <main className="max-w-7xl mx-auto px-4 py-12 sm:px-6 lg:px-8">

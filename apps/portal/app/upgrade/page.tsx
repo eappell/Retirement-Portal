@@ -81,7 +81,7 @@ export default function UpgradePage() {
 
   if (!mounted || !user || tierLoading) {
     return (
-      <div className="flex min-h-screen items-center justify-center bg-gradient-to-br from-blue-50 to-indigo-100">
+      <div className="flex items-center justify-center min-h-0 h-full bg-gradient-to-br from-blue-50 to-indigo-100">
         <div className="text-center">
           <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-indigo-600 mx-auto mb-4"></div>
           <p className="text-gray-600">Loading pricing plans...</p>
@@ -109,7 +109,7 @@ export default function UpgradePage() {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100 dark:bg-gradient-to-br dark:from-slate-900 dark:to-slate-800 py-12 px-4">
+    <div className="min-h-0 bg-gradient-to-br from-blue-50 to-indigo-100 dark:bg-gradient-to-br dark:from-slate-900 dark:to-slate-800 py-12 px-4">
       {/* Header */}
       <div className="max-w-7xl mx-auto mb-12">
         <div className="flex justify-between items-center mb-8">
