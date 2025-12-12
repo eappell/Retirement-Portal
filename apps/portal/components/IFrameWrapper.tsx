@@ -274,53 +274,35 @@ export function IFrameWrapper({
         return;
       }
 
-      // Handle healthcare data save request from Healthcare Cost app
-      if (event.data?.type === "SAVE_HEALTHCARE_DATA") {
-        console.log("[Portal] Saving healthcare data to portal localStorage:", event.data.data);
-        try {
-          localStorage.setItem('pendingHealthcareDataTransfer', JSON.stringify(event.data.data));
-          console.log("[Portal] Healthcare data saved successfully");
-        } catch (error) {
-          console.error("[Portal] Failed to save healthcare data:", error);
-        }
-        return;
-      }
+      // Removed SAVE_HEALTHCARE_DATA and REQUEST_HEALTHCARE_DATA handlers to disable automatic
+      // cross-app healthcare data transfers. This feature caused user scenarios to be overwritten.
       
-      // Handle request for pending healthcare data from Retirement Planner
-      if (event.data?.type === "REQUEST_HEALTHCARE_DATA") {
-        console.log("[Portal] Retirement Planner requesting healthcare data");
-        const pendingData = localStorage.getItem('pendingHealthcareDataTransfer');
-        if (pendingData) {
-          console.log("[Portal] Sending healthcare data to Retirement Planner");
-          if (iframeRef.current) {
-            iframeRef.current.contentWindow?.postMessage(
-              {
-                type: 'HEALTHCARE_DATA_RESPONSE',
-                data: JSON.parse(pendingData)
-              },
-              "*"
-            );
-          }
-          // Clear after sending
-          localStorage.removeItem('pendingHealthcareDataTransfer');
-          console.log("[Portal] Cleared healthcare data from portal storage");
-        } else {
-          console.log("[Portal] No pending healthcare data found");
-        }
-        return;
-      }
-      
-      // Handle cross-app data transfer requests
+      // Handle cross-app data transfer requests - be conservative when routing potentially sensitive data
       if (event.data?.type === "APP_DATA_TRANSFER") {
         console.log("[Portal] Routing data transfer:", {
           from: event.data.sourceApp,
           to: event.data.targetApp,
           dataType: event.data.dataType,
         });
-        
-        // Forward the message to all iframes (they'll filter by targetApp)
-        // In a multi-iframe setup, you'd need to track which iframe is which app
-        // For now, broadcast to the current iframe
+
+        // Sanity check: prevent accidental forwarding of full scenarios state or other large payloads
+        const data = event.data || {};
+        const payload = data.data || {};
+        const suspiciousKeys = ['scenarios', 'scenariosState', 'activeScenarioId'];
+        for (const k of suspiciousKeys) {
+          if (Object.prototype.hasOwnProperty.call(payload, k)) {
+            console.warn(`[Portal] Ignoring APP_DATA_TRANSFER with suspicious payload key: ${k}`);
+            return; // Drop message to avoid overwriting app state
+          }
+        }
+
+        // Only whitelist healthcare cost transfers for now; other app data types should be filtered and approved
+        if (data.dataType && data.dataType !== 'HEALTHCARE_COSTS') {
+          console.log('[Portal] APP_DATA_TRANSFER ignored - unsupported dataType', data.dataType);
+          return;
+        }
+
+        // Forward the message to the current iframe
         if (iframeRef.current) {
           iframeRef.current.contentWindow?.postMessage(event.data, "*");
         }
@@ -535,7 +517,7 @@ export function IFrameWrapper({
         title={appName}
         className="flex-1 w-full border-0"
         allow="camera;microphone;geolocation"
-        sandbox="allow-same-origin allow-scripts allow-popups allow-forms allow-modals allow-top-navigation"
+        sandbox="allow-same-origin allow-scripts allow-popups allow-forms allow-modals allow-top-navigation allow-downloads"
       />
     </div>
   );
