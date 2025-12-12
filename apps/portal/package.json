@@ -5,7 +5,9 @@
   "scripts": {
     "dev": "next dev",
     "build": "next build",
+    "prebuild": "npm run lint:layout",
     "start": "next start",
+    "lint:layout": "node ../../scripts/check-minh-screen.js",
     "lint": "eslint",
     "test": "vitest",
     "test:ci": "vitest --run"

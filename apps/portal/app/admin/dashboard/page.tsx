@@ -311,7 +311,7 @@ export default function AdminDashboard() {
 
         {/* Users Modal */}
         {showUsers && (
-          <div className="fixed inset-0 z-50 flex items-center justify-center">
+          <div data-allow-overlay className="fixed inset-0 z-50 flex items-center justify-center">
             <div className="fixed inset-0 bg-black/50" onClick={() => setShowUsers(false)} />
             <div className="relative bg-white dark:bg-slate-800 rounded-lg shadow-lg w-full max-w-3xl mx-4 p-6">
               <div className="flex items-center justify-between mb-4">
@@ -387,7 +387,7 @@ export default function AdminDashboard() {
 
         {/* Create User Modal */}
         {showCreateModal && (
-          <div className="fixed inset-0 z-50 flex items-center justify-center">
+          <div data-allow-overlay className="fixed inset-0 z-50 flex items-center justify-center">
             <div className="fixed inset-0 bg-black/50" onClick={() => setShowCreateModal(false)} />
             <div className="relative bg-white dark:bg-slate-800 rounded-lg shadow-lg w-full max-w-md mx-4 p-6">
               <div className="flex items-center justify-between mb-4">
@@ -407,7 +407,7 @@ export default function AdminDashboard() {
 
         {/* Analytics Events Modal */}
         {showAnalyticsModal && (
-          <div className="fixed inset-0 z-50 flex items-center justify-center">
+          <div data-allow-overlay className="fixed inset-0 z-50 flex items-center justify-center">
             <div className="fixed inset-0 bg-black/50" onClick={() => setShowAnalyticsModal(false)} />
             <div className="relative bg-white dark:bg-slate-800 rounded-lg shadow-lg w-full max-w-3xl mx-4 p-6">
               <div className="flex items-center justify-between mb-4">
@@ -445,7 +445,7 @@ export default function AdminDashboard() {
 
         {/* Analytics Events Modal */}
         {showAnalytics && (
-          <div className="fixed inset-0 z-50 flex items-center justify-center">
+          <div data-allow-overlay className="fixed inset-0 z-50 flex items-center justify-center">
             <div className="fixed inset-0 bg-black/50" onClick={() => setShowAnalytics(false)} />
             <div className="relative bg-white dark:bg-slate-800 rounded-lg shadow-lg w-full max-w-4xl mx-4 p-6">
               <div className="flex items-center justify-between mb-4">

@@ -99,7 +99,7 @@ export default function UserInfoDialog({
   };
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center">
+    <div data-allow-overlay className="fixed inset-0 z-50 flex items-center justify-center">
       <div className="absolute inset-0 bg-black/40" onClick={onClose} />
       <div className="relative bg-white dark:bg-slate-800 rounded-lg shadow-lg max-w-xl w-full mx-4 p-6 z-50">
         <h3 className="text-lg font-semibold text-gray-900 dark:text-slate-100 mb-2">User Info</h3>

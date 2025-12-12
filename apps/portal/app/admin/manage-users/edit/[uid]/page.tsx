@@ -91,7 +91,7 @@ export default function EditUserPage() {
   };
 
   return (
-    <div className="min-h-screen bg-background">
+    <div className="min-h-0 bg-background">
       <main className="max-w-3xl mx-auto px-4 py-12">
         <div className="mb-6">
           <h1 className="text-2xl font-bold">Edit User</h1>

@@ -186,7 +186,7 @@ export default function AppPage() {
 
   if (!appId || !appConfig) {
     return (
-      <div className="min-h-screen bg-gray-50">
+      <div className="min-h-0 bg-gray-50">
         <Header />
         <div className="max-w-7xl mx-auto px-4 py-12 sm:px-6 lg:px-8">
           <div className="text-center">
@@ -206,7 +206,7 @@ export default function AppPage() {
   // If app is disabled in Firestore, show an offline placeholder page
   if (appConfig?.disabled) {
     return (
-      <div className="min-h-screen bg-gray-50">
+      <div className="min-h-0 bg-gray-50">
         <Header />
         <div className="max-w-7xl mx-auto px-4 py-12 sm:px-6 lg:px-8">
           <div className="text-center">
