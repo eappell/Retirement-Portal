@@ -122,7 +122,7 @@ export default function AppPageContent() {
   const app = APP_REGISTRY[appId];
 
   return (
-    <div className="flex flex-col h-screen bg-gray-50">
+    <div className="flex flex-col min-h-0 bg-gray-50">
       <Header />
 
       {/* App Info Bar */}

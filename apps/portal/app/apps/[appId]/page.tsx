@@ -230,7 +230,7 @@ export default function AppPage() {
   const finalAppName = appName || appConfig.name;
 
   return (
-    <div className="flex flex-col min-h-screen bg-gray-50">
+    <div className="flex flex-col min-h-0 bg-gray-50">
       <Header />
 
       {/* App Info Bar */}
