@@ -20,6 +20,7 @@ interface App {
   icon: string;
   url: string;
   freeAllowed?: boolean;
+  gradient?: string;
 }
 
 const DEFAULT_APPS: App[] = [
@@ -30,6 +31,7 @@ const DEFAULT_APPS: App[] = [
     icon: "📊",
     url: "http://localhost:5173/",
     freeAllowed: true,
+    gradient: 'linear-gradient(135deg, #34d399 0%, #10b981 100%)',
   },
   {
     id: "retire-abroad",
@@ -38,6 +40,7 @@ const DEFAULT_APPS: App[] = [
     icon: "🌍",
     url: "https://retire-abroad-ai.vercel.app/",
     freeAllowed: true,
+    gradient: 'linear-gradient(135deg, #60a5fa 0%, #3b82f6 100%)',
   },
   {
     id: "tax-impact-analyzer",
@@ -54,6 +57,7 @@ const DEFAULT_APPS: App[] = [
     icon: "❤️",
     url: "https://healthcare-cost.vercel.app/",
     freeAllowed: true,
+    gradient: 'linear-gradient(135deg, #fca5a5 0%, #ef4444 100%)',
   },
 ];
 
@@ -65,6 +69,7 @@ export default function DashboardPage() {
   const [mounted, setMounted] = useState(false);
   const [apps, setApps] = useState<App[]>(DEFAULT_APPS);
   const [loadingApps, setLoadingApps] = useState(true);
+ 
 
   useEffect(() => {
     setMounted(true);
@@ -75,6 +80,10 @@ export default function DashboardPage() {
       router.push("/");
     }
   }, [user, mounted, router]);
+
+ 
+
+ 
 
   
 
@@ -96,11 +105,46 @@ export default function DashboardPage() {
             icon: data.icon || "📦",
             url: data.url,
             freeAllowed: data.freeAllowed,
+            gradient: data.gradient,
           });
         });
 
-        if (loadedApps.length > 0) {
-          setApps(loadedApps);
+          if (loadedApps.length > 0) {
+            // Loaded apps
+          // Merge firestore apps into defaults: favor firestore values (including gradient)
+          const normalizeText = (s?: string) => (s || '').toLowerCase().replace(/[^a-z0-9 ]/g, ' ');
+          const matchesDefault = (d: App, a: App) => {
+            if (!a) return false;
+            if (a.id === d.id) return true;
+            const an = normalizeText(a.name);
+            const dn = normalizeText(d.name);
+            if (an.includes(dn) || dn.includes(an)) return true;
+            if (an.includes(d.id.replace(/-/g, ' '))) return true;
+            const aTokens = new Set(an.split(/\s+/).filter(Boolean));
+            const dTokens = new Set(dn.split(/\s+/).filter(Boolean));
+            let common = 0;
+            aTokens.forEach((t) => { if (dTokens.has(t)) common++; });
+            if (common >= 2) return true;
+            const minLen = Math.min(aTokens.size || 1, dTokens.size || 1);
+            if (common / minLen >= 0.5) return true;
+            return false;
+          };
+          const merged = DEFAULT_APPS.map((d) => {
+            const override = loadedApps.find((a) => matchesDefault(d, a));
+            return override
+              ? {
+                  id: override.id || d.id,
+                  name: override.name || d.name,
+                  description: override.description || d.description,
+                  icon: override.icon || d.icon,
+                  url: override.url || d.url || '',
+                  freeAllowed: typeof override.freeAllowed === 'boolean' ? override.freeAllowed : d.freeAllowed,
+                  gradient: override.gradient || d.gradient,
+                }
+              : d;
+          }).concat(loadedApps.filter((a) => !DEFAULT_APPS.some((d) => matchesDefault(d, a))).map(a => ({ id: a.id, name: a.name, description: a.description, icon: a.icon || '📦', url: a.url || '', freeAllowed: a.freeAllowed, gradient: a.gradient || '' })));
+          // merged apps set
+          setApps(merged);
         } else {
           setApps(DEFAULT_APPS);
         }
@@ -165,16 +209,21 @@ export default function DashboardPage() {
 
               // Determine gradient robustly using id or name keywords (handles Firestore variations)
               const key = `${app.id || ''} ${app.name || ''}`.toLowerCase();
-              const gradient = key.includes('health') || key.includes('healthcare')
+              // Prefer app-provided gradient if present
+              const computedGradient = key.includes('health') || key.includes('healthcare')
                 ? redGradient
                 : key.includes('income') || key.includes('estimator')
                 ? greenGradient
                 : key.includes('retire') || key.includes('abroad')
                 ? blueGradient
                 : gradients[index % gradients.length];
+              const gradient = app.gradient || computedGradient;
 
               // Choose a robust classname to apply the gradient via CSS so it persists
-              const appGradientClass = key.includes('health') || key.includes('healthcare')
+              // Only apply the static per-app class when an explicit gradient is not set in Firestore
+              const appGradientClass = app.gradient
+                ? ''
+                : key.includes('health') || key.includes('healthcare')
                 ? 'app-gradient-healthcare'
                 : key.includes('income') || key.includes('estimator')
                 ? 'app-gradient-income-estimator'
@@ -183,13 +232,15 @@ export default function DashboardPage() {
                 : '';
               
               
+              
               return (
                 <Link
                   key={app.id}
                   href={`/apps/${app.id}?name=${encodeURIComponent(app.name)}&url=${encodeURIComponent(app.url)}`}
                   onClick={() => handleAppClick(app)}
+                  data-app-id={app.id}
                   className={`rounded-lg shadow-lg hover:shadow-xl transition-shadow p-6 block group ${appGradientClass}`}
-                  style={{background: gradient}}
+                  style={{background: gradient, backgroundImage: gradient}}
                 >
                   <div className="flex items-start justify-between">
                     <div className="flex items-start gap-4">
@@ -199,6 +250,7 @@ export default function DashboardPage() {
                           return <IconComponent className="h-10 w-10" style={{color: '#111827'}} />;
                         })()}
                       </div>
+                      
                       <div>
                         <h3 className="text-xl font-bold group-hover:transition-colors" style={{color: '#111827'}} onMouseEnter={(e) => e.currentTarget.style.color = '#000000'} onMouseLeave={(e) => e.currentTarget.style.color = '#111827'}>
                           {app.name}
@@ -212,6 +264,7 @@ export default function DashboardPage() {
               );
             })}
           </div>
+          
         </div>
 
         {/* Coming Soon */}

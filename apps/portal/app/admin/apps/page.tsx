@@ -84,6 +84,7 @@ interface App {
   icon: string;
   freeAllowed: boolean;
   firestoreId?: string; // Firestore document ID
+  gradient?: string;
 }
 
 export default function AdminAppsPage() {
@@ -95,6 +96,8 @@ export default function AdminAppsPage() {
   const [loading, setLoading] = useState(true);
   const [isEditing, setIsEditing] = useState<string | null>(null);
   const [editForm, setEditForm] = useState<App | null>(null);
+  const [editGradientStart, setEditGradientStart] = useState('#34d399');
+  const [editGradientEnd, setEditGradientEnd] = useState('#10b981');
   const [showNewForm, setShowNewForm] = useState(false);
   const [newApp, setNewApp] = useState<Partial<App>>({
     id: "",
@@ -103,7 +106,10 @@ export default function AdminAppsPage() {
     url: "",
     icon: "Calculator",
     freeAllowed: true,
+    gradient: ''
   });
+  const [newGradientStart, setNewGradientStart] = useState('#34d399');
+  const [newGradientEnd, setNewGradientEnd] = useState('#10b981');
   const [error, setError] = useState<string>("");
   const [success, setSuccess] = useState<string>("");
 
@@ -145,6 +151,7 @@ export default function AdminAppsPage() {
           url: data.url,
           icon: data.icon,
           freeAllowed: data.freeAllowed,
+          gradient: data.gradient,
           firestoreId: doc.id,
         });
       });
@@ -161,6 +168,13 @@ export default function AdminAppsPage() {
   const handleEdit = (app: App) => {
     setIsEditing(app.id);
     setEditForm({ ...app });
+    if (app.gradient) {
+      const match = app.gradient.match(/#(?:[0-9a-fA-F]{3}){1,2}/g);
+      if (match && match.length >= 2) {
+        setEditGradientStart(match[0]);
+        setEditGradientEnd(match[1]);
+      }
+    }
   };
 
   const handleSave = async (appId: string) => {
@@ -176,6 +190,7 @@ export default function AdminAppsPage() {
           url: editForm.url,
           icon: editForm.icon,
           freeAllowed: editForm.freeAllowed,
+            gradient: editForm.gradient || `linear-gradient(135deg, ${editGradientStart} 0%, ${editGradientEnd} 100%)`,
         });
       }
 
@@ -236,6 +251,7 @@ export default function AdminAppsPage() {
         url: newApp.url,
         icon: newApp.icon || "📦",
         freeAllowed: newApp.freeAllowed ?? true,
+        gradient: newApp.gradient || `linear-gradient(135deg, ${newGradientStart} 0%, ${newGradientEnd} 100%)`,
         createdAt: new Date(),
       });
 
@@ -246,6 +262,7 @@ export default function AdminAppsPage() {
         url: newApp.url as string,
         icon: newApp.icon || "📦",
         freeAllowed: newApp.freeAllowed ?? true,
+        gradient: newApp.gradient || `linear-gradient(135deg, ${newGradientStart} 0%, ${newGradientEnd} 100%)`,
         firestoreId: docRef.id,
       };
 
@@ -260,7 +277,10 @@ export default function AdminAppsPage() {
         url: "",
         icon: "📦",
         freeAllowed: true,
+        gradient: '',
       });
+      setNewGradientStart('#34d399');
+      setNewGradientEnd('#10b981');
     } catch (err) {
       console.error("Error creating app:", err);
       setError("Failed to create application");
@@ -423,6 +443,40 @@ export default function AdminAppsPage() {
               </label>
             </div>
 
+            <div className="mb-6">
+              <label className="block text-sm font-medium text-gray-700 mb-2">Gradient</label>
+              <div className="flex items-center gap-3">
+                <input aria-label="Gradient start color" type="color" className="w-10 h-8 p-0 border-0" value={newGradientStart} onChange={(e) => {
+                  const start = e.target.value;
+                  setNewGradientStart(start);
+                  const end = newGradientEnd || '#10b981';
+                  setNewApp({ ...newApp, gradient: `linear-gradient(135deg, ${start} 0%, ${end} 100%)` });
+                }} />
+                <input aria-label="Gradient end color" type="color" className="w-10 h-8 p-0 border-0" value={newGradientEnd} onChange={(e) => {
+                  const end = e.target.value;
+                  setNewGradientEnd(end);
+                  const start = newGradientStart || '#34d399';
+                  setNewApp({ ...newApp, gradient: `linear-gradient(135deg, ${start} 0%, ${end} 100%)` });
+                }} />
+                <input title="gradient-css" type="text" className="flex-1 px-3 py-2 border border-gray-300 rounded-md" placeholder="CSS gradient (optional)" value={newApp.gradient || ''} onChange={(e) => setNewApp({ ...newApp, gradient: e.target.value })} />
+                <div className="w-24 h-8 rounded" style={{background: newApp.gradient || `linear-gradient(135deg, ${newGradientStart} 0%, ${newGradientEnd} 100%)`, backgroundImage: newApp.gradient || `linear-gradient(135deg, ${newGradientStart} 0%, ${newGradientEnd} 100%)`}} />
+              </div>
+              <div className="mt-2 flex gap-2">
+                <button type="button" className="w-8 h-8 rounded" title="Green preset" onClick={() => {
+                  const g = 'linear-gradient(135deg, #34d399 0%, #10b981 100%)';
+                  setNewApp({ ...newApp, gradient: g }); setNewGradientStart('#34d399'); setNewGradientEnd('#10b981');
+                }} style={{background: 'linear-gradient(135deg, #34d399 0%, #10b981 100%)', backgroundImage: 'linear-gradient(135deg, #34d399 0%, #10b981 100%)'}}></button>
+                <button type="button" className="w-8 h-8 rounded" title="Blue preset" onClick={() => {
+                  const g = 'linear-gradient(135deg, #60a5fa 0%, #3b82f6 100%)';
+                  setNewApp({ ...newApp, gradient: g }); setNewGradientStart('#60a5fa'); setNewGradientEnd('#3b82f6');
+                }} style={{background: 'linear-gradient(135deg, #60a5fa 0%, #3b82f6 100%)', backgroundImage: 'linear-gradient(135deg, #60a5fa 0%, #3b82f6 100%)'}}></button>
+                <button type="button" className="w-8 h-8 rounded" title="Red preset" onClick={() => {
+                  const g = 'linear-gradient(135deg, #fca5a5 0%, #ef4444 100%)';
+                  setNewApp({ ...newApp, gradient: g }); setNewGradientStart('#fca5a5'); setNewGradientEnd('#ef4444');
+                }} style={{background: 'linear-gradient(135deg, #fca5a5 0%, #ef4444 100%)', backgroundImage: 'linear-gradient(135deg, #fca5a5 0%, #ef4444 100%)'}}></button>
+              </div>
+            </div>
+
             <div className="flex gap-3">
               <button
                 onClick={handleAddNew}
@@ -542,6 +596,40 @@ export default function AdminAppsPage() {
                     </label>
                   </div>
 
+                  <div className="mb-6">
+                    <label className="block text-sm font-medium text-gray-700 mb-2">Gradient</label>
+                    <div className="flex items-center gap-3">
+                      <input aria-label="Gradient start color" type="color" className="w-10 h-8 p-0 border-0" value={editGradientStart} onChange={(e) => {
+                        const start = e.target.value;
+                        setEditGradientStart(start);
+                        const end = editGradientEnd || '#10b981';
+                        setEditForm({ ...editForm!, gradient: `linear-gradient(135deg, ${start} 0%, ${end} 100%)` });
+                      }} />
+                      <input aria-label="Gradient end color" type="color" className="w-10 h-8 p-0 border-0" value={editGradientEnd} onChange={(e) => {
+                        const end = e.target.value;
+                        setEditGradientEnd(end);
+                        const start = editGradientStart || '#34d399';
+                        setEditForm({ ...editForm!, gradient: `linear-gradient(135deg, ${start} 0%, ${end} 100%)` });
+                      }} />
+                      <input title="gradient-css" type="text" className="flex-1 px-3 py-2 border border-gray-300 rounded-md" placeholder="CSS gradient (optional)" value={editForm?.gradient || ''} onChange={(e) => setEditForm({ ...editForm!, gradient: e.target.value })} />
+                      <div className="w-24 h-8 rounded" style={{background: editForm?.gradient || `linear-gradient(135deg, ${editGradientStart} 0%, ${editGradientEnd} 100%)`, backgroundImage: editForm?.gradient || `linear-gradient(135deg, ${editGradientStart} 0%, ${editGradientEnd} 100%)`}} />
+                    </div>
+                    <div className="mt-2 flex gap-2">
+                      <button type="button" className="w-8 h-8 rounded" title="Green preset" onClick={() => {
+                        const g = 'linear-gradient(135deg, #34d399 0%, #10b981 100%)';
+                        setEditForm({ ...editForm!, gradient: g }); setEditGradientStart('#34d399'); setEditGradientEnd('#10b981');
+                      }} style={{background: 'linear-gradient(135deg, #34d399 0%, #10b981 100%)', backgroundImage: 'linear-gradient(135deg, #34d399 0%, #10b981 100%)'}}></button>
+                      <button type="button" className="w-8 h-8 rounded" title="Blue preset" onClick={() => {
+                        const g = 'linear-gradient(135deg, #60a5fa 0%, #3b82f6 100%)';
+                        setEditForm({ ...editForm!, gradient: g }); setEditGradientStart('#60a5fa'); setEditGradientEnd('#3b82f6');
+                      }} style={{background: 'linear-gradient(135deg, #60a5fa 0%, #3b82f6 100%)', backgroundImage: 'linear-gradient(135deg, #60a5fa 0%, #3b82f6 100%)'}}></button>
+                      <button type="button" className="w-8 h-8 rounded" title="Red preset" onClick={() => {
+                        const g = 'linear-gradient(135deg, #fca5a5 0%, #ef4444 100%)';
+                        setEditForm({ ...editForm!, gradient: g }); setEditGradientStart('#fca5a5'); setEditGradientEnd('#ef4444');
+                      }} style={{background: 'linear-gradient(135deg, #fca5a5 0%, #ef4444 100%)', backgroundImage: 'linear-gradient(135deg, #fca5a5 0%, #ef4444 100%)'}}></button>
+                    </div>
+                  </div>
+
                   <div className="flex gap-3">
                     <button
                       onClick={() => handleSave(app.id)}
@@ -565,7 +653,7 @@ export default function AdminAppsPage() {
                   <div className="flex items-start justify-between">
                     <div className="flex-1">
                       <div className="flex items-center gap-4">
-                        <div className="p-2 rounded-lg" style={{backgroundColor: '#BFCDE0'}}>
+                        <div className="p-2 rounded-lg" style={{background: app.gradient || '#BFCDE0', backgroundImage: app.gradient || undefined}}>
                           {(() => {
                             const iconData = AVAILABLE_ICONS.find(i => i.name === app.icon);
                             if (iconData) {
