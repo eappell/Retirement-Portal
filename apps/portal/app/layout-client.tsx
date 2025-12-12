@@ -3,12 +3,16 @@
 import {AuthProvider} from "@/lib/auth";
 import {ThemeProvider} from "@/lib/theme";
 import ToastProvider from "@/components/ToastProvider";
+import Footer from "@/components/Footer";
 
 export default function RootLayoutClient({children}: {children: React.ReactNode}) {
   return (
     <ThemeProvider>
       <AuthProvider>
-        <ToastProvider>{children}</ToastProvider>
+        <ToastProvider>
+          <div className="min-h-screen pb-16">{children}</div>
+          <Footer />
+        </ToastProvider>
       </AuthProvider>
     </ThemeProvider>
   );
