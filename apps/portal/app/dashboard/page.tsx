@@ -247,7 +247,7 @@ export default function DashboardPage() {
                   href={`/apps/${app.id}?name=${encodeURIComponent(app.name)}&url=${encodeURIComponent(app.url)}`}
                   onClick={() => handleAppClick(app)}
                   data-app-id={app.id}
-                  className={`rounded-lg shadow-lg hover:shadow-xl transition-shadow p-6 block group ${appGradientClass}`}
+                  className={`app-tile rounded-lg shadow-lg hover:shadow-xl transition-shadow p-6 block group ${appGradientClass} relative overflow-hidden`}
                   style={{background: gradient, backgroundImage: gradient}}
                 >
                   <div className="flex items-start justify-between">
