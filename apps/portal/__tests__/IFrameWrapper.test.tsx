@@ -46,6 +46,9 @@ describe('IFrameWrapper messaging', () => {
       writable: true,
     });
 
+    // Simulate iframe load event so the component's onload handler runs
+    iframe.dispatchEvent(new Event('load'));
+
     // Wait for effects to run and post messages
     await waitFor(() => {
       expect(postSpy).toHaveBeenCalled();
