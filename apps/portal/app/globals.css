@@ -216,7 +216,7 @@ button {
 }
 
 .light .dashboard-redesign {
-  --bg: #FBFDFF; /* near-white background in light mode */
+  --bg: #F9F8F6; /* near-white background in light mode */
   --text: #0f172a;
   --muted: #475569;
   --card-bg: rgba(255,255,255,0.98);
