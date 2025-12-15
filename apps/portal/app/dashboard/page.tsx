@@ -301,12 +301,12 @@ export default function DashboardPage() {
             .tool-description{ color:var(--muted); line-height:1.6; font-size:1rem }
             .badge{ display:inline-block; background: rgba(96,165,250,0.14); color:var(--accent); padding:6px 14px; border-radius:18px; font-size:.78rem; font-weight:700; margin-top:12px; border:1px solid rgba(96,165,250,0.18) }
             .stats-section{ display:flex; gap:20px; justify-content:space-between; align-items:stretch; margin-top:24px }
-            .stat-card{ background: var(--card-bg); backdrop-filter: blur(6px); border:1px solid var(--card-border); border-radius:16px; padding:20px; text-align:center; transition:all .3s; display:flex; align-items:center; justify-content:center; flex:1; min-width:150px }
+            .stat-card{ background: var(--card-bg); backdrop-filter: blur(6px); border:1px solid var(--card-border); border-radius:16px; padding:18px 20px; text-align:center; transition:all .3s; display:flex; flex-direction:column; align-items:center; justify-content:center; gap:8px; flex:1; min-width:150px }
             .stat-card:hover{ transform: translateY(-4px); border-color: rgba(0,0,0,0.08) }
 -            .stat-card{ background: rgba(255,255,255,0.05); backdrop-filter: blur(10px); border:1px solid rgba(255,255,255,0.1); border-radius:16px; padding:24px; text-align:center; transition:all .3s }
             .stat-card:hover{ transform: translateY(-4px); border-color: rgba(0,0,0,0.08) }
-            .stat-value{ font-size:2.5rem; font-weight:800; color:var(--accent); margin-bottom:8px }
-            .stat-label{ color:var(--muted); font-size:.9rem; font-weight:500 }
+            .stat-value{ font-size:3rem; font-weight:900; color:var(--accent); line-height:1 }
+            .stat-label{ color:var(--muted); font-size:.95rem; font-weight:600 }
 
              @media (max-width:1024px){ .tools-grid{ grid-template-columns: 1fr } h1{ font-size:2rem } .tool-title{ font-size:1.25rem } .tool-icon{ width:72px; height:72px } }
            `}</style>
