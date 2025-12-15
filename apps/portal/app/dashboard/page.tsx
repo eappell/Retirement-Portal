@@ -206,7 +206,7 @@ export default function DashboardPage() {
                 >
                   <div className="tool-card-content">
                     <div className="tool-icon" style={app.gradient ? { background: app.gradient } : undefined}>
-                      <AppIcon icon={app.icon} className="w-8 h-8 text-white" />
+                      <AppIcon icon={app.icon} className="w-12 h-12 text-white" />
                     </div>
                     <div className="tool-info">
                       <div className="tool-title">{app.name}</div>
@@ -274,9 +274,9 @@ export default function DashboardPage() {
             @keyframes float { 0%,100%{ transform: translate(0,0) scale(1); opacity: .3 } 33%{ transform: translate(50px,-50px) scale(1.1); opacity:.5 } 66%{ transform: translate(-30px,30px) scale(.9); opacity:.4 } }
             .container{ max-width:1400px; margin:0 auto; padding:0 20px; position:relative; z-index:1; padding-top:40px; }
             .hero-section { margin-bottom:48px; text-align:center; }
--            h1{ font-size:3rem; font-weight:800; margin-bottom:16px; background:linear-gradient(135deg,#ffffff 0%, #60a5fa 100%); -webkit-background-clip:text; -webkit-text-fill-color:transparent; background-clip:text; letter-spacing:-0.02em }
--            .subtitle{ font-size:1.25rem; color:#94a3b8; font-weight:500 }
--            .tools-grid{ display:grid; grid-template-columns: repeat(auto-fit, minmax(500px,1fr)); gap:24px; margin-bottom:48px }
+            h1{ font-size:3rem; font-weight:800; margin-bottom:16px; background:var(--title-gradient); -webkit-background-clip:text; -webkit-text-fill-color:transparent; background-clip:text; letter-spacing:-0.02em }
+            .subtitle{ font-size:1.25rem; color:var(--muted); font-weight:500 }
+            .tools-grid{ display:grid; grid-template-columns: repeat(2, minmax(320px,1fr)); gap:32px; margin-bottom:48px }
 -            .tool-card{ background: rgba(255,255,255,0.05); backdrop-filter: blur(10px); border:1px solid rgba(255,255,255,0.1); border-radius:20px; padding:32px; position:relative; overflow:hidden; cursor:pointer; transition: all .4s cubic-bezier(.4,0,.2,1) }
 -            .tool-card:hover{ transform: translateY(-8px) scale(1.02); border-color: rgba(255,255,255,0.3); box-shadow:0 20px 40px rgba(0,0,0,0.3) }
 -            .tool-card.income{ background: linear-gradient(135deg, rgba(16,185,129,0.15) 0%, rgba(5,150,105,0.1) 100%) }
@@ -302,12 +302,9 @@ export default function DashboardPage() {
 -            .badge{ display:inline-block; background: rgba(96,165,250,0.2); color:#60a5fa; padding:4px 12px; border-radius:20px; font-size:.75rem; font-weight:600; margin-top:12px; border:1px solid rgba(96,165,250,0.3) }
 -            .stats-section{ display:grid; grid-template-columns: repeat(auto-fit, minmax(200px,1fr)); gap:20px; margin-top:48px }
 -            .stat-card{ background: rgba(255,255,255,0.05); backdrop-filter: blur(10px); border:1px solid rgba(255,255,255,0.1); border-radius:16px; padding:24px; text-align:center; transition:all .3s }
--            .stat-card:hover{ transform: translateY(-4px); border-color: rgba(255,255,255,0.2) }
--            .stat-value{ font-size:2.5rem; font-weight:800; color:#60a5fa; margin-bottom:8px }
--            .stat-label{ color:#94a3b8; font-size:.9rem; font-weight:500 }
-+            h1{ font-size:3rem; font-weight:800; margin-bottom:16px; background:var(--title-gradient); -webkit-background-clip:text; -webkit-text-fill-color:transparent; background-clip:text; letter-spacing:-0.02em }
-+            .subtitle{ font-size:1.25rem; color:var(--muted); font-weight:500 }
-+            .tools-grid{ display:grid; grid-template-columns: repeat(auto-fit, minmax(500px,1fr)); gap:24px; margin-bottom:48px }
+            .stat-card:hover{ transform: translateY(-4px); border-color: rgba(0,0,0,0.08) }
+            .stat-value{ font-size:2.5rem; font-weight:800; color:var(--accent); margin-bottom:8px }
+            .stat-label{ color:var(--muted); font-size:.9rem; font-weight:500 }
 +            .tool-card{ background: var(--card-bg); backdrop-filter: blur(10px); border:1px solid var(--card-border); border-radius:20px; padding:32px; position:relative; overflow:hidden; cursor:pointer; transition: all .4s cubic-bezier(.4,0,.2,1) }
 +            .tool-card:hover{ transform: translateY(-8px) scale(1.02); border-color: rgba(0,0,0,0.08); box-shadow:0 20px 40px rgba(0,0,0,0.05) }
 +            .tool-card.income{ background: linear-gradient(135deg, rgba(16,185,129,0.08) 0%, rgba(5,150,105,0.06) 100%) }
@@ -336,7 +333,7 @@ export default function DashboardPage() {
 +            .stat-card:hover{ transform: translateY(-4px); border-color: rgba(0,0,0,0.08) }
 +            .stat-value{ font-size:2.5rem; font-weight:800; color:var(--accent); margin-bottom:8px }
 +            .stat-label{ color:var(--muted); font-size:.9rem; font-weight:500 }
-             @media (max-width:768px){ .tools-grid{ grid-template-columns: 1fr } h1{ font-size:2rem } .tool-title{ font-size:1.25rem } }
+             @media (max-width:1024px){ .tools-grid{ grid-template-columns: 1fr } h1{ font-size:2rem } .tool-title{ font-size:1.25rem } .tool-icon{ width:72px; height:72px } }
            `}</style>
         </div>
       </main>
