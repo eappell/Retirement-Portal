@@ -1,5 +1,5 @@
 import React from 'react';
-import { render, waitFor } from '@testing-library/react';
+import { render, waitFor, screen } from '@testing-library/react';
 import '@testing-library/jest-dom';
 
 // Mock the hooks used by the component
@@ -36,7 +36,7 @@ describe('IFrameWrapper messaging', () => {
     );
 
     // Wait for the iframe to be rendered after async auth token fetch
-    const iframe = await waitFor(() => container.querySelector('iframe[title="Test App"]')) as HTMLIFrameElement;
+    const iframe = await screen.findByTitle('Test App') as HTMLIFrameElement;
     expect(iframe).toBeTruthy();
 
     // Provide a fake contentWindow with a postMessage spy
