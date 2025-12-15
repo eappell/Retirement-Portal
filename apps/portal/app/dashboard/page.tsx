@@ -239,24 +239,8 @@ export default function DashboardPage() {
           </div>
 
           <style>{`
-            /* Theme-aware variables (default = light theme) */
+            /* Theme-aware variables (default = dark theme) */
             .dashboard-redesign {
-              --bg: linear-gradient(to bottom right, #E8E3DF, #BFCDE0);
-              --text: #0f172a;
-              --muted: #475569;
-              --card-bg: rgba(255,255,255,0.8);
-              --card-border: rgba(15,23,42,0.05);
-              --title-gradient: linear-gradient(135deg,#0B5394 0%, #60a5fa 100%);
-              --accent: #0B5394;
-              min-height: 100vh;
-              background: var(--bg);
-              color: var(--text);
-              position: relative;
-              overflow-x: hidden;
-            }
-
-            /* Dark theme overrides */
-            .dark .dashboard-redesign {
               --bg: linear-gradient(135deg, #1e293b 0%, #0f172a 100%);
               --text: #e2e8f0;
               --muted: #94a3b8;
@@ -264,6 +248,22 @@ export default function DashboardPage() {
               --card-border: rgba(255,255,255,0.1);
               --title-gradient: linear-gradient(135deg,#ffffff 0%, #60a5fa 100%);
               --accent: #60a5fa;
+              min-height: 100vh;
+              background: var(--bg);
+              color: var(--text);
+              position: relative;
+              overflow-x: hidden;
+            }
+
+            /* Light theme overrides */
+            .light .dashboard-redesign {
+              --bg: linear-gradient(to bottom right, #E8E3DF, #BFCDE0);
+              --text: #0f172a;
+              --muted: #475569;
+              --card-bg: rgba(255,255,255,0.8);
+              --card-border: rgba(15,23,42,0.05);
+              --title-gradient: linear-gradient(135deg,#0B5394 0%, #60a5fa 100%);
+              --accent: #0B5394;
             }
 
             .background-particles { position: absolute; inset: 0; pointer-events: none; z-index: 0; overflow: hidden; }
