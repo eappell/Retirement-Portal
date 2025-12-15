@@ -180,9 +180,9 @@ export default function DashboardPage() {
 
   if (!mounted || !user) {
     return (
-      <div className="flex min-h-screen items-center justify-center" style={{background: 'linear-gradient(to bottom right, #E8E3DF, #BFCDE0)'}}>
+      <div className="flex min-h-screen items-center justify-center bg-gradient-to-br from-[#E8E3DF] to-[#BFCDE0]">
         <div className="text-center">
-          <div className="animate-spin rounded-full h-12 w-12 border-b-2 mx-auto mb-4" style={{borderColor: '#0B5394'}}></div>
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-[#0B5394] mx-auto mb-4"></div>
           <p className="text-gray-600">Loading dashboard...</p>
         </div>
       </div>
@@ -247,23 +247,25 @@ export default function DashboardPage() {
                   href={`/apps/${app.id}?name=${encodeURIComponent(app.name)}&url=${encodeURIComponent(app.url)}`}
                   onClick={() => handleAppClick(app)}
                   data-app-id={app.id}
-                  className={`app-tile rounded-lg shadow-lg hover:shadow-xl transition-shadow p-6 block group ${appGradientClass} relative overflow-hidden`}
+                  className={`app-tile rounded-2xl shadow-lg hover:shadow-2xl transform transition-all duration-200 hover:scale-105 p-8 md:p-10 block group ${appGradientClass}`}
                   style={{background: gradient, backgroundImage: gradient}}
                 >
                   <div className="flex items-start justify-between">
                     <div className="flex items-start gap-4">
                       <div className="flex-shrink-0">
-                        <AppIcon icon={app.icon} className="h-10 w-10" style={{color: '#111827'}} />
+                        <div className="h-14 w-14 rounded-full flex items-center justify-center bg-white/80 transition-transform transform group-hover:rotate-6">
+                          <AppIcon icon={app.icon} className="h-8 w-8 text-gray-900" />
+                        </div>
                       </div>
-                      
+
                       <div>
-                        <h3 className="text-xl font-bold group-hover:transition-colors" style={{color: '#111827'}} onMouseEnter={(e) => e.currentTarget.style.color = '#000000'} onMouseLeave={(e) => e.currentTarget.style.color = '#111827'}>
+                        <h3 className="text-2xl font-bold text-gray-900">
                           {app.name}
                         </h3>
-                        <p className="mt-2" style={{color: '#111827'}}>{app.description}</p>
+                        <p className="mt-2 text-gray-900">{app.description}</p>
                       </div>
                     </div>
-                    <div className="text-2xl" style={{color: '#111827'}}>→</div>
+                    <div className="text-2xl text-gray-900">→</div>
                   </div>
                 </Link>
               );
