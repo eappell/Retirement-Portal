@@ -7,10 +7,18 @@ import {
   HeartIcon,
   BellIcon,
   ChartPieIcon,
+  SparklesIcon,
+  BoltIcon,
+  RocketLaunchIcon,
   CalendarIcon,
   BookmarkIcon,
   CheckCircleIcon,
   ClipboardDocumentIcon,
+  ShoppingCartIcon,
+  CreditCardIcon,
+  UserGroupIcon,
+  DocumentTextIcon,
+  ChatBubbleLeftIcon,
   CodeBracketIcon,
   Cog6ToothIcon,
   ChartBarIcon,
@@ -50,6 +58,24 @@ export const ICON_MAP: Record<string, React.ComponentType<{ className?: string }
   ChartBarSquareIcon: ChartBarSquareIcon,
   DocumentChartBar: DocumentChartBarIcon,
   DocumentChartBarIcon: DocumentChartBarIcon,
+  Sparkles: SparklesIcon,
+  SparklesIcon: SparklesIcon,
+  Bolt: BoltIcon,
+  BoltIcon: BoltIcon,
+  Rocket: RocketLaunchIcon,
+  RocketLaunch: RocketLaunchIcon,
+  RocketLaunchIcon: RocketLaunchIcon,
+  CreditCard: CreditCardIcon,
+  CreditCardIcon: CreditCardIcon,
+  Shopping: ShoppingCartIcon,
+  ShoppingCart: ShoppingCartIcon,
+  ShoppingCartIcon: ShoppingCartIcon,
+  UserGroup: UserGroupIcon,
+  UserGroupIcon: UserGroupIcon,
+  Document: DocumentTextIcon,
+  DocumentTextIcon: DocumentTextIcon,
+  Chat: ChatBubbleLeftIcon,
+  ChatBubbleLeftIcon: ChatBubbleLeftIcon,
   PresentationChartBar: PresentationChartBarIcon,
   PresentationChartBarIcon: PresentationChartBarIcon,
   Calendar: CalendarIcon,
@@ -91,4 +117,27 @@ export function getIconComponent(name?: string) {
   }
 
   return CalculatorIcon;
+}
+
+export function AppIcon({ icon, className, style }: { icon?: string; className?: string; style?: React.CSSProperties }) {
+  if (!icon) {
+    const C = CalculatorIcon;
+    return <C className={className} style={style} />;
+  }
+
+  const trimmed = icon.trim();
+
+  // SVG string
+  if (trimmed.startsWith("<svg")) {
+    return <div className={className} style={style} dangerouslySetInnerHTML={{ __html: icon }} />;
+  }
+
+  // Emoji or short text icon (use a text span)
+  if (trimmed.length <= 3 && /[^a-zA-Z0-9]/.test(trimmed)) {
+    return <span className={className} style={style}>{icon}</span>;
+  }
+
+  // Otherwise, treat as a heroicon name
+  const IconComponent = getIconComponent(icon);
+  return <IconComponent className={className} style={style} />;
 }

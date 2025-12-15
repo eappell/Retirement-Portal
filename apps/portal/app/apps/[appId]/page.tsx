@@ -26,6 +26,7 @@ import {
   SparklesIcon,
   BoltIcon,
 } from "@heroicons/react/24/outline";
+import { AppIcon } from "@/components/icon-map";
 
 // Available HeroIcons mapping
 const AVAILABLE_ICONS = [
@@ -238,14 +239,7 @@ export default function AppPage() {
         <div className="max-w-7xl mx-auto px-4 py-3 sm:px-6 lg:px-8 flex items-center justify-between">
           <div className="flex items-center gap-4 flex-1">
             {/* App Icon */}
-            {(() => {
-              const iconData = AVAILABLE_ICONS.find(i => i.name === appConfig.icon);
-              if (iconData) {
-                const IconComponent = iconData.component;
-                return <IconComponent className="h-8 w-8 text-gray-700 dark:text-gray-300" />;
-              }
-              return <CubeIcon className="h-8 w-8 text-gray-700 dark:text-gray-300" />;
-            })()}
+            <AppIcon icon={appConfig.icon} className="h-8 w-8 text-gray-700 dark:text-gray-300" />
             {/* App Name and Description */}
             <div className="flex-1">
               <h2 className="text-lg font-semibold text-gray-900">

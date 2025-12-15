@@ -1,6 +1,7 @@
 "use client";
 
 import Link from "next/link";
+import { AppIcon } from "@/components/icon-map";
 import { useTheme } from "@/lib/theme";
 import {useAuth} from "@/lib/auth";
 import { db } from '@/lib/firebase';
@@ -117,7 +118,10 @@ export default function Home() {
 
     return (
       <div key={app.id} data-app-id={app.id} className={`flex flex-col items-start justify-between rounded-lg overflow-hidden ${appGradientClass}`} style={{background: gradient, backgroundImage: gradient}}>
-        <div className="px-3 py-2 text-sm font-medium text-white">{app.name}</div>
+        <div className="px-3 py-2 text-sm font-medium text-white flex items-center gap-3">
+          <AppIcon icon={app.icon} className="h-6 w-6" />
+          <span>{app.name}</span>
+        </div>
         
       </div>
     );

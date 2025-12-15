@@ -9,7 +9,7 @@ import {collection, getDocs} from "firebase/firestore";
 import Link from "next/link";
 import {Header} from "@/components/Header";
 // CubeIcon intentionally removed (unused)
-import { getIconComponent } from "@/components/icon-map";
+import { getIconComponent, AppIcon } from "@/components/icon-map";
 
 // Use shared icon resolver so Firestore icon names (e.g. "Heart") resolve correctly
 
@@ -253,10 +253,7 @@ export default function DashboardPage() {
                   <div className="flex items-start justify-between">
                     <div className="flex items-start gap-4">
                       <div className="flex-shrink-0">
-                        {(() => {
-                          const IconComponent = getIconComponent(app.icon);
-                          return <IconComponent className="h-10 w-10" style={{color: '#111827'}} />;
-                        })()}
+                        <AppIcon icon={app.icon} className="h-10 w-10" style={{color: '#111827'}} />
                       </div>
                       
                       <div>

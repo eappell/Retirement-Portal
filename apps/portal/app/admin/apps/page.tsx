@@ -48,6 +48,7 @@ import {
   CodeBracketIcon,
   Cog6ToothIcon,
 } from "@heroicons/react/24/outline";
+import { AppIcon } from "@/components/icon-map";
 
 // Available HeroIcons for app selection
 const AVAILABLE_ICONS = [
@@ -706,14 +707,7 @@ export default function AdminAppsPage() {
                     <div className="flex-1">
                       <div className="flex items-center gap-4">
                         <div className="p-2 rounded-lg" style={{background: app.gradient || '#BFCDE0', backgroundImage: app.gradient || undefined}}>
-                          {(() => {
-                            const iconData = AVAILABLE_ICONS.find(i => i.name === app.icon);
-                            if (iconData) {
-                              const IconComponent = iconData.component;
-                              return <IconComponent className="h-8 w-8" style={{color: '#6b5e62'}} />;
-                            }
-                            return <CubeIcon className="h-8 w-8" style={{color: '#6b5e62'}} />;
-                          })()}
+                          <AppIcon icon={app.icon} className="h-8 w-8" style={{color: '#6b5e62'}} />
                         </div>
                         <div>
                           <div className="flex items-center gap-2">
