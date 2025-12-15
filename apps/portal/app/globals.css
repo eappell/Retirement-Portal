@@ -125,6 +125,11 @@ body {
   transition: filter 180ms ease, box-shadow 180ms ease;
   will-change: filter;
 }
+/* Unified dark-blue gradient for all app tiles */
+.app-tile-unified {
+  background-image: linear-gradient(135deg, #0B5394 0%, #083653 100%) !important;
+  color: #fff;
+}
 .app-tile:hover,
 .app-tile:focus-visible {
   filter: brightness(0.88);
@@ -133,6 +138,12 @@ body {
 .dark .app-tile:hover,
 .dark .app-tile:focus-visible {
   filter: brightness(0.92);
+}
+.app-tile-unified h3,
+.app-tile-unified p,
+.app-tile-unified .tool-title,
+.app-tile-unified .tool-description {
+  color: #ffffff !important;
 }
 
 /* end of customizations removed to restore original colors */

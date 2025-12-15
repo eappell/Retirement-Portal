@@ -200,7 +200,8 @@ export default function DashboardPage() {
 
         {/* Apps Grid */}
         <div>
-          <h2 className="text-2xl font-bold text-gray-900 mb-6">Available Tools</h2>
+          <h2 className="text-3xl font-extrabold text-blue-700 mb-2 text-center">Available Tools</h2>
+          <p className="text-center text-blue-600 mb-6 text-lg font-medium">Plan with Clarity. Live with Confidence.</p>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
             {apps.map((app, index) => {
               // Create different gradients using vibrant standard colors
@@ -247,25 +248,24 @@ export default function DashboardPage() {
                   href={`/apps/${app.id}?name=${encodeURIComponent(app.name)}&url=${encodeURIComponent(app.url)}`}
                   onClick={() => handleAppClick(app)}
                   data-app-id={app.id}
-                  className={`app-tile rounded-2xl shadow-lg hover:shadow-2xl transform transition-all duration-200 hover:scale-105 p-8 md:p-10 block group ${appGradientClass}`}
-                  style={{background: gradient, backgroundImage: gradient}}
+                  className={`app-tile app-tile-unified rounded-2xl shadow-lg hover:shadow-2xl transform transition-all duration-200 hover:scale-105 p-8 md:p-10 block group ${appGradientClass}`}
                 >
                   <div className="flex items-start justify-between">
                     <div className="flex items-start gap-4">
                       <div className="flex-shrink-0">
-                        <div className="h-14 w-14 rounded-full flex items-center justify-center bg-white/80 transition-transform transform group-hover:rotate-6">
-                          <AppIcon icon={app.icon} className="h-8 w-8 text-gray-900" />
+                        <div className="h-14 w-14 rounded-full flex items-center justify-center bg-white/10 transition-transform transform group-hover:rotate-6">
+                          <AppIcon icon={app.icon} className="h-8 w-8 text-white" />
                         </div>
                       </div>
 
                       <div>
-                        <h3 className="text-2xl font-bold text-gray-900">
+                        <h3 className="text-2xl font-bold text-white">
                           {app.name}
                         </h3>
-                        <p className="mt-2 text-gray-900">{app.description}</p>
+                        <p className="mt-2 text-white/90">{app.description}</p>
                       </div>
                     </div>
-                    <div className="text-2xl text-gray-900">→</div>
+                    <div className="text-2xl text-white">→</div>
                   </div>
                 </Link>
               );
