@@ -300,39 +300,14 @@ export default function DashboardPage() {
             .tool-title{ font-size:1.75rem; font-weight:800; margin-bottom:8px; color:var(--text) }
             .tool-description{ color:var(--muted); line-height:1.6; font-size:1rem }
             .badge{ display:inline-block; background: rgba(96,165,250,0.14); color:var(--accent); padding:6px 14px; border-radius:18px; font-size:.78rem; font-weight:700; margin-top:12px; border:1px solid rgba(96,165,250,0.18) }
--            .stats-section{ display:grid; grid-template-columns: repeat(auto-fit, minmax(200px,1fr)); gap:20px; margin-top:48px }
+            .stats-section{ display:flex; gap:20px; justify-content:space-between; align-items:stretch; margin-top:24px }
+            .stat-card{ background: var(--card-bg); backdrop-filter: blur(6px); border:1px solid var(--card-border); border-radius:16px; padding:20px; text-align:center; transition:all .3s; display:flex; align-items:center; justify-content:center; flex:1; min-width:150px }
+            .stat-card:hover{ transform: translateY(-4px); border-color: rgba(0,0,0,0.08) }
 -            .stat-card{ background: rgba(255,255,255,0.05); backdrop-filter: blur(10px); border:1px solid rgba(255,255,255,0.1); border-radius:16px; padding:24px; text-align:center; transition:all .3s }
             .stat-card:hover{ transform: translateY(-4px); border-color: rgba(0,0,0,0.08) }
             .stat-value{ font-size:2.5rem; font-weight:800; color:var(--accent); margin-bottom:8px }
             .stat-label{ color:var(--muted); font-size:.9rem; font-weight:500 }
-+            .tool-card{ background: var(--card-bg); backdrop-filter: blur(10px); border:1px solid var(--card-border); border-radius:20px; padding:32px; position:relative; overflow:hidden; cursor:pointer; transition: all .4s cubic-bezier(.4,0,.2,1) }
-+            .tool-card:hover{ transform: translateY(-8px) scale(1.02); border-color: rgba(0,0,0,0.08); box-shadow:0 20px 40px rgba(0,0,0,0.05) }
-+            .tool-card.income{ background: linear-gradient(135deg, rgba(16,185,129,0.08) 0%, rgba(5,150,105,0.06) 100%) }
-+            .tool-card.abroad{ background: linear-gradient(135deg, rgba(96,165,250,0.08) 0%, rgba(59,130,246,0.06) 100%) }
-+            .tool-card.tax{ background: linear-gradient(135deg, rgba(139,92,246,0.08) 0%, rgba(124,58,237,0.06) 100%) }
-+            .tool-card.healthcare{ background: linear-gradient(135deg, rgba(244,114,182,0.08) 0%, rgba(236,72,153,0.06) 100%) }
-+            .tool-card.activity{ background: linear-gradient(135deg, rgba(251,146,60,0.08) 0%, rgba(249,115,22,0.06) 100%) }
-+            .tool-card.social{ background: linear-gradient(135deg, rgba(251,191,36,0.08) 0%, rgba(245,158,11,0.06) 100%) }
-+            .tool-card.pension{ background: linear-gradient(135deg, rgba(168,85,247,0.08) 0%, rgba(147,51,234,0.06) 100%) }
-+            .tool-card-content{ position:relative; z-index:1; display:flex; align-items:flex-start; gap:20px }
-+            .tool-icon{ width:64px; height:64px; border-radius:16px; display:flex; align-items:center; justify-content:center; font-size:2rem; flex-shrink:0; transition:all .4s; box-shadow:0 4px 12px rgba(0,0,0,0.06) }
-+            .tool-card:hover .tool-icon{ transform: scale(1.1) rotate(5deg) }
-+            .tool-card.income .tool-icon { background: linear-gradient(135deg,#10b981 0%, #059669 100%) }
-+            .tool-card.abroad .tool-icon { background: linear-gradient(135deg,#60a5fa 0%, #3b82f6 100%) }
-+            .tool-card.tax .tool-icon { background: linear-gradient(135deg,#8b5cf6 0%, #7c3aed 100%) }
-+            .tool-card.healthcare .tool-icon { background: linear-gradient(135deg,#f472b6 0%, #ec4899 100%) }
-+            .tool-card.activity .tool-icon { background: linear-gradient(135deg,#fb923c 0%, #f97316 100%) }
-+            .tool-card.social .tool-icon { background: linear-gradient(135deg,#fbbf24 0%, #f59e0b 100%) }
-+            .tool-card.pension .tool-icon { background: linear-gradient(135deg,#a855f7 0%, #9333ea 100%) }
-+            .tool-info{ flex:1 }
-+            .tool-title{ font-size:1.5rem; font-weight:700; margin-bottom:8px; color:var(--text) }
-+            .tool-description{ color:var(--muted); line-height:1.6; font-size:.95rem }
-+            .badge{ display:inline-block; background: rgba(96,165,250,0.12); color:var(--accent); padding:4px 12px; border-radius:20px; font-size:.75rem; font-weight:600; margin-top:12px; border:1px solid rgba(96,165,250,0.18) }
-+            .stats-section{ display:grid; grid-template-columns: repeat(auto-fit, minmax(200px,1fr)); gap:20px; margin-top:48px }
-+            .stat-card{ background: var(--card-bg); backdrop-filter: blur(6px); border:1px solid var(--card-border); border-radius:16px; padding:24px; text-align:center; transition:all .3s }
-+            .stat-card:hover{ transform: translateY(-4px); border-color: rgba(0,0,0,0.08) }
-+            .stat-value{ font-size:2.5rem; font-weight:800; color:var(--accent); margin-bottom:8px }
-+            .stat-label{ color:var(--muted); font-size:.9rem; font-weight:500 }
+
              @media (max-width:1024px){ .tools-grid{ grid-template-columns: 1fr } h1{ font-size:2rem } .tool-title{ font-size:1.25rem } .tool-icon{ width:72px; height:72px } }
            `}</style>
         </div>
