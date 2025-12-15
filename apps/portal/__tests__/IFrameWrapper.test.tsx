@@ -41,7 +41,10 @@ describe('IFrameWrapper messaging', () => {
 
     // Provide a fake contentWindow with a postMessage spy
     const postSpy = vi.fn();
-    (iframe as any).contentWindow = { postMessage: postSpy };
+    Object.defineProperty(iframe, 'contentWindow', {
+      value: { postMessage: postSpy },
+      writable: true,
+    });
 
     // Wait for effects to run and post messages
     await waitFor(() => {
