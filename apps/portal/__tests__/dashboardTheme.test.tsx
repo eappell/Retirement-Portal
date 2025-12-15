@@ -8,8 +8,7 @@ vi.mock('@/lib/useUserTier', () => ({ useUserTier: () => ({ tier: 'paid', loadin
 vi.mock('@/lib/theme', () => ({ useTheme: () => ({ theme: 'light', toggleTheme: () => {} }) }));
 
 // Minimal firebase mocks to avoid network calls
-vi.mock('@/lib/firebase', () => ({
-  db: {},
+vi.mock('firebase/firestore', () => ({
   collection: () => ({}),
   getDocs: async () => ({ forEach: (cb: (d: any) => void) => {} }),
 }));

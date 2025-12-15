@@ -11,8 +11,7 @@ vi.mock('@/lib/theme', () => ({ useTheme: () => ({ theme: 'light', toggleTheme: 
 const disabledApp = { id: 'disabled-app', name: 'Disabled App', url: 'http://localhost/', disabled: true };
 const enabledApp = { id: 'enabled-app', name: 'Enabled App', url: 'http://localhost:1000/', disabled: false };
 
-vi.mock('@/lib/firebase', () => ({
-  db: {},
+vi.mock('firebase/firestore', () => ({
   collection: () => ({}),
   getDocs: async () => ({
     forEach: (cb: (d: any) => void) => {
