@@ -36,7 +36,7 @@ describe('IFrameWrapper messaging', () => {
     );
 
     // Wait for the iframe to be rendered after async auth token fetch
-    const iframe = await waitFor(() => container.querySelector('iframe')) as HTMLIFrameElement;
+    const iframe = await waitFor(() => container.querySelector('iframe[title="Test App"]')) as HTMLIFrameElement;
     expect(iframe).toBeTruthy();
 
     // Provide a fake contentWindow with a postMessage spy

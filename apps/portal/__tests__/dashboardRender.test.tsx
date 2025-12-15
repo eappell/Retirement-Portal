@@ -30,7 +30,7 @@ describe('Dashboard render', () => {
     await waitFor(() => expect(container.querySelector('[data-app-id="enabled-app"]')).toBeTruthy());
     expect(container.querySelector('[data-app-id="other-app"]')).toBeTruthy();
 
-    const cards = container.querySelectorAll('.tool-card');
+    const cards = container.querySelectorAll('.app-tile');
     expect(cards.length).toBeGreaterThanOrEqual(2);
   });
 });
