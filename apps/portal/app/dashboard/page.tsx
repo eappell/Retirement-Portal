@@ -277,29 +277,29 @@ export default function DashboardPage() {
             h1{ font-size:3rem; font-weight:800; margin-bottom:16px; background:var(--title-gradient); -webkit-background-clip:text; -webkit-text-fill-color:transparent; background-clip:text; letter-spacing:-0.02em }
             .subtitle{ font-size:1.25rem; color:var(--muted); font-weight:500 }
             .tools-grid{ display:grid; grid-template-columns: repeat(2, minmax(320px,1fr)); gap:32px; margin-bottom:48px }
--            .tool-card{ background: rgba(255,255,255,0.05); backdrop-filter: blur(10px); border:1px solid rgba(255,255,255,0.1); border-radius:20px; padding:32px; position:relative; overflow:hidden; cursor:pointer; transition: all .4s cubic-bezier(.4,0,.2,1) }
--            .tool-card:hover{ transform: translateY(-8px) scale(1.02); border-color: rgba(255,255,255,0.3); box-shadow:0 20px 40px rgba(0,0,0,0.3) }
--            .tool-card.income{ background: linear-gradient(135deg, rgba(16,185,129,0.15) 0%, rgba(5,150,105,0.1) 100%) }
--            .tool-card.abroad{ background: linear-gradient(135deg, rgba(96,165,250,0.15) 0%, rgba(59,130,246,0.1) 100%) }
--            .tool-card.tax{ background: linear-gradient(135deg, rgba(139,92,246,0.15) 0%, rgba(124,58,237,0.1) 100%) }
--            .tool-card.healthcare{ background: linear-gradient(135deg, rgba(244,114,182,0.15) 0%, rgba(236,72,153,0.1) 100%) }
--            .tool-card.activity{ background: linear-gradient(135deg, rgba(251,146,60,0.15) 0%, rgba(249,115,22,0.1) 100%) }
--            .tool-card.social{ background: linear-gradient(135deg, rgba(251,191,36,0.15) 0%, rgba(245,158,11,0.1) 100%) }
--            .tool-card.pension{ background: linear-gradient(135deg, rgba(168,85,247,0.15) 0%, rgba(147,51,234,0.1) 100%) }
--            .tool-card-content{ position:relative; z-index:1; display:flex; align-items:flex-start; gap:20px }
--            .tool-icon{ width:64px; height:64px; border-radius:16px; display:flex; align-items:center; justify-content:center; font-size:2rem; flex-shrink:0; transition:all .4s; box-shadow:0 4px 12px rgba(0,0,0,0.2) }
--            .tool-card:hover .tool-icon{ transform: scale(1.1) rotate(5deg) }
--            .tool-card.income .tool-icon { background: linear-gradient(135deg,#10b981 0%, #059669 100%) }
--            .tool-card.abroad .tool-icon { background: linear-gradient(135deg,#60a5fa 0%, #3b82f6 100%) }
--            .tool-card.tax .tool-icon { background: linear-gradient(135deg,#8b5cf6 0%, #7c3aed 100%) }
--            .tool-card.healthcare .tool-icon { background: linear-gradient(135deg,#f472b6 0%, #ec4899 100%) }
--            .tool-card.activity .tool-icon { background: linear-gradient(135deg,#fb923c 0%, #f97316 100%) }
--            .tool-card.social .tool-icon { background: linear-gradient(135deg,#fbbf24 0%, #f59e0b 100%) }
--            .tool-card.pension .tool-icon { background: linear-gradient(135deg,#a855f7 0%, #9333ea 100%) }
--            .tool-info{ flex:1 }
--            .tool-title{ font-size:1.5rem; font-weight:700; margin-bottom:8px; color:white }
--            .tool-description{ color:#94a3b8; line-height:1.6; font-size:.95rem }
--            .badge{ display:inline-block; background: rgba(96,165,250,0.2); color:#60a5fa; padding:4px 12px; border-radius:20px; font-size:.75rem; font-weight:600; margin-top:12px; border:1px solid rgba(96,165,250,0.3) }
+            .tool-card{ background: var(--card-bg); backdrop-filter: blur(10px); border:1px solid var(--card-border); border-radius:24px; padding:28px; min-height:150px; position:relative; overflow:hidden; cursor:pointer; transition: transform .28s cubic-bezier(.4,0,.2,1), box-shadow .28s }
+            .tool-card:hover{ transform: translateY(-6px) scale(1.03); border-color: rgba(0,0,0,0.08); box-shadow:0 18px 40px rgba(0,0,0,0.12) }
+            .tool-card.income{ background: linear-gradient(135deg, rgba(16,185,129,0.06) 0%, rgba(5,150,105,0.04) 100%) }
+            .tool-card.abroad{ background: linear-gradient(135deg, rgba(96,165,250,0.06) 0%, rgba(59,130,246,0.04) 100%) }
+            .tool-card.tax{ background: linear-gradient(135deg, rgba(139,92,246,0.06) 0%, rgba(124,58,237,0.04) 100%) }
+            .tool-card.healthcare{ background: linear-gradient(135deg, rgba(244,114,182,0.06) 0%, rgba(236,72,153,0.04) 100%) }
+            .tool-card.activity{ background: linear-gradient(135deg, rgba(251,146,60,0.06) 0%, rgba(249,115,22,0.04) 100%) }
+            .tool-card.social{ background: linear-gradient(135deg, rgba(251,191,36,0.06) 0%, rgba(245,158,11,0.04) 100%) }
+            .tool-card.pension{ background: linear-gradient(135deg, rgba(168,85,247,0.06) 0%, rgba(147,51,234,0.04) 100%) }
+            .tool-card-content{ position:relative; z-index:1; display:flex; align-items:center; gap:24px; flex-wrap:nowrap }
+            .tool-icon{ width:88px; height:88px; border-radius:18px; display:flex; align-items:center; justify-content:center; font-size:2.5rem; flex:0 0 88px; transition:all .3s; box-shadow:0 6px 20px rgba(0,0,0,0.08); overflow:hidden }
+            .tool-card:hover .tool-icon{ transform: scale(1.05) rotate(3deg) }
+            .tool-card.income .tool-icon { background: linear-gradient(135deg,#10b981 0%, #059669 100%) }
+            .tool-card.abroad .tool-icon { background: linear-gradient(135deg,#60a5fa 0%, #3b82f6 100%) }
+            .tool-card.tax .tool-icon { background: linear-gradient(135deg,#8b5cf6 0%, #7c3aed 100%) }
+            .tool-card.healthcare .tool-icon { background: linear-gradient(135deg,#f472b6 0%, #ec4899 100%) }
+            .tool-card.activity .tool-icon { background: linear-gradient(135deg,#fb923c 0%, #f97316 100%) }
+            .tool-card.social .tool-icon { background: linear-gradient(135deg,#fbbf24 0%, #f59e0b 100%) }
+            .tool-card.pension .tool-icon { background: linear-gradient(135deg,#a855f7 0%, #9333ea 100%) }
+            .tool-info{ flex:1; min-width:0 }
+            .tool-title{ font-size:1.75rem; font-weight:800; margin-bottom:8px; color:var(--text) }
+            .tool-description{ color:var(--muted); line-height:1.6; font-size:1rem }
+            .badge{ display:inline-block; background: rgba(96,165,250,0.14); color:var(--accent); padding:6px 14px; border-radius:18px; font-size:.78rem; font-weight:700; margin-top:12px; border:1px solid rgba(96,165,250,0.18) }
 -            .stats-section{ display:grid; grid-template-columns: repeat(auto-fit, minmax(200px,1fr)); gap:20px; margin-top:48px }
 -            .stat-card{ background: rgba(255,255,255,0.05); backdrop-filter: blur(10px); border:1px solid rgba(255,255,255,0.1); border-radius:16px; padding:24px; text-align:center; transition:all .3s }
             .stat-card:hover{ transform: translateY(-4px); border-color: rgba(0,0,0,0.08) }
