@@ -223,6 +223,8 @@ button {
   --card-border: rgba(15,23,42,0.05);
   --title-gradient: linear-gradient(135deg,#0B5394 0%, #60a5fa 100%);
   --accent: #0B5394;
+  /* Force background to use the --bg variable when light mode is active to override utility classes that may set background-color */
+  background: var(--bg) !important;
 }
 
 .background-particles { position: absolute; inset: 0; pointer-events: none; z-index: 0; overflow: hidden; }
