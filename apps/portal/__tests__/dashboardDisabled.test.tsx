@@ -12,6 +12,7 @@ const disabledApp = { id: 'disabled-app', name: 'Disabled App', url: 'http://loc
 const enabledApp = { id: 'enabled-app', name: 'Enabled App', url: 'http://localhost:1000/', disabled: false };
 
 vi.mock('firebase/firestore', () => ({
+  getFirestore: () => ({}),
   collection: () => ({}),
   getDocs: async () => ({
     forEach: (cb: (d: any) => void) => {

@@ -12,6 +12,7 @@ const enabledApp = { id: 'enabled-app', name: 'Enabled App', url: 'http://localh
 const otherApp = { id: 'other-app', name: 'Other App', url: 'http://localhost:1001/', disabled: false, icon: '🚀', description: 'Another app' };
 
 vi.mock('firebase/firestore', () => ({
+  getFirestore: () => ({}),
   collection: () => ({}),
   getDocs: async () => ({
     forEach: (cb: (d: any) => void) => {

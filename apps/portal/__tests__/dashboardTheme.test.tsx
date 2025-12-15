@@ -9,6 +9,7 @@ vi.mock('@/lib/theme', () => ({ useTheme: () => ({ theme: 'light', toggleTheme: 
 
 // Minimal firebase mocks to avoid network calls
 vi.mock('firebase/firestore', () => ({
+  getFirestore: () => ({}),
   collection: () => ({}),
   getDocs: async () => ({ forEach: (cb: (d: any) => void) => {} }),
 }));
