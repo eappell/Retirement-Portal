@@ -200,8 +200,8 @@ export default function DashboardPage() {
 
         {/* Apps Grid */}
         <div>
-          <h2 className="text-3xl font-extrabold text-blue-700 mb-2 text-center">Available Tools</h2>
-          <p className="text-center text-blue-600 mb-6 text-lg font-medium">Plan with Clarity. Live with Confidence.</p>
+          <h2 className="text-3xl font-extrabold text-blue-800 mb-2 text-center">Available Tools</h2>
+          <p className="text-center text-blue-700 mb-6 text-lg font-medium">Plan with Clarity. Live with Confidence.</p>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
             {apps.map((app, index) => {
               // Create different gradients using vibrant standard colors
