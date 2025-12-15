@@ -194,29 +194,69 @@ export default function DashboardPage() {
                 <div className="text-center text-gray-500">No apps available</div>
               )}
 
-              {apps.map((app) => (
-                <div
-                  key={app.id}
-                  data-app-id={app.id}
-                  className={`tool-card ${app.id}`}
-                  onClick={() => {
-                    handleAppClick(app);
-                    router.push(`/apps/${app.id}?name=${encodeURIComponent(app.name)}`);
-                  }}
-                >
-                  <div className="tool-card-content">
-                    <div className="tool-icon" style={app.gradient ? { background: app.gradient } : undefined}>
-                      <AppIcon icon={app.icon} className="w-12 h-12 text-white" />
+              {apps.map((app, index) => {
+                const gradients = [
+                  'linear-gradient(135deg, #60a5fa 0%, #3b82f6 100%)',
+                  'linear-gradient(135deg, #34d399 0%, #10b981 100%)',
+                  'linear-gradient(135deg, #fbbf24 0%, #f59e0b 100%)',
+                  'linear-gradient(135deg, #a78bfa 0%, #8b5cf6 100%)',
+                ];
+                const redGradient = 'linear-gradient(135deg, #fca5a5 0%, #ef4444 100%)';
+                const blueGradient = 'linear-gradient(135deg, #60a5fa 0%, #3b82f6 100%)';
+                const greenGradient = 'linear-gradient(135deg, #34d399 0%, #10b981 100%)';
+
+                const key = `${app.id || ''} ${app.name || ''}`.toLowerCase();
+                const computedGradient = key.includes('health') || key.includes('healthcare')
+                  ? redGradient
+                  : key.includes('income') || key.includes('estimator')
+                  ? greenGradient
+                  : key.includes('retire') || key.includes('abroad')
+                  ? blueGradient
+                  : gradients[index % gradients.length];
+                const gradient = app.gradient || computedGradient;
+
+                const appGradientClass = app.gradient
+                  ? ''
+                  : key.includes('health') || key.includes('healthcare')
+                  ? 'app-gradient-healthcare'
+                  : key.includes('income') || key.includes('estimator')
+                  ? 'app-gradient-income-estimator'
+                  : key.includes('retire') || key.includes('abroad')
+                  ? 'app-gradient-retire-abroad'
+                  : '';
+
+                return (
+                  <Link
+                    key={app.id}
+                    href={`/apps/${app.id}?name=${encodeURIComponent(app.name)}&url=${encodeURIComponent(app.url)}`}
+                    onClick={() => handleAppClick(app)}
+                    data-app-id={app.id}
+                    className={`rounded-2xl shadow-lg hover:shadow-2xl transform transition-all duration-200 hover:scale-105 p-8 md:p-10 block group ${appGradientClass}`}
+                    style={{background: gradient, backgroundImage: gradient}}
+                  >
+                    <div className="flex items-start justify-between">
+                      <div className="flex items-start gap-4">
+                        <div className="flex-shrink-0">
+                          <div className="h-14 w-14 rounded-full flex items-center justify-center bg-white/80 transition-transform transform group-hover:rotate-6">
+                            {(() => {
+                              const IconComponent = getIconComponent(app.icon);
+                              return <IconComponent className="h-8 w-8" style={{color: '#111827'}} />;
+                            })()}
+                          </div>
+                        </div>
+
+                        <div>
+                          <h3 className="text-2xl font-bold" style={{color: '#111827'}}>{app.name}</h3>
+                          <p className="mt-3 text-sm" style={{color: '#111827'}}>{app.description}</p>
+                        </div>
+                      </div>
+                      <div className="text-2xl" style={{color: '#111827'}}>→</div>
                     </div>
-                    <div className="tool-info">
-                      <div className="tool-title">{app.name}</div>
-                      <p className="tool-description">{app.description}</p>
-                      {app.freeAllowed && <span className="badge">Free</span>}
-                    </div>
-                  </div>
-                </div>
-              ))}
+                  </Link>
+                );
+              })}
             </div>
+          </div>
 
             <div className="stats-section">
               <div className="stat-card">
