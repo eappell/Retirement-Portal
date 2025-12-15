@@ -190,82 +190,32 @@ export default function DashboardPage() {
             </div>
 
             <div className="tools-grid">
-              <div className="tool-card income" onClick={() => router.push('/apps/income-estimator?name=Monthly%20Retirement%20Income%20Estimator')}>
-                <div className="tool-card-content">
-                  <div className="tool-icon">💰</div>
-                  <div className="tool-info">
-                    <div className="tool-title">Monthly Retirement Income AI</div>
-                    <p className="tool-description">Estimate your retirement income, taxes, and net worth with AI-powered precision and personalized recommendations.</p>
-                    <span className="badge">AI-Powered</span>
-                  </div>
-                </div>
-              </div>
+              {apps.length === 0 && !loadingApps && (
+                <div className="text-center text-gray-500">No apps available</div>
+              )}
 
-              <div className="tool-card abroad" onClick={() => router.push('/apps/retire-abroad?name=Retire%20Abroad%20AI%20Recommendations')}>
-                <div className="tool-card-content">
-                  <div className="tool-icon">🌍</div>
-                  <div className="tool-info">
-                    <div className="tool-title">Retire Abroad AI</div>
-                    <p className="tool-description">Find your perfect retirement destination from 100+ countries with personalized matching based on your lifestyle and budget.</p>
-                    <span className="badge">100+ Destinations</span>
+              {apps.map((app) => (
+                <div
+                  key={app.id}
+                  data-app-id={app.id}
+                  className={`tool-card ${app.id}`}
+                  onClick={() => {
+                    handleAppClick(app);
+                    router.push(`/apps/${app.id}?name=${encodeURIComponent(app.name)}`);
+                  }}
+                >
+                  <div className="tool-card-content">
+                    <div className="tool-icon" style={app.gradient ? { background: app.gradient } : undefined}>
+                      <AppIcon icon={app.icon} className="w-8 h-8 text-white" />
+                    </div>
+                    <div className="tool-info">
+                      <div className="tool-title">{app.name}</div>
+                      <p className="tool-description">{app.description}</p>
+                      {app.freeAllowed && <span className="badge">Free</span>}
+                    </div>
                   </div>
                 </div>
-              </div>
-
-              <div className="tool-card tax" onClick={() => router.push('/apps/tax-impact-analyzer?name=Tax%20Impact%20Analyzer')}>
-                <div className="tool-card-content">
-                  <div className="tool-icon">📊</div>
-                  <div className="tool-info">
-                    <div className="tool-title">Tax Impact Analyzer</div>
-                    <p className="tool-description">Plan your retirement taxes with confidence and optimize your withdrawal strategy for maximum tax efficiency.</p>
-                    <span className="badge">Tax Optimization</span>
-                  </div>
-                </div>
-              </div>
-
-              <div className="tool-card healthcare" onClick={() => router.push('/apps/healthcare-cost?name=Healthcare%20Cost%20Calculator')}>
-                <div className="tool-card-content">
-                  <div className="tool-icon">🏥</div>
-                  <div className="tool-info">
-                    <div className="tool-title">Healthcare Cost Calculator</div>
-                    <p className="tool-description">Plan for your retirement healthcare expenses with personalized projections based on your health profile, location, and lifestyle.</p>
-                    <span className="badge">Personalized</span>
-                  </div>
-                </div>
-              </div>
-
-              <div className="tool-card activity" onClick={() => router.push('/apps/activity-budget?name=Activity%20Budget%20Planner')}>
-                <div className="tool-card-content">
-                  <div className="tool-icon">🚀</div>
-                  <div className="tool-info">
-                    <div className="tool-title">Activity Budget Planner</div>
-                    <p className="tool-description">Design intentional activity budgets across the three retirement phases: Go-Go, Slow-Go, and No-Go years.</p>
-                    <span className="badge">3-Phase Planning</span>
-                  </div>
-                </div>
-              </div>
-
-              <div className="tool-card social" onClick={() => router.push('/apps/social-security?name=Social%20Security%20Optimizer')}>
-                <div className="tool-card-content">
-                  <div className="tool-icon">💵</div>
-                  <div className="tool-info">
-                    <div className="tool-title">Social Security Optimizer</div>
-                    <p className="tool-description">Maximize your lifetime Social Security benefits with data-driven insights and break-even analysis.</p>
-                    <span className="badge">Data-Driven</span>
-                  </div>
-                </div>
-              </div>
-
-              <div className="tool-card pension" onClick={() => router.push('/apps/pension-analyzer?name=Pension%20vs%20Lumpsum%20Analyzer')}>
-                <div className="tool-card-content">
-                  <div className="tool-icon">⚖️</div>
-                  <div className="tool-info">
-                    <div className="tool-title">Pension vs Lumpsum Analyzer</div>
-                    <p className="tool-description">Make informed pension election decisions with comprehensive analysis of your options and long-term projections.</p>
-                    <span className="badge">Decision Support</span>
-                  </div>
-                </div>
-              </div>
+              ))}
             </div>
 
             <div className="stats-section">
