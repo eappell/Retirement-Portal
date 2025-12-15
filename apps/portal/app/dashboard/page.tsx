@@ -63,20 +63,46 @@ const DEFAULT_APPS: App[] = [
     disabled: false,
   },
 ];
+export default function DashboardPage() {
+  const router = useRouter();
+  const { user } = useAuth();
+  const { trackEvent } = useAnalytics();
+  const [mounted, setMounted] = useState(false);
+  const [apps, setApps] = useState<App[]>(DEFAULT_APPS);
+  const [loadingApps, setLoadingApps] = useState(true);
+
+  useEffect(() => {
+    setMounted(true);
+  }, []);
+
+  useEffect(() => {
+    const loadApps = async () => {
+      try {
+        setLoadingApps(true);
+        const appsRef = collection(db, 'apps');
+        const snapshot = await getDocs(appsRef);
+        const loadedApps: App[] = [];
+        snapshot.forEach((doc) => {
+          const data = doc.data();
+          loadedApps.push({
+            id: data.id,
+            name: data.name,
+            description: data.description,
+            url: data.url,
+            icon: data.icon,
+            freeAllowed: data.freeAllowed,
             gradient: data.gradient,
             disabled: data.disabled,
           });
         });
 
-          if (loadedApps.length > 0) {
-            // Loaded apps
-          // Merge firestore apps into defaults: favor firestore values (including gradient)
+        if (loadedApps.length > 0) {
           const normalizeText = (s?: string) => (s || '').toLowerCase().replace(/[^a-z0-9 ]/g, ' ');
-          const matchesDefault = (d: App, a: App) => {
+          const matchesDefault = (d: App, a?: App) => {
             if (!a) return false;
             if (a.id === d.id) return true;
-            const an = normalizeText(a.name);
-            const dn = normalizeText(d.name);
+            const an = normalizeText(a.name || '');
+            const dn = normalizeText(d.name || '');
             if (an.includes(dn) || dn.includes(an)) return true;
             if (an.includes(d.id.replace(/-/g, ' '))) return true;
             const aTokens = new Set(an.split(/\s+/).filter(Boolean));
@@ -88,6 +114,7 @@ const DEFAULT_APPS: App[] = [
             if (common / minLen >= 0.5) return true;
             return false;
           };
+
           const merged = DEFAULT_APPS.map((d) => {
             const override = loadedApps.find((a) => matchesDefault(d, a));
             return override
@@ -311,7 +338,4 @@ const DEFAULT_APPS: App[] = [
   );
 }
 
-*** End Patch
-    </div>
-  );
-}
+
