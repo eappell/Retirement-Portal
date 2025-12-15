@@ -3,22 +3,22 @@ import { render, waitFor } from '@testing-library/react';
 import '@testing-library/jest-dom';
 
 // Mock the hooks used by the component
-jest.mock('@/lib/auth', () => ({
+vi.mock('@/lib/auth', () => ({
   useAuth: () => ({
     user: { uid: 'uid123', email: 'a@b.com', isAnonymous: false, tier: 'free' },
   }),
 }));
 
-jest.mock('@/lib/useUserTier', () => ({
+vi.mock('@/lib/useUserTier', () => ({
   useUserTier: () => ({ tier: 'paid', subscriptionExpiry: null, loading: false }),
 }));
 
-jest.mock('@/lib/theme', () => ({
+vi.mock('@/lib/theme', () => ({
   useTheme: () => ({ theme: 'light', toggleTheme: () => {} }),
 }));
 
 // Mock firebase auth currentUser used by IFrameWrapper
-jest.mock('@/lib/firebase', () => ({
+vi.mock('@/lib/firebase', () => ({
   auth: {
     currentUser: {
       getIdToken: async () => 'fake-token-123',
@@ -40,7 +40,7 @@ describe('IFrameWrapper messaging', () => {
     expect(iframe).toBeTruthy();
 
     // Provide a fake contentWindow with a postMessage spy
-    const postSpy = jest.fn();
+    const postSpy = vi.fn();
     (iframe as any).contentWindow = { postMessage: postSpy };
 
     // Wait for effects to run and post messages

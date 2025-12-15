@@ -3,12 +3,12 @@ import { render, waitFor } from '@testing-library/react';
 import '@testing-library/jest-dom';
 
 // Mock auth so the dashboard renders
-jest.mock('@/lib/auth', () => ({ useAuth: () => ({ user: { uid: 'uid1', email: 'a@b.com' } }) }));
-jest.mock('@/lib/useUserTier', () => ({ useUserTier: () => ({ tier: 'paid', loading: false }) }));
-jest.mock('@/lib/theme', () => ({ useTheme: () => ({ theme: 'light', toggleTheme: () => {} }) }));
+vi.mock('@/lib/auth', () => ({ useAuth: () => ({ user: { uid: 'uid1', email: 'a@b.com' } }) }));
+vi.mock('@/lib/useUserTier', () => ({ useUserTier: () => ({ tier: 'paid', loading: false }) }));
+vi.mock('@/lib/theme', () => ({ useTheme: () => ({ theme: 'light', toggleTheme: () => {} }) }));
 
 // Minimal firebase mocks to avoid network calls
-jest.mock('@/lib/firebase', () => ({
+vi.mock('@/lib/firebase', () => ({
   db: {},
   collection: () => ({}),
   getDocs: async () => ({ forEach: (cb: (d: any) => void) => {} }),

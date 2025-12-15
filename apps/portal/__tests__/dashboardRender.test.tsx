@@ -3,15 +3,15 @@ import { render, waitFor } from '@testing-library/react';
 import '@testing-library/jest-dom';
 
 // Mock auth so the dashboard renders
-jest.mock('@/lib/auth', () => ({ useAuth: () => ({ user: { uid: 'uid1', email: 'a@b.com' } }) }));
-jest.mock('@/lib/useUserTier', () => ({ useUserTier: () => ({ tier: 'paid', loading: false }) }));
-jest.mock('@/lib/theme', () => ({ useTheme: () => ({ theme: 'light', toggleTheme: () => {} }) }));
+vi.mock('@/lib/auth', () => ({ useAuth: () => ({ user: { uid: 'uid1', email: 'a@b.com' } }) }));
+vi.mock('@/lib/useUserTier', () => ({ useUserTier: () => ({ tier: 'paid', loading: false }) }));
+vi.mock('@/lib/theme', () => ({ useTheme: () => ({ theme: 'light', toggleTheme: () => {} }) }));
 
 // Mock firebase to provide two apps
 const enabledApp = { id: 'enabled-app', name: 'Enabled App', url: 'http://localhost:1000/', disabled: false, icon: 'Sparkles', description: 'An enabled app' };
 const otherApp = { id: 'other-app', name: 'Other App', url: 'http://localhost:1001/', disabled: false, icon: '🚀', description: 'Another app' };
 
-jest.mock('@/lib/firebase', () => ({
+vi.mock('@/lib/firebase', () => ({
   db: {},
   collection: () => ({}),
   getDocs: async () => ({

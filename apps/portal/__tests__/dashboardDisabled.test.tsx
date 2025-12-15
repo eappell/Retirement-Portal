@@ -3,15 +3,15 @@ import { render, waitFor } from '@testing-library/react';
 import '@testing-library/jest-dom';
 
 // Mock auth and user tier so the dashboard renders
-jest.mock('@/lib/auth', () => ({ useAuth: () => ({ user: { uid: 'uid1', email: 'a@b.com' } }) }));
-jest.mock('@/lib/useUserTier', () => ({ useUserTier: () => ({ tier: 'paid', loading: false }) }));
-jest.mock('@/lib/theme', () => ({ useTheme: () => ({ theme: 'light', toggleTheme: () => {} }) }));
+vi.mock('@/lib/auth', () => ({ useAuth: () => ({ user: { uid: 'uid1', email: 'a@b.com' } }) }));
+vi.mock('@/lib/useUserTier', () => ({ useUserTier: () => ({ tier: 'paid', loading: false }) }));
+vi.mock('@/lib/theme', () => ({ useTheme: () => ({ theme: 'light', toggleTheme: () => {} }) }));
 
 // Mock firebase getDocs/collection to supply an app that is disabled and one that is enabled
 const disabledApp = { id: 'disabled-app', name: 'Disabled App', url: 'http://localhost/', disabled: true };
 const enabledApp = { id: 'enabled-app', name: 'Enabled App', url: 'http://localhost:1000/', disabled: false };
 
-jest.mock('@/lib/firebase', () => ({
+vi.mock('@/lib/firebase', () => ({
   db: {},
   collection: () => ({}),
   getDocs: async () => ({
