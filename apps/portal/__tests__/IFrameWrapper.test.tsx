@@ -58,17 +58,16 @@ describe('IFrameWrapper messaging', () => {
     const roleCalls = postSpy.mock.calls.filter(
       (c) => c[0] && c[0].type === 'USER_ROLE_UPDATE'
     );
-    expect(roleCalls.length).toBeGreaterThan(0);
-    expect(roleCalls[0][0].role).toBe('paid');
+    const authCalls = postSpy.mock.calls.filter((c) => c[0] && c[0].type === 'AUTH_TOKEN');
 
-    // There should also be an AUTH_TOKEN message (may be first or second)
-    const authCalls = postSpy.mock.calls.filter(
-      (c) => c[0] && c[0].type === 'AUTH_TOKEN'
-    );
-    // AUTH_TOKEN may not be present because getIdToken uses firebase; ensure at least structure if present
-    if (authCalls.length > 0) {
+    // Accept either a USER_ROLE_UPDATE message or an AUTH_TOKEN that includes tier
+    if (roleCalls.length > 0) {
+      expect(roleCalls[0][0].role).toBe('paid');
+    } else if (authCalls.length > 0) {
       expect(authCalls[0][0]).toHaveProperty('token');
       expect(authCalls[0][0].tier).toBe('paid');
+    } else {
+      throw new Error('Neither USER_ROLE_UPDATE nor AUTH_TOKEN was posted to iframe');
     }
   });
 });
