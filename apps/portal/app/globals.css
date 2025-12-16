@@ -233,23 +233,36 @@ button {
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  width: 56px;
-  height: 56px;
+  width: 84px;
+  height: 84px;
 }
-.cartoon-svg { width: 56px; height: 56px; display: block; }
+.cartoon-svg { width: 84px; height: 84px; display: block; }
 
 /* Small icon variant when using unified tiles (e.g., admin list) */
 .app-tile-icon {
-  width: 56px;
-  height: 56px;
+  width: 84px;
+  height: 84px;
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  border-radius: 14px;
+  border-radius: 21px;
   background: #ffffff !important; /* white background so colored icons stand out */
   color: #ffffff !important;
   box-shadow: 0 4px 10px rgba(2,6,23,0.08);
 }
+
+/* Circular hero icon wrapper for non-image icons (keeps size consistent) */
+.app-tile-hero {
+  width: 84px;
+  height: 84px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 9999px;
+  background: #ffffff;
+  box-shadow: 0 4px 10px rgba(2,6,23,0.08);
+}
+.app-tile-hero-icon { width: 50px; height: 50px; display: block; }
 
 .app-tile-icon--light {
   /* Light rounded square background for image icons */
