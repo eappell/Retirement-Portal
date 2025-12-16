@@ -8,9 +8,7 @@ import {db} from "@/lib/firebase";
 import {collection, getDocs} from "firebase/firestore";
 import Link from "next/link";
 import {Header} from "@/components/Header";
-// CubeIcon intentionally removed (unused)
-import { getIconComponent, AppIcon, getIconColor } from "@/components/icon-map";
-import { CARTOON_ICON_MAP } from '@/components/cartoon-icons';
+import { AppIcon } from "@/components/icon-map";
 
 // Use shared icon resolver so Firestore icon names (e.g. "Heart") resolve correctly
 
@@ -220,7 +218,11 @@ export default function DashboardPage() {
           >
             Available Tools
           </h2>
-          <p className="text-center text-slate-400" style={{ fontSize: '20px', fontWeight: 500, marginBottom: '50px' }}>Plan with Clarity. Live with Confidence.</p>
+          <p className="text-center text-slate-400 tagline-with-egg" style={{ fontSize: '20px', fontWeight: 500, marginBottom: '50px', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px' }}>
+            <span>Plan with Clarity.</span>
+            <img src="/images/NesteggOnly-dark.png" alt="" className="tagline-egg" style={{ height: '24px', width: 'auto' }} />
+            <span>Live with Confidence.</span>
+          </p>
           <div className="tools-grid-custom">
             {apps.map((app, index) => {
               // Determine app type from id/name
@@ -293,15 +295,9 @@ export default function DashboardPage() {
                   <div className="flex items-start justify-between h-full">
                     <div className="flex items-start gap-4">
                       <div className="flex-shrink-0">
-                        {/* Icon square with gradient background */}
+                        {/* Icon square with gradient background - always use Heroicons from Firestore */}
                         <div className="app-tile-icon-bg" style={{ background: appStyle.iconGradient }}>
-                          {CARTOON_ICON_MAP[app.id] ? (
-                            <AppIcon icon={app.icon} appId={app.id} className="cartoon-svg" bgColor="transparent" />
-                          ) : (app.id || app.name || '').toLowerCase().includes('income') ? (
-                            <img src="/images/money1_trans.png" alt={app.name} width={48} height={48} className="block" />
-                          ) : (
-                            <AppIcon icon={app.icon} appId={app.id} className="app-tile-hero-icon" color="#ffffff" />
-                          )}
+                          <AppIcon icon={app.icon} className="app-tile-hero-icon" color="#ffffff" />
                         </div>
                       </div>
 
@@ -324,12 +320,24 @@ export default function DashboardPage() {
           
         </div>
 
-        {/* Coming Soon */}
-        <div className="mt-12 bg-gradient-to-r from-gray-50 to-gray-100 rounded-lg shadow-lg p-8 text-center">
-          <h3 className="text-xl font-bold text-gray-900 mb-2">More Tools Coming Soon</h3>
-          <p className="text-gray-600">
-            We're constantly adding new retirement planning tools and features to help you plan better.
-          </p>
+        {/* Stats Section */}
+        <div className="stats-section mt-12">
+          <div className="stat-card">
+            <div className="stat-value">6</div>
+            <div className="stat-label">Planning Tools</div>
+          </div>
+          <div className="stat-card">
+            <div className="stat-value">AI</div>
+            <div className="stat-label">Powered Insights</div>
+          </div>
+          <div className="stat-card">
+            <div className="stat-value">100%</div>
+            <div className="stat-label">Free to Use</div>
+          </div>
+          <div className="stat-card">
+            <div className="stat-value">∞</div>
+            <div className="stat-label">Possibilities</div>
+          </div>
         </div>
 
         {/* Sample Dashboard Link */}

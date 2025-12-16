@@ -10,7 +10,11 @@ import { useTheme } from "@/lib/theme";
 import { AppSwitcher } from "./AppSwitcher";
 import { SunIcon, MoonIcon } from "@heroicons/react/24/outline";
 
-export function Header() {
+interface HeaderProps {
+  showAppSwitcher?: boolean;
+}
+
+export function Header({ showAppSwitcher = false }: HeaderProps) {
   const router = useRouter();
   const { user, logout } = useAuth();
   const { tier, loading: tierLoading } = useUserTier();
@@ -73,9 +77,9 @@ export function Header() {
             />
           </Link>
 
-          {/* Centered App Switcher */}
+          {/* Centered App Switcher - only shown when an app is loaded */}
           <div className="flex-1 flex justify-center">
-            <AppSwitcher />
+            {showAppSwitcher && <AppSwitcher />}
           </div>
 
           {/* Right Side Navigation */}
@@ -164,7 +168,7 @@ export function Header() {
                 </div>
               </div>
               <div className="relative group">
-                <button className={`w-10 h-10 rounded-full flex items-center justify-center font-semibold transition-colors ${theme === 'light' ? 'text-gray-900' : 'text-white'}`} style={{backgroundColor: '#0B5394'}} onMouseEnter={(e) => e.currentTarget.style.backgroundColor = '#094170'} onMouseLeave={(e) => e.currentTarget.style.backgroundColor = '#0B5394'}>
+                <button className="w-10 h-10 rounded-full flex items-center justify-center font-semibold transition-colors text-white" style={{backgroundColor: '#0B5394'}} onMouseEnter={(e) => e.currentTarget.style.backgroundColor = '#094170'} onMouseLeave={(e) => e.currentTarget.style.backgroundColor = '#0B5394'}>
                   {user?.email ? user.email[0].toUpperCase() : "G"}
                 </button>
                 <div className={`absolute top-full right-0 mt-2 px-2 py-1 ${dropdownBg} ${theme === 'light' ? 'text-black' : 'text-white'} text-xs rounded opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all whitespace-nowrap z-50`}>
