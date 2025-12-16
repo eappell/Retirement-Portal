@@ -706,8 +706,8 @@ export default function AdminAppsPage() {
                   <div className="flex items-start justify-between">
                     <div className="flex-1">
                       <div className="flex items-center gap-4">
-                        <div className="p-2 rounded-lg" style={{background: app.gradient || '#BFCDE0', backgroundImage: app.gradient || undefined}}>
-                          <AppIcon icon={app.icon} className="h-8 w-8" style={{color: '#6b5e62'}} />
+                        <div className="p-2 rounded-lg app-tile-unified app-tile-icon" /* unified dark-blue icon background */>
+                          <AppIcon icon={app.icon} className="h-8 w-8" />
                         </div>
                         <div>
                           <div className="flex items-center gap-2">

@@ -218,6 +218,31 @@ button {
   color: #D1D5DB !important; /* slate-300 */
 }
 
+/* Ensure that when an app tile uses the unified dark tile, any nested name/description use white text for contrast */
+.app-tile-unified .portal-app-name,
+.app-tile-unified .portal-app-desc,
+.app-tile-unified h3,
+.app-tile-unified p,
+.app-tile-unified .tool-title,
+.app-tile-unified .tool-description {
+  color: #ffffff !important;
+}
+
+/* Small icon variant when using unified tiles (e.g., admin list) */
+.app-tile-icon {
+  width: 48px;
+  height: 48px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 12px;
+  background-image: linear-gradient(135deg, #0B5394 0%, #083653 100%) !important;
+  color: #ffffff !important;
+}
+
+.app-tile-icon > * { color: #ffffff !important; }
+
+
 /* Dashboard redesign styles (migrated from inline CSS in dashboard page) */
 .dashboard-redesign {
   --bg: linear-gradient(135deg, #1e293b 0%, #0f172a 100%);
