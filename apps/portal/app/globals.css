@@ -156,15 +156,23 @@ body {
   display: none; /* default hidden in light mode */
 }
 
-/* Tools grid that matches the sampledash layout: wide container, responsive single-column on narrow view, two or more on wide */
+/* Tools grid similar to sample: 2 columns on wide screens, 1 column on narrow screens */
 .tools-grid-custom {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(500px, 1fr));
-  gap: 32px; /* larger gap so tiles don't collide when expanded */
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 24px; /* gap between tiles */
+  align-items: start;
+}
+
+@media (max-width: 768px) {
+  .tools-grid-custom {
+    grid-template-columns: 1fr;
+    gap: 20px;
+  }
 }
 
 /* Ensure tiles are stacked properly when hovered (so scaled tiles don't push layout or overlap awkwardly) */
-.app-tile-unified { z-index: 1; }
+.app-tile-unified { z-index: 1; width: 100%; }
 .app-tile-unified:hover { z-index: 10; }
 /* Show particles only in dark mode */
 .dark .background-particles {
