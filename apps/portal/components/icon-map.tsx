@@ -138,7 +138,7 @@ export function AppIcon({ icon, className, style, color, appId }: { icon?: strin
   // If we have an appId and a cartoon icon for it, render the cartoon icon (filled, colorful)
   if (appId && CARTOON_ICON_MAP[appId]) {
     const Cartoon = CARTOON_ICON_MAP[appId];
-    return <Cartoon className={className} size={48} color={color || getIconColor(appId)} />;
+    return <Cartoon className={className} size={84} color={color || getIconColor(appId)} />;
   }
 
   if (!icon) {

@@ -31,7 +31,7 @@ export function IncomeBagIcon({ size = 56, className = '', colorStart = '#0EA5A2
 // Use a lightweight image-based icon for the income estimator (first variation)
 export function IncomeMoneyImage({ size = 84, className = '' }: { size?: number; className?: string }) {
   // Render the processed PNG inside the standard rounded-square icon container
-  const innerSize = Math.round(size * 0.6); // 84 -> ~50
+  const innerSize = Math.round(size * 0.76); // 84 -> ~64
   return (
     <div className={`app-tile-icon app-tile-icon--light ${className}`}>
       <img src="/images/money1_trans.png" alt="Income" width={innerSize} height={innerSize} />
@@ -41,7 +41,7 @@ export function IncomeMoneyImage({ size = 84, className = '' }: { size?: number;
 
 export function GlobeImage({ size = 84, className = '', variant = 'globe2' }: { size?: number; className?: string; variant?: 'globe1'|'globe2' }) {
   // Use the processed globe image (choose variant). Renders inside the same rounded-square container
-  const innerSize = Math.round(size * 0.6);
+  const innerSize = Math.round(size * 0.76);
   const src = `/images/${variant}_trans.png`;
   return (
     <div className={`app-tile-icon app-tile-icon--light ${className}`}>
@@ -52,7 +52,7 @@ export function GlobeImage({ size = 84, className = '', variant = 'globe2' }: { 
 
 export function ChartImage({ size = 84, className = '', variant = 'barchart1' }: { size?: number; className?: string; variant?: 'barchart1'|'barchart2' }) {
   // Use the processed chart image (choose variant). Renders inside the same rounded-square container
-  const innerSize = Math.round(size * 0.6);
+  const innerSize = Math.round(size * 0.76);
   const src = `/images/${variant}_trans.png`;
   return (
     <div className={`app-tile-icon app-tile-icon--light ${className}`}>
@@ -63,7 +63,7 @@ export function ChartImage({ size = 84, className = '', variant = 'barchart1' }:
 
 export function HospitalImage({ size = 84, className = '', variant = 'hospital1' }: { size?: number; className?: string; variant?: 'hospital1'|'hospital2'|'hospital3' }) {
   // Healthcare image renderer (round-square container)
-  const innerSize = Math.round(size * 0.6);
+  const innerSize = Math.round(size * 0.76);
   const src = `/images/${variant}_trans.png`;
   return (
     <div className={`app-tile-icon app-tile-icon--light ${className}`}>
@@ -74,7 +74,7 @@ export function HospitalImage({ size = 84, className = '', variant = 'hospital1'
 
 export function RocketImage({ size = 84, className = '', variant = 'rocket3' }: { size?: number; className?: string; variant?: 'rocket1'|'rocket2'|'rocket3'|'rocket4' }) {
   // Rocket/activity image renderer (round-square container)
-  const innerSize = Math.round(size * 0.6);
+  const innerSize = Math.round(size * 0.76);
   const src = `/images/${variant}_trans.png`;
   return (
     <div className={`app-tile-icon app-tile-icon--light ${className}`}>
@@ -85,7 +85,7 @@ export function RocketImage({ size = 84, className = '', variant = 'rocket3' }: 
 
 export function MoneybagImage({ size = 84, className = '', variant = 'moneybag1' }: { size?: number; className?: string; variant?: 'moneybag1'|'moneybag2'|'moneybag3' }) {
   // Moneybag / finance image renderer (round-square container)
-  const innerSize = Math.round(size * 0.6);
+  const innerSize = Math.round(size * 0.76);
   const src = `/images/${variant}_trans.png`;
   return (
     <div className={`app-tile-icon app-tile-icon--light ${className}`}>
