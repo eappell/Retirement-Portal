@@ -147,6 +147,12 @@ export const CARTOON_ICON_MAP: Record<string, React.ComponentType<{ size?: numbe
   'retire-abroad-ai': GlobeIcon,
   'tax-impact-analyzer': TaxBarsIcon,
   'income-estimator': IncomeMoneyImage,
+  // Common alternative ids / name variants for the income estimator
+  'income': IncomeMoneyImage,
+  'monthly-retirement-income': IncomeMoneyImage,
+  'monthly-retirement-income-ai': IncomeMoneyImage,
+  'monthly-retirement-income-estimator': IncomeMoneyImage,
+  'monthly-retirement-income-estimator-v1': IncomeMoneyImage,
   'healthcare-cost': HealthcareCrossIcon,
   'activity-budget-planner': ActivityRocketIcon,
   'social-security-optimizer': SocialSecurityIcon,
