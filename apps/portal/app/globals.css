@@ -257,15 +257,16 @@ body {
 /* Cartoon svg wrapper also animates on hover */
 .cartoon-icon { transition: transform 280ms cubic-bezier(.2,.9,.2,1); transform-origin: center; }
 
-/* Hover expansion behaviour to match sampledash (smooth scale card and icon) */
+/* Hover expansion behaviour (slower and reduced magnitude) */
 .app-tile-unified {
-  transition: transform 820ms cubic-bezier(.2,.9,.2,1), box-shadow 620ms ease, filter 620ms ease;
+  transition: transform 1400ms cubic-bezier(.2,.9,.2,1), box-shadow 1200ms ease, filter 1200ms ease;
   transform-origin: center;
   will-change: transform;
 }
+/* Reduce translateY and scale by ~40% for a subtler expansion */
 .app-tile-unified:hover {
-  transform: translateY(-7px) scale(1.025);
-}
+  transform: translateY(-4px) scale(1.015);
+} 
 /* Icon square background wrapper: use CSS variable --tile-bg to set color */
 .app-tile-icon-bg {
   width: 84px;
@@ -275,13 +276,15 @@ body {
   align-items: center;
   justify-content: center;
   background: var(--tile-bg, rgba(255,255,255,0.06));
-  transition: transform 820ms cubic-bezier(.2,.9,.2,1), box-shadow 620ms ease, background 220ms ease;
+  transition: transform 1400ms cubic-bezier(.2,.9,.2,1), box-shadow 1200ms ease, background 220ms ease;
   box-shadow: 0 4px 12px rgba(2,6,23,0.08);
 }
-.app-tile-unified:hover .app-tile-icon-bg { transform: scale(1.084); box-shadow: 0 8px 26px rgba(2,6,23,0.18); }
-/* Cartoon icon fallback still animates */
-.cartoon-icon { transition: transform 820ms cubic-bezier(.2,.9,.2,1); transform-origin: center; }
-.app-tile-unified:hover .cartoon-icon { transform: scale(1.084) rotate(4deg); }
+/* Reduce icon-scale growth to ~1.05 for subtler effect */
+.app-tile-unified:hover .app-tile-icon-bg { transform: scale(1.05); box-shadow: 0 8px 26px rgba(2,6,23,0.18); }
+/* Cartoon icon fallback still animates (slower, subtler) */
+.cartoon-icon { transition: transform 1400ms cubic-bezier(.2,.9,.2,1); transform-origin: center; }
+/* Slight rotate retained but reduced scale */
+.app-tile-unified:hover .cartoon-icon { transform: scale(1.05) rotate(3deg); }
 
 /* Light-mode override: ensure tiles use the unified dark-blue gradient and white text like dark mode */
 .light .app-tile-unified {
