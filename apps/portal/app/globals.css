@@ -164,7 +164,7 @@ body {
   align-items: start;
 }
 
-@media (max-width: 768px) {
+@media (max-width: 1080px) {
   .tools-grid-custom {
     grid-template-columns: 1fr;
     gap: 20px;
