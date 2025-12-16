@@ -132,27 +132,31 @@ body {
   border: 2px solid rgba(96,165,250,0.24); /* light-blue border (2px) */
   box-shadow: 0 6px 18px rgba(9,38,60,0.12);
 }
-/* Light-mode override: use a white card background with subtle blue border and dark text */
+/* Light-mode override: ensure tiles use the unified dark-blue gradient and white text like dark mode */
 .light .app-tile-unified {
-  background-image: none !important;
-  background: #FBFDFF !important;
-  color: #0B5394 !important; /* dark blue text in light mode */
-  border: 2px solid rgba(96,165,250,0.36) !important;
+  /* keep the same gradient as dark mode */
+  background-image: linear-gradient(135deg, #0B5394 0%, #083653 100%) !important;
+  /* don't reset background - we want the gradient to show */
+  color: #ffffff !important; /* white text in light mode to match dark mode tiles */
+  border: 2px solid rgba(96,165,250,0.24) !important;
 }
-/* Adjust the icon circle for light mode so it reads on the white background */
+/* Adjust the icon circle for light mode to match dark tile contrast.
+   Use a subtle dark translucent circle so white icons remain visible
+   even when the tile is over a light background (defensive). */
 .light .app-tile-unified .h-14 {
-  background: rgba(11,83,148,0.06) !important;
+  background: rgba(0,0,0,0.12) !important;
 }
 .light .app-tile-unified .h-14 > * {
-  color: #0B5394 !important;
-} 
-/* Adjust the icon circle for light mode so it reads on the white background */
-.light .app-tile-unified .h-14 {
-  background: rgba(11,83,148,0.06) !important;
+  color: #ffffff !important;
 }
-.light .app-tile-unified .h-14 > * {
-  color: #0B5394 !important;
+/* Ensure text color in light mode is enforced (matching dark mode) */
+.light .app-tile-unified h3,
+.light .app-tile-unified p,
+.light .app-tile-unified .tool-title,
+.light .app-tile-unified .tool-description {
+  color: #ffffff !important;
 }
+
 .app-tile:hover,
 .app-tile:focus-visible {
   filter: brightness(0.88);
@@ -168,14 +172,29 @@ body {
 .app-tile-unified .tool-description {
   color: #ffffff !important;
 }
-/* Ensure text color in light mode is enforced */
+/* Remove legacy rule that forced dark-blue text in light mode (conflicts with unified dark tile look) */
 .light .app-tile-unified h3,
 .light .app-tile-unified p {
-  color: #0B5394 !important;
+  color: #ffffff !important;
 }
 
 /* end of customizations removed to restore original colors */
 
+/* Dark-mode override: make dashboard title and tagline white (Available Tools + subtitle)
+   Note: the page uses an h2 and a paragraph for these elements, so include both selectors. */
+.dark .dashboard-redesign .hero-section h1,
+.dark .dashboard-redesign h2.text-3xl.font-extrabold,
+.dark .dashboard-redesign h2 {
+  -webkit-text-fill-color: #ffffff !important;
+  color: #ffffff !important;
+  background: none !important;
+  -webkit-background-clip: unset !important;
+}
+.dark .dashboard-redesign .subtitle,
+.dark .dashboard-redesign p.text-lg.font-medium,
+.dark .dashboard-redesign p {
+  color: #ffffff !important;
+}
 
 
 /* Ensure pointer cursor for all <button> elements across the portal */
