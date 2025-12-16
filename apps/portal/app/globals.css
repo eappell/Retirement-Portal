@@ -115,6 +115,11 @@ body {
   overflow: hidden;
 }
 
+/* Ensure dark mode uses the same gradient (overrides more specific rules like .dark .portal-dashboard) */
+.dark .dashboard-redesign {
+  background: linear-gradient(135deg, #1e293b 0%, #0f172a 100%);
+}
+
 /* Very subtle textured overlay using small radial dots (low-opacity) */
 .dashboard-redesign::before {
   content: "";
