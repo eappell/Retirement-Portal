@@ -50,6 +50,17 @@ export function GlobeImage({ size = 56, className = '', variant = 'globe2' }: { 
   );
 }
 
+export function ChartImage({ size = 56, className = '', variant = 'barchart1' }: { size?: number; className?: string; variant?: 'barchart1'|'barchart2' }) {
+  // Use the processed chart image (choose variant). Renders inside the same rounded-square container
+  const innerSize = Math.round(size * 0.6);
+  const src = `/images/${variant}_trans.png`;
+  return (
+    <div className={`app-tile-icon app-tile-icon--light ${className}`}>
+      <img src={src} alt="Chart" width={innerSize} height={innerSize} />
+    </div>
+  );
+}
+
 export function GlobeIcon({ size = 56, className = '', colorStart = '#60a5fa', colorEnd = '#3b82f6' }: { size?: number; className?: string; colorStart?: string; colorEnd?: string }) {
   return (
     <svg className={className} width={size} height={size} viewBox="0 0 64 64" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Globe">
@@ -161,7 +172,8 @@ export function SocialSecurityIcon({ size = 56, className = '', colorStart = '#f
 export const CARTOON_ICON_MAP: Record<string, React.ComponentType<{ size?: number; color?: string; className?: string }>> = {
   'retire-abroad': (props) => <GlobeImage {...props} variant={'globe2'} />,
   'retire-abroad-ai': (props) => <GlobeImage {...props} variant={'globe2'} />,
-  'tax-impact-analyzer': TaxBarsIcon,
+  'tax-impact-analyzer': (props) => <ChartImage {...props} variant={'barchart1'} />,
+  'tax': (props) => <ChartImage {...props} variant={'barchart1'} />,
   'income-estimator': IncomeMoneyImage,
   // Common alternative ids / name variants for the income estimator
   'income': IncomeMoneyImage,
