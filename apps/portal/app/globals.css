@@ -250,20 +250,20 @@ body {
 }
 
 /* Icon square variants */
-.app-tile-icon { transition: transform 400ms cubic-bezier(0.4,0,0.2,1), box-shadow 400ms ease; transform-origin: center; }
+.app-tile-icon { transition: transform 700ms cubic-bezier(0.0,0.02,0.2,1), box-shadow 600ms ease; transform-origin: center; }
 .app-tile-icon--light { background: #F9F8F6; }
 .app-tile-icon--income { background: #F9F8F6 !important; }
 
 /* Cartoon svg wrapper also animates on hover */
 .cartoon-icon { transition: transform 280ms cubic-bezier(.2,.9,.2,1); transform-origin: center; }
 
-/* Hover expansion behaviour: stronger ease-in and reduced magnitude (subtle) */
+/* Hover expansion behaviour: very slow ease-in start, extended duration for gentle ramp-up */
 .app-tile-unified {
-  transition: transform 500ms cubic-bezier(0.55,0.055,0.675,0.19), box-shadow 500ms ease, filter 500ms ease;
+  transition: transform 700ms cubic-bezier(0.0,0.02,0.2,1), box-shadow 600ms ease, filter 600ms ease;
   transform-origin: center;
   will-change: transform;
 }
-/* Reduced translateY and scale (~60% less): very subtle movement */
+/* Subtle movement; animation starts very slowly then eases into full motion */
 .app-tile-unified:hover {
   transform: translateY(-3px) scale(1.01);
   box-shadow: 0 8px 20px rgba(0, 0, 0, 0.18);
@@ -277,13 +277,13 @@ body {
   align-items: center;
   justify-content: center;
   background: var(--tile-bg, rgba(255,255,255,0.06));
-  transition: transform 500ms cubic-bezier(0.55,0.055,0.675,0.19), box-shadow 500ms ease, background 220ms ease;
+  transition: transform 700ms cubic-bezier(0.0,0.02,0.2,1), box-shadow 600ms ease, background 220ms ease;
   box-shadow: 0 4px 12px rgba(2,6,23,0.08);
 }
 /* Icon scales more subtly to ~1.04 */
 .app-tile-unified:hover .app-tile-icon-bg { transform: scale(1.04); box-shadow: 0 6px 18px rgba(2,6,23,0.14); }
-/* Cartoon icon fallback animates with stronger ease-in */
-.cartoon-icon { transition: transform 500ms cubic-bezier(0.55,0.055,0.675,0.19); transform-origin: center; }
+/* Cartoon icon fallback animates with very slow ease-in */
+.cartoon-icon { transition: transform 700ms cubic-bezier(0.0,0.02,0.2,1); transform-origin: center; }
 /* Slight rotate retained but reduced to ~2deg */
 .app-tile-unified:hover .cartoon-icon { transform: scale(1.04) rotate(2deg); }
 
