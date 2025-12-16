@@ -120,25 +120,33 @@ body {
   background: linear-gradient(135deg, #1e293b 0%, #0f172a 100%);
 }
 
-/* Very subtle textured overlay using small radial dots (production-ready) */
+/* Dashboard overlay: repeating diagonal stripes (adjusted for visibility) */
 .dashboard-redesign::before {
   content: "";
   position: absolute;
   inset: 0;
   pointer-events: none;
-  /* small dots + low alpha for a subtle texture */
-  background-image: radial-gradient(rgba(255,255,255,0.035) 1px, rgba(0,0,0,0) 1px);
-  background-size: 20px 20px;
-  opacity: 0.12;
-  mix-blend-mode: normal;
+  /* repeating diagonal stripes: subtle but more visible than dots */
+  background-image: repeating-linear-gradient(135deg, rgba(255,255,255,0.045) 0 1px, rgba(0,0,0,0) 1px 7px);
+  background-size: auto;
+  /* slightly higher opacity so it's visible on all monitors */
+  opacity: 0.22;
+  /* use overlay blend to let the gradient show through, but keep consistent rendering */
+  mix-blend-mode: overlay;
   z-index: 0;
 }
 
-/* Dark mode variant: slightly reduced alpha to keep it understated */
+/* Dark mode variant: tuned alpha for subtlety in dark backgrounds */
 .dark .dashboard-redesign::before {
-  background-image: radial-gradient(rgba(255,255,255,0.025) 1px, rgba(0,0,0,0) 1px);
-  opacity: 0.08;
-  mix-blend-mode: normal;
+  background-image: repeating-linear-gradient(135deg, rgba(255,255,255,0.035) 0 1px, rgba(0,0,0,0) 1px 7px);
+  opacity: 0.18;
+  mix-blend-mode: overlay;
+}
+
+/* Ensure main content sits above the overlay */
+.dashboard-redesign > * {
+  position: relative;
+  z-index: 2;
 }
 
 /* Ensure the content sits above the overlay */
