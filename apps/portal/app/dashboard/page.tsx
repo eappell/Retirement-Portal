@@ -196,6 +196,13 @@ export default function DashboardPage() {
     <div className="min-h-screen bg-background portal-dashboard dashboard-redesign">
       <Header />
 
+      {/* Background particles (dark mode only) */}
+      <div className="background-particles" aria-hidden="true">
+        <div className="particle" />
+        <div className="particle" />
+        <div className="particle" />
+      </div>
+
       <main className="max-w-7xl mx-auto px-4 py-12 sm:px-6 lg:px-8">
         {/* User info card removed: information is available in the header */}
 
