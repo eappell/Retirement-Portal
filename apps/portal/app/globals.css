@@ -250,23 +250,23 @@ body {
 }
 
 /* Icon square variants */
-.app-tile-icon { transition: transform 700ms cubic-bezier(0.0,0.02,0.2,1), box-shadow 600ms ease; transform-origin: center; }
+.app-tile-icon { transition: transform 1100ms cubic-bezier(0.0,0.001,0.08,1), box-shadow 800ms ease; transform-origin: center; }
 .app-tile-icon--light { background: #F9F8F6; }
 .app-tile-icon--income { background: #F9F8F6 !important; }
 
 /* Cartoon svg wrapper also animates on hover */
 .cartoon-icon { transition: transform 280ms cubic-bezier(.2,.9,.2,1); transform-origin: center; }
 
-/* Hover expansion behaviour: very slow ease-in start, extended duration for gentle ramp-up */
+/* Hover expansion behaviour: very slow ease-in start, initial ramp nearly flat */
 .app-tile-unified {
-  transition: transform 700ms cubic-bezier(0.0,0.02,0.2,1), box-shadow 600ms ease, filter 600ms ease;
+  transition: transform 1100ms cubic-bezier(0.0,0.001,0.08,1), box-shadow 800ms ease, filter 800ms ease;
   transform-origin: center;
   will-change: transform;
 }
-/* Subtle movement; animation starts very slowly then eases into full motion */
+/* Nearly imperceptible movement; animation starts extremely slowly then eases into the subtle final state */
 .app-tile-unified:hover {
-  transform: translateY(-3px) scale(1.01);
-  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.18);
+  transform: translateY(-2px) scale(1.005);
+  box-shadow: 0 6px 14px rgba(0, 0, 0, 0.12);
 }
 /* Icon square background wrapper: use CSS variable --tile-bg to set color */
 .app-tile-icon-bg {
@@ -277,15 +277,15 @@ body {
   align-items: center;
   justify-content: center;
   background: var(--tile-bg, rgba(255,255,255,0.06));
-  transition: transform 700ms cubic-bezier(0.0,0.02,0.2,1), box-shadow 600ms ease, background 220ms ease;
+  transition: transform 1100ms cubic-bezier(0.0,0.001,0.08,1), box-shadow 800ms ease, background 220ms ease;
   box-shadow: 0 4px 12px rgba(2,6,23,0.08);
 }
-/* Icon scales more subtly to ~1.04 */
-.app-tile-unified:hover .app-tile-icon-bg { transform: scale(1.04); box-shadow: 0 6px 18px rgba(2,6,23,0.14); }
-/* Cartoon icon fallback animates with very slow ease-in */
-.cartoon-icon { transition: transform 700ms cubic-bezier(0.0,0.02,0.2,1); transform-origin: center; }
-/* Slight rotate retained but reduced to ~2deg */
-.app-tile-unified:hover .cartoon-icon { transform: scale(1.04) rotate(2deg); }
+/* Icon scales very subtly to ~1.02 */
+.app-tile-unified:hover .app-tile-icon-bg { transform: scale(1.02); box-shadow: 0 5px 14px rgba(2,6,23,0.12); }
+/* Cartoon icon fallback animates with a near-flat initial ramp */
+.cartoon-icon { transition: transform 1100ms cubic-bezier(0.0,0.001,0.08,1); transform-origin: center; }
+/* Slight rotate retained but minimal (~1deg) */
+.app-tile-unified:hover .cartoon-icon { transform: scale(1.02) rotate(1deg); }
 
 /* Light-mode override: ensure tiles use the unified dark-blue gradient and white text like dark mode */
 .light .app-tile-unified {
