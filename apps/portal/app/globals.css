@@ -251,6 +251,12 @@ button {
   box-shadow: 0 4px 10px rgba(2,6,23,0.08);
 }
 
+.app-tile-icon--light {
+  /* Light rounded square background for image icons */
+  background: #F9F8F6 !important;
+  color: inherit !important;
+}
+
 .app-tile-icon > * { color: inherit !important; }
 
 

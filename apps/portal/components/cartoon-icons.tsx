@@ -29,10 +29,15 @@ export function IncomeBagIcon({ size = 56, className = '', colorStart = '#0EA5A2
 }
 
 // Use a lightweight image-based icon for the income estimator (first variation)
-export function IncomeMoneyImage({ size = 56, className = '' }: { size?: number; className?: string }) {
-  // We use the processed PNG which has transparency and is sized to 56x56
-  return <img src="/images/money1_trans.png" alt="Income" width={size} height={size} className={className} />;
-}
+export function IncomeMoneyImage({ size = 48, className = '' }: { size?: number; className?: string }) {
+  // Render the processed PNG inside the standard rounded-square icon container
+  const innerSize = Math.round(size * 0.58); // 48 -> ~28
+  return (
+    <div className={`app-tile-icon app-tile-icon--light ${className}`}>
+      <img src="/images/money1_trans.png" alt="Income" width={innerSize} height={innerSize} />
+    </div>
+  );
+} 
 
 export function GlobeIcon({ size = 56, className = '', colorStart = '#60a5fa', colorEnd = '#3b82f6' }: { size?: number; className?: string; colorStart?: string; colorEnd?: string }) {
   return (
