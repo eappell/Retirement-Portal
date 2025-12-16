@@ -203,14 +203,14 @@ export default function DashboardPage() {
         <div className="particle" />
       </div>
 
-      <main className="max-w-7xl mx-auto px-4 py-12 sm:px-6 lg:px-8">
+      <main className="max-w-[1400px] mx-auto px-4 py-12 sm:px-6 lg:px-8">
         {/* User info card removed: information is available in the header */}
 
         {/* Apps Grid */}
         <div>
           <h2 className="text-3xl font-extrabold text-blue-900 mb-2 text-center">Available Tools</h2>
           <p className="text-center text-blue-800 mb-6 text-lg font-medium">Plan with Clarity. Live with Confidence.</p>
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+          <div className="tools-grid-custom">
             {apps.map((app, index) => {
               // Create different gradients using vibrant standard colors
               const gradients = [
@@ -276,7 +276,8 @@ export default function DashboardPage() {
                       <div className="flex-shrink-0">
                         {/* Use filled cartoon icon when available, otherwise fall back to the heroicon-in-circle */}
                         {CARTOON_ICON_MAP[app.id] ? (
-                          <div className="cartoon-icon" style={{ background: tileColor }}>
+                          // Render icon inside a fixed rounded-square background (.app-tile-icon-bg). Use CSS var --tile-bg to set color.
+                          <div className="app-tile-icon-bg" style={{ ['--tile-bg' as any]: tileColor }}>
                             <AppIcon icon={app.icon} appId={app.id} className="cartoon-svg" bgColor={tileColor} />
                           </div>
                         ) : ( (app.id || app.name || '').toLowerCase().includes('income') ? (
@@ -285,7 +286,7 @@ export default function DashboardPage() {
                             <img src="/images/money1_trans.png" alt={app.name} width={64} height={64} className="block" />
                           </div>
                         ) : (
-                          <div className="app-tile-hero transition-transform transform group-hover:rotate-6" style={{ background: tileColor }}>
+                          <div className="app-tile-hero transition-transform transform group-hover:rotate-6" style={{ ['--tile-bg' as any]: tileColor }}>
                             <AppIcon icon={app.icon} appId={app.id} className="app-tile-hero-icon" color={getIconColor(app.id || app.name)} />
                           </div>
                         ))}

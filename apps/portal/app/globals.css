@@ -156,6 +156,16 @@ body {
   display: none; /* default hidden in light mode */
 }
 
+/* Tools grid that matches the sampledash layout: wide container, responsive single-column on narrow view, two or more on wide */
+.tools-grid-custom {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(500px, 1fr));
+  gap: 32px; /* larger gap so tiles don't collide when expanded */
+}
+
+/* Ensure tiles are stacked properly when hovered (so scaled tiles don't push layout or overlap awkwardly) */
+.app-tile-unified { z-index: 1; }
+.app-tile-unified:hover { z-index: 10; }
 /* Show particles only in dark mode */
 .dark .background-particles {
   display: block;
@@ -239,9 +249,30 @@ body {
 /* Cartoon svg wrapper also animates on hover */
 .cartoon-icon { transition: transform 280ms cubic-bezier(.2,.9,.2,1); transform-origin: center; }
 
-/* Hover expansion behaviour to match sampledash (scale card and icon) */
-.app-tile-unified:hover { transform: translateY(-8px) scale(1.02); }
-.app-tile-unified:hover .app-tile-icon { transform: scale(1.12); box-shadow: 0 8px 22px rgba(2,6,23,0.16); }
+/* Hover expansion behaviour to match sampledash (smooth scale card and icon) */
+.app-tile-unified {
+  transition: transform 520ms cubic-bezier(.2,.9,.2,1), box-shadow 420ms ease, filter 420ms ease;
+  transform-origin: center;
+  will-change: transform;
+}
+.app-tile-unified:hover {
+  transform: translateY(-10px) scale(1.035);
+}
+/* Icon square background wrapper: use CSS variable --tile-bg to set color */
+.app-tile-icon-bg {
+  width: 84px;
+  height: 84px;
+  border-radius: 14px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--tile-bg, rgba(255,255,255,0.06));
+  transition: transform 520ms cubic-bezier(.2,.9,.2,1), box-shadow 420ms ease, background 220ms ease;
+  box-shadow: 0 4px 12px rgba(2,6,23,0.08);
+}
+.app-tile-unified:hover .app-tile-icon-bg { transform: scale(1.12); box-shadow: 0 8px 26px rgba(2,6,23,0.18); }
+/* Cartoon icon fallback still animates */
+.cartoon-icon { transition: transform 520ms cubic-bezier(.2,.9,.2,1); transform-origin: center; }
 .app-tile-unified:hover .cartoon-icon { transform: scale(1.12) rotate(4deg); }
 
 /* Light-mode override: ensure tiles use the unified dark-blue gradient and white text like dark mode */
