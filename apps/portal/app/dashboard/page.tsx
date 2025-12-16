@@ -259,11 +259,16 @@ export default function DashboardPage() {
                           <div className="cartoon-icon">
                             <AppIcon icon={app.icon} appId={app.id} className="cartoon-svg" />
                           </div>
+                        ) : ( (app.id || app.name || '').toLowerCase().includes('income') ? (
+                          // Explicit fallback: if app id or name looks like the income estimator, render the processed image asset
+                          <div className="cartoon-icon">
+                            <img src="/images/money1_trans.png" alt={app.name} width={56} height={56} className="cartoon-svg" />
+                          </div>
                         ) : (
                           <div className="h-14 w-14 rounded-full flex items-center justify-center bg-white shadow-sm transition-transform transform group-hover:rotate-6">
                             <AppIcon icon={app.icon} appId={app.id} className="h-8 w-8" color={getIconColor(app.id || app.name)} />
                           </div>
-                        )}
+                        ))}
                       </div>
 
                       <div>
