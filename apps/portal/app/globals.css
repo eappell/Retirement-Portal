@@ -107,6 +107,38 @@ body {
   background: #293757;
 }
 
+/* Dashboard redesign background + subtle pattern overlay */
+.dashboard-redesign {
+  /* base gradient (matches your example) */
+  background: linear-gradient(135deg, #1e293b 0%, #0f172a 100%);
+  position: relative; /* establish containing block for the overlay */
+  overflow: hidden;
+}
+
+/* Very subtle textured overlay using small radial dots (low-opacity) */
+.dashboard-redesign::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  background-image: radial-gradient(rgba(255,255,255,0.03) 1px, transparent 1px);
+  background-size: 20px 20px;
+  opacity: 0.8;
+  mix-blend-mode: overlay;
+}
+
+/* Reduce overlay intensity in dark mode so it remains subtle */
+.dark .dashboard-redesign::before {
+  background-image: radial-gradient(rgba(255,255,255,0.02) 1px, transparent 1px);
+  opacity: 0.6;
+}
+
+/* Ensure the content sits above the overlay */
+.dashboard-redesign > * {
+  position: relative;
+  z-index: 1;
+}
+
 /* Explicit per-app gradient utility classes to make backgrounds resilient to runtime updates */
 .app-gradient-healthcare {
   background-image: linear-gradient(135deg, #fca5a5 0%, #ef4444 100%);
