@@ -1,7 +1,7 @@
 @import "tailwindcss";
 
 :root {
-  --background: #FEFCFD;
+  --background: #F9F8F6;
   --foreground: #6b5e62;
   --primary: #0B5394;
   --primary-hover: #094170;
@@ -154,36 +154,42 @@ body {
   pointer-events: none;
   z-index: 1; /* sit above the overlay (z-index:0) but below content (z-index:2) */
   overflow: hidden;
-  display: none; /* default hidden in light mode */
 }
 
 /* Tools grid similar to sample: 2 columns on wide screens, 1 column on narrow screens */
 .tools-grid-custom {
   display: grid;
   grid-template-columns: repeat(2, minmax(0, 1fr));
-  gap: 24px; /* gap between tiles */
-  align-items: start;
+  column-gap: 24px;
+  row-gap: 24px;
+  align-items: stretch; /* Equal height tiles */
 }
 
 @media (max-width: 1080px) {
   .tools-grid-custom {
     grid-template-columns: 1fr;
-    gap: 20px;
+    column-gap: 24px;
+    row-gap: 24px;
   }
 }
 
 /* Ensure tiles are stacked properly when hovered (so scaled tiles don't push layout or overlap awkwardly) */
 .app-tile-unified { z-index: 1; width: 100%; }
 .app-tile-unified:hover { z-index: 10; }
-/* Show particles only in dark mode */
-.dark .background-particles {
+/* Show particles in both modes */
+.background-particles {
   display: block;
 }
+/* Light mode particles - subtle gray blobs */
 .particle {
   position: absolute;
-  background: radial-gradient(circle, rgba(96, 165, 250, 0.3) 0%, transparent 70%);
+  background: radial-gradient(circle, rgba(200, 200, 200, 0.6) 0%, transparent 70%);
   border-radius: 50%;
   animation: dashboard-float 20s infinite ease-in-out;
+}
+/* Dark mode particles - blue blobs */
+.dark .particle {
+  background: radial-gradient(circle, rgba(96, 165, 250, 0.3) 0%, transparent 70%);
 }
 
 .particle:nth-child(1) { width: 300px; height: 300px; top: 10%; left: 10%; animation-delay: 0s; }
@@ -194,6 +200,20 @@ body {
   0%, 100% { transform: translate(0, 0) scale(1); opacity: 0.3; }
   33% { transform: translate(50px, -50px) scale(1.1); opacity: 0.5; }
   66% { transform: translate(-30px, 30px) scale(0.9); opacity: 0.4; }
+}
+
+/* Dashboard title gradient - darker for light mode, lighter for dark mode */
+.dashboard-title {
+  background: linear-gradient(135deg, #2563eb 0%, #1d4ed8 50%, #1e40af 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+.dark .dashboard-title {
+  background: linear-gradient(135deg, #c4dfff 0%, #a9cffa 50%, #9ccaff 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
 }
 
 /* Ensure main content sits above the overlay and particles */
@@ -272,9 +292,9 @@ body {
 }
 /* Icon square background wrapper: use CSS variable --tile-bg to set color */
 .app-tile-icon-bg {
-  width: 84px;
-  height: 84px;
-  border-radius: 14px;
+  width: 63px;
+  height: 63px;
+  border-radius: 10px;
   display: inline-flex;
   align-items: center;
   justify-content: center;
@@ -289,11 +309,9 @@ body {
 /* Icon hover matches sampledash */
 .app-tile-unified:hover .cartoon-icon { transform: scale(1.1) rotate(5deg); }
 
-/* Light-mode override: ensure tiles use the unified dark-blue gradient and white text like dark mode */
+/* Light-mode override: use subtle colored backgrounds like dark mode */
 .light .app-tile-unified {
-  /* keep the same gradient as dark mode */
-  background-image: linear-gradient(135deg, #0B5394 0%, #083653 100%) !important;
-  /* don't reset background - we want the gradient to show */
+  /* Allow inline backgroundColor to show through - same as dark mode */
   color: #ffffff !important; /* white text in light mode to match dark mode tiles */
   border: 2px solid rgba(96,165,250,0.24) !important;
 }
@@ -306,12 +324,18 @@ body {
 .light .app-tile-unified .h-14 > * {
   color: #ffffff !important;
 }
-/* Ensure text color in light mode is enforced (matching dark mode) */
+/* Ensure text color in light mode - black titles and darker descriptions */
 .light .app-tile-unified h3,
+.light .app-tile-unified .tool-title {
+  color: #000000 !important;
+}
 .light .app-tile-unified p,
-.light .app-tile-unified .tool-title,
 .light .app-tile-unified .tool-description {
-  color: #ffffff !important;
+  font-family: -apple-system, 'system-ui', 'Segoe UI', system-ui, sans-serif !important;
+  font-size: 15.2px !important;
+  font-weight: 400 !important;
+  font-style: normal !important;
+  color: #4b5563 !important;
 }
 
 .app-tile:hover,
@@ -324,15 +348,27 @@ body {
   filter: brightness(0.92);
 }
 .app-tile-unified h3,
-.app-tile-unified p,
-.app-tile-unified .tool-title,
-.app-tile-unified .tool-description {
+.app-tile-unified .tool-title {
   color: #ffffff !important;
 }
-/* Remove legacy rule that forced dark-blue text in light mode (conflicts with unified dark tile look) */
-.light .app-tile-unified h3,
+.app-tile-unified p,
+.app-tile-unified .tool-description {
+  font-family: -apple-system, 'system-ui', 'Segoe UI', system-ui, sans-serif !important;
+  font-size: 15.2px !important;
+  font-weight: 400 !important;
+  font-style: normal !important;
+  color: rgb(148, 163, 184) !important;
+}
+/* Light mode text colors - black titles, darker descriptions */
+.light .app-tile-unified h3 {
+  color: #000000 !important;
+}
 .light .app-tile-unified p {
-  color: #ffffff !important;
+  font-family: -apple-system, 'system-ui', 'Segoe UI', system-ui, sans-serif !important;
+  font-size: 15.2px !important;
+  font-weight: 400 !important;
+  font-style: normal !important;
+  color: #4b5563 !important;
 }
 
 /* end of customizations removed to restore original colors */
@@ -367,12 +403,18 @@ button {
 
 /* Ensure that when an app tile uses the unified dark tile, any nested name/description use white text for contrast */
 .app-tile-unified .portal-app-name,
-.app-tile-unified .portal-app-desc,
 .app-tile-unified h3,
-.app-tile-unified p,
-.app-tile-unified .tool-title,
-.app-tile-unified .tool-description {
+.app-tile-unified .tool-title {
   color: #ffffff !important;
+}
+.app-tile-unified .portal-app-desc,
+.app-tile-unified p,
+.app-tile-unified .tool-description {
+  font-family: -apple-system, 'system-ui', 'Segoe UI', system-ui, sans-serif !important;
+  font-size: 15.2px !important;
+  font-weight: 400 !important;
+  font-style: normal !important;
+  color: rgb(148, 163, 184) !important;
 }
 
 /* Cartoon icon sizing helper */
@@ -479,5 +521,30 @@ h1{ font-size:3rem; font-weight:800; margin-bottom:16px; background:var(--title-
 .stat-value{ font-size:3rem; font-weight:900; color:var(--accent); line-height:1 }
 
 @media (max-width:1024px){ .tools-grid{ grid-template-columns: 1fr } h1{ font-size:2rem } .tool-title{ font-size:1.25rem } .tool-icon{ width:72px; height:72px } }
+
+/* App tile description styling - highest specificity */
+.app-tile-unified .app-description,
+.app-tile .app-description,
+p.app-description {
+  font-family: -apple-system, "system-ui", "Segoe UI", system-ui, sans-serif !important;
+  font-size: 16px !important;
+  font-weight: 600 !important;
+  font-style: normal !important;
+  color: rgb(148, 163, 184) !important;
+  line-height: 1.5 !important;
+}
+
+/* App tile badge styling */
+.app-tile-badge {
+  display: inline-block;
+  background: rgba(96, 165, 250, 0.14);
+  color: #60a5fa;
+  padding: 6px 14px;
+  border-radius: 18px;
+  font-size: 0.78rem;
+  font-weight: 700;
+  border: 1px solid rgba(96, 165, 250, 0.18);
+  width: fit-content;
+}
 
 

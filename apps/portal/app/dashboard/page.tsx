@@ -209,17 +209,13 @@ export default function DashboardPage() {
         {/* Apps Grid */}
         <div>
           <h2 
-            className="mb-2 text-center"
+            className="mb-2 text-center dashboard-title"
             style={{ 
               fontFamily: "-apple-system, 'system-ui', 'Segoe UI', system-ui, sans-serif", 
               fontSize: '48px', 
               fontWeight: 800, 
               fontStyle: 'normal',
-              letterSpacing: '-0.02em',
-              background: 'linear-gradient(135deg, #c4dfff 0%, #a9cffa 50%, #9ccaff 100%)',
-              WebkitBackgroundClip: 'text',
-              WebkitTextFillColor: 'transparent',
-              backgroundClip: 'text'
+              letterSpacing: '-0.02em'
             }}
           >
             Available Tools
@@ -227,56 +223,63 @@ export default function DashboardPage() {
           <p className="text-center text-slate-400" style={{ fontSize: '20px', fontWeight: 500, marginBottom: '50px' }}>Plan with Clarity. Live with Confidence.</p>
           <div className="tools-grid-custom">
             {apps.map((app, index) => {
-              // Create different gradients using vibrant standard colors
-              const gradients = [
-                'linear-gradient(135deg, #60a5fa 0%, #3b82f6 100%)', // Blue
-                'linear-gradient(135deg, #34d399 0%, #10b981 100%)', // Green
-                'linear-gradient(135deg, #fbbf24 0%, #f59e0b 100%)', // Yellow/Amber
-                'linear-gradient(135deg, #a78bfa 0%, #8b5cf6 100%)', // Purple
-              ];
-
-              // Pick a deterministic color for the icon background based on app id/name
-              const PALETTE = ['#FFB86C','#60A5FA','#34D399','#F472B6','#FBBF24','#A78BFA','#F97316','#F59E0B','#8B5CF6'];
-              const pickColor = (s?: string) => {
-                const key = (s || '').toLowerCase();
-                let h = 0;
-                for (let i = 0; i < key.length; i++) h = (h << 5) - h + key.charCodeAt(i);
-                const idx = Math.abs(h) % PALETTE.length;
-                return PALETTE[idx];
-              };
-
-              const tileColor = (app.id || app.name || '').toLowerCase().includes('income') ? '#F9F8F6' : pickColor(app.id || app.name);
-
-              // For the healthcare app, use a distinct red gradient
-              const redGradient = 'linear-gradient(135deg, #fca5a5 0%, #ef4444 100%)';
-              const blueGradient = 'linear-gradient(135deg, #60a5fa 0%, #3b82f6 100%)';
-              const greenGradient = 'linear-gradient(135deg, #34d399 0%, #10b981 100%)';
-
-              // Determine gradient robustly using id or name keywords (handles Firestore variations)
+              // Determine app type from id/name
               const key = `${app.id || ''} ${app.name || ''}`.toLowerCase();
-              // Prefer app-provided gradient if present
-              const computedGradient = key.includes('health') || key.includes('healthcare')
-                ? redGradient
-                : key.includes('income') || key.includes('estimator')
-                ? greenGradient
-                : key.includes('retire') || key.includes('abroad')
-                ? blueGradient
-                : gradients[index % gradients.length];
-              const gradient = app.gradient || computedGradient;
-
-              // Choose a robust classname to apply the gradient via CSS so it persists
-              // Only apply the static per-app class when an explicit gradient is not set in Firestore
-              const appGradientClass = app.gradient
-                ? ''
-                : key.includes('health') || key.includes('healthcare')
-                ? 'app-gradient-healthcare'
-                : key.includes('income') || key.includes('estimator')
-                ? 'app-gradient-income-estimator'
-                : key.includes('retire') || key.includes('abroad')
-                ? 'app-gradient-retire-abroad'
-                : '';
               
+              // Define icon square gradients (light shades), tile backgrounds (very light/subtle), and badges
+              type AppStyle = { iconGradient: string; tileBg: string; badge: string };
+              const getAppStyle = (): AppStyle => {
+                if (key.includes('income') || key.includes('estimator')) {
+                  return {
+                    iconGradient: 'linear-gradient(135deg, #86efac 0%, #4ade80 100%)', // light green
+                    tileBg: 'rgba(134, 239, 172, 0.08)', // very subtle green
+                    badge: 'AI-Powered'
+                  };
+                }
+                if (key.includes('retire') || key.includes('abroad')) {
+                  return {
+                    iconGradient: 'linear-gradient(135deg, #93c5fd 0%, #60a5fa 100%)', // light blue
+                    tileBg: 'rgba(147, 197, 253, 0.08)', // very subtle blue
+                    badge: '100+ Destinations'
+                  };
+                }
+                if (key.includes('tax')) {
+                  return {
+                    iconGradient: 'linear-gradient(135deg, #c4b5fd 0%, #a78bfa 100%)', // light purple
+                    tileBg: 'rgba(196, 181, 253, 0.08)', // very subtle purple
+                    badge: 'Tax Optimization'
+                  };
+                }
+                if (key.includes('health') || key.includes('healthcare')) {
+                  return {
+                    iconGradient: 'linear-gradient(135deg, #fca5a5 0%, #f87171 100%)', // light red
+                    tileBg: 'rgba(252, 165, 165, 0.08)', // very subtle red
+                    badge: 'Personalized'
+                  };
+                }
+                if (key.includes('activity')) {
+                  return {
+                    iconGradient: 'linear-gradient(135deg, #fdba74 0%, #fb923c 100%)', // light orange
+                    tileBg: 'rgba(253, 186, 116, 0.08)', // very subtle orange
+                    badge: '3-Phase Planning'
+                  };
+                }
+                if (key.includes('social') || key.includes('security')) {
+                  return {
+                    iconGradient: 'linear-gradient(135deg, #166534 0%, #15803d 100%)', // dark green
+                    tileBg: 'rgba(22, 101, 52, 0.08)', // very subtle dark green
+                    badge: 'Data-Driven'
+                  };
+                }
+                // Default fallback
+                return {
+                  iconGradient: 'linear-gradient(135deg, #93c5fd 0%, #60a5fa 100%)',
+                  tileBg: 'rgba(147, 197, 253, 0.08)',
+                  badge: ''
+                };
+              };
               
+              const appStyle = getAppStyle();
               
               return (
                 <Link
@@ -284,34 +287,32 @@ export default function DashboardPage() {
                   href={`/apps/${app.id}?name=${encodeURIComponent(app.name)}&url=${encodeURIComponent(app.url)}`}
                   onClick={() => handleAppClick(app)}
                   data-app-id={app.id}
-                  className={`app-tile app-tile-unified rounded-2xl shadow-lg hover:shadow-2xl transform transition-all duration-200 hover:scale-105 p-5 md:p-6 block group ${appGradientClass}`}
+                  className="app-tile app-tile-unified rounded-2xl shadow-lg hover:shadow-2xl transform transition-all duration-200 hover:scale-[1.035] block group"
+                  style={{ padding: '30px', backgroundColor: appStyle.tileBg, maxWidth: '668px', height: '180px' }}
                 >
-                  <div className="flex items-start justify-between">
+                  <div className="flex items-start justify-between h-full">
                     <div className="flex items-start gap-4">
                       <div className="flex-shrink-0">
-                        {/* Use filled cartoon icon when available, otherwise fall back to the heroicon-in-circle */}
-                        {CARTOON_ICON_MAP[app.id] ? (
-                          // Render icon inside a fixed rounded-square background (.app-tile-icon-bg). Use CSS var --tile-bg to set color.
-                          <div className="app-tile-icon-bg" style={{ ['--tile-bg' as any]: tileColor }}>
-                            <AppIcon icon={app.icon} appId={app.id} className="cartoon-svg" bgColor={tileColor} />
-                          </div>
-                        ) : ( (app.id || app.name || '').toLowerCase().includes('income') ? (
-                          // Explicit fallback: if app id or name looks like the income estimator, render the processed image asset inside rounded square (off-white)
-                          <div className="app-tile-icon app-tile-icon--income">
-                            <img src="/images/money1_trans.png" alt={app.name} width={64} height={64} className="block" />
-                          </div>
-                        ) : (
-                          <div className="app-tile-hero transition-transform transform group-hover:rotate-6" style={{ ['--tile-bg' as any]: tileColor }}>
-                            <AppIcon icon={app.icon} appId={app.id} className="app-tile-hero-icon" color={getIconColor(app.id || app.name)} />
-                          </div>
-                        ))}
+                        {/* Icon square with gradient background */}
+                        <div className="app-tile-icon-bg" style={{ background: appStyle.iconGradient }}>
+                          {CARTOON_ICON_MAP[app.id] ? (
+                            <AppIcon icon={app.icon} appId={app.id} className="cartoon-svg" bgColor="transparent" />
+                          ) : (app.id || app.name || '').toLowerCase().includes('income') ? (
+                            <img src="/images/money1_trans.png" alt={app.name} width={48} height={48} className="block" />
+                          ) : (
+                            <AppIcon icon={app.icon} appId={app.id} className="app-tile-hero-icon" color="#ffffff" />
+                          )}
+                        </div>
                       </div>
 
-                      <div>
+                      <div className="flex flex-col">
                         <h3 className="text-2xl text-white" style={{ fontWeight: 800 }}>
                           {app.name}
                         </h3>
-                        <p className="mt-2 text-white/90">{app.description}</p>
+                        <p className="mt-2 app-description">{app.description}</p>
+                        {appStyle.badge && (
+                          <span className="app-tile-badge mt-3">{appStyle.badge}</span>
+                        )}
                       </div>
                     </div>
 
