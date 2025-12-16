@@ -48,7 +48,8 @@ import {
   CodeBracketIcon,
   Cog6ToothIcon,
 } from "@heroicons/react/24/outline";
-import { AppIcon } from "@/components/icon-map";
+import { AppIcon, getIconColor } from "@/components/icon-map";
+import { CARTOON_ICON_MAP } from '@/components/cartoon-icons';
 
 // Available HeroIcons for app selection
 const AVAILABLE_ICONS = [
@@ -706,8 +707,16 @@ export default function AdminAppsPage() {
                   <div className="flex items-start justify-between">
                     <div className="flex-1">
                       <div className="flex items-center gap-4">
-                        <div className="p-2 rounded-lg" style={{background: app.gradient || '#BFCDE0', backgroundImage: app.gradient || undefined}}>
-                          <AppIcon icon={app.icon} className="h-8 w-8" style={{color: '#6b5e62'}} />
+                        <div className="">
+                          {CARTOON_ICON_MAP[app.id] ? (
+                            <div className="cartoon-icon">
+                              <AppIcon icon={app.icon} appId={app.id} className="cartoon-svg" />
+                            </div>
+                          ) : (
+                            <div className="p-2 rounded-lg app-tile-icon">
+                              <AppIcon icon={app.icon} appId={app.id} className="h-6 w-6" color={getIconColor(app.id || app.name)} />
+                            </div>
+                          )}
                         </div>
                         <div>
                           <div className="flex items-center gap-2">

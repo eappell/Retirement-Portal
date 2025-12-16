@@ -125,6 +125,38 @@ body {
   transition: filter 180ms ease, box-shadow 180ms ease;
   will-change: filter;
 }
+/* Unified dark-blue gradient for all app tiles */
+.app-tile-unified {
+  background-image: linear-gradient(135deg, #0B5394 0%, #083653 100%) !important;
+  color: #fff;
+  border: 2px solid rgba(96,165,250,0.24); /* light-blue border (2px) */
+  box-shadow: 0 6px 18px rgba(9,38,60,0.12);
+}
+/* Light-mode override: ensure tiles use the unified dark-blue gradient and white text like dark mode */
+.light .app-tile-unified {
+  /* keep the same gradient as dark mode */
+  background-image: linear-gradient(135deg, #0B5394 0%, #083653 100%) !important;
+  /* don't reset background - we want the gradient to show */
+  color: #ffffff !important; /* white text in light mode to match dark mode tiles */
+  border: 2px solid rgba(96,165,250,0.24) !important;
+}
+/* Adjust the icon circle for light mode to match dark tile contrast.
+   Use a subtle dark translucent circle so white icons remain visible
+   even when the tile is over a light background (defensive). */
+.light .app-tile-unified .h-14 {
+  background: rgba(0,0,0,0.12) !important;
+}
+.light .app-tile-unified .h-14 > * {
+  color: #ffffff !important;
+}
+/* Ensure text color in light mode is enforced (matching dark mode) */
+.light .app-tile-unified h3,
+.light .app-tile-unified p,
+.light .app-tile-unified .tool-title,
+.light .app-tile-unified .tool-description {
+  color: #ffffff !important;
+}
+
 .app-tile:hover,
 .app-tile:focus-visible {
   filter: brightness(0.88);
@@ -134,9 +166,35 @@ body {
 .dark .app-tile:focus-visible {
   filter: brightness(0.92);
 }
+.app-tile-unified h3,
+.app-tile-unified p,
+.app-tile-unified .tool-title,
+.app-tile-unified .tool-description {
+  color: #ffffff !important;
+}
+/* Remove legacy rule that forced dark-blue text in light mode (conflicts with unified dark tile look) */
+.light .app-tile-unified h3,
+.light .app-tile-unified p {
+  color: #ffffff !important;
+}
 
 /* end of customizations removed to restore original colors */
 
+/* Dark-mode override: make dashboard title and tagline white (Available Tools + subtitle)
+   Note: the page uses an h2 and a paragraph for these elements, so include both selectors. */
+.dark .dashboard-redesign .hero-section h1,
+.dark .dashboard-redesign h2.text-3xl.font-extrabold,
+.dark .dashboard-redesign h2 {
+  -webkit-text-fill-color: #ffffff !important;
+  color: #ffffff !important;
+  background: none !important;
+  -webkit-background-clip: unset !important;
+}
+.dark .dashboard-redesign .subtitle,
+.dark .dashboard-redesign p.text-lg.font-medium,
+.dark .dashboard-redesign p {
+  color: #ffffff !important;
+}
 
 
 /* Ensure pointer cursor for all <button> elements across the portal */
@@ -159,5 +217,111 @@ button {
 .dark .portal-app-desc {
   color: #D1D5DB !important; /* slate-300 */
 }
+
+/* Ensure that when an app tile uses the unified dark tile, any nested name/description use white text for contrast */
+.app-tile-unified .portal-app-name,
+.app-tile-unified .portal-app-desc,
+.app-tile-unified h3,
+.app-tile-unified p,
+.app-tile-unified .tool-title,
+.app-tile-unified .tool-description {
+  color: #ffffff !important;
+}
+
+/* Cartoon icon sizing helper */
+.cartoon-icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 56px;
+  height: 56px;
+}
+.cartoon-svg { width: 56px; height: 56px; display: block; }
+
+/* Small icon variant when using unified tiles (e.g., admin list) */
+.app-tile-icon {
+  width: 48px;
+  height: 48px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 12px;
+  background: #ffffff !important; /* white background so colored icons stand out */
+  color: #ffffff !important;
+  box-shadow: 0 4px 10px rgba(2,6,23,0.08);
+}
+
+.app-tile-icon > * { color: inherit !important; }
+
+
+
+/* Dashboard redesign styles (migrated from inline CSS in dashboard page) */
+.dashboard-redesign {
+  --bg: linear-gradient(135deg, #1e293b 0%, #0f172a 100%);
+  --text: #e2e8f0;
+  --muted: #94a3b8;
+  --card-bg: rgba(255,255,255,0.05);
+  --card-border: rgba(255,255,255,0.1);
+  --title-gradient: linear-gradient(135deg,#ffffff 0%, #60a5fa 100%);
+  --accent: #60a5fa;
+  min-height: 100vh;
+  background: var(--bg);
+  color: var(--text);
+  position: relative;
+  overflow-x: hidden;
+}
+
+.light .dashboard-redesign {
+  --bg: #F9F8F6; /* near-white background in light mode */
+  --text: #0f172a;
+  --muted: #475569;
+  --card-bg: rgba(255,255,255,0.98);
+  --card-border: rgba(15,23,42,0.05);
+  --title-gradient: linear-gradient(135deg,#0B5394 0%, #60a5fa 100%);
+  --accent: #0B5394;
+  /* Force background to use the --bg variable when light mode is active to override utility classes that may set background-color */
+  background: var(--bg) !important;
+}
+
+.background-particles { position: absolute; inset: 0; pointer-events: none; z-index: 0; overflow: hidden; }
+.particle { position: absolute; background: radial-gradient(circle, rgba(96, 165, 250, 0.3) 0%, transparent 70%); border-radius: 50%; animation: float 20s infinite ease-in-out; }
+.particle:nth-child(1) { width: 300px; height: 300px; top: 10%; left: 10%; animation-delay: 0s; }
+.particle:nth-child(2) { width: 200px; height: 200px; top: 60%; left: 70%; animation-delay: 5s; }
+.particle:nth-child(3) { width: 250px; height: 250px; top: 30%; left: 80%; animation-delay: 10s; }
+@keyframes float { 0%,100%{ transform: translate(0,0) scale(1); opacity: .3 } 33%{ transform: translate(50px,-50px) scale(1.1); opacity:.5 } 66%{ transform: translate(-30px,30px) scale(.9); opacity:.4 } }
+.container{ max-width:1400px; margin:0 auto; padding:0 20px; position:relative; z-index:1; padding-top:40px; }
+.hero-section { margin-bottom:48px; text-align:center; }
+h1{ font-size:3rem; font-weight:800; margin-bottom:16px; background:var(--title-gradient); -webkit-background-clip:text; -webkit-text-fill-color:transparent; background-clip:text; letter-spacing:-0.02em }
+.subtitle{ font-size:1.25rem; color:var(--muted); font-weight:500 }
+.tools-grid{ display:grid; grid-template-columns: repeat(2, minmax(320px,1fr)); gap:32px; margin-bottom:48px }
+.tool-card{ background: var(--card-bg); -webkit-backdrop-filter: blur(10px); backdrop-filter: blur(10px); border:1px solid var(--card-border); border-radius:24px; padding:28px; min-height:150px; position:relative; overflow:hidden; cursor:pointer; transition: transform .28s cubic-bezier(.4,0,.2,1), box-shadow .28s }
+.tool-card:hover{ transform: translateY(-6px) scale(1.03); border-color: rgba(0,0,0,0.08); box-shadow:0 18px 40px rgba(0,0,0,0.12) }
+.tool-card.income{ background: linear-gradient(135deg, rgba(16,185,129,0.06) 0%, rgba(5,150,105,0.04) 100%) }
+.tool-card.abroad{ background: linear-gradient(135deg, rgba(96,165,250,0.06) 0%, rgba(59,130,246,0.04) 100%) }
+.tool-card.tax{ background: linear-gradient(135deg, rgba(139,92,246,0.06) 0%, rgba(124,58,237,0.04) 100%) }
+.tool-card.healthcare{ background: linear-gradient(135deg, rgba(244,114,182,0.06) 0%, rgba(236,72,153,0.04) 100%) }
+.tool-card.activity{ background: linear-gradient(135deg, rgba(251,146,60,0.06) 0%, rgba(249,115,22,0.04) 100%) }
+.tool-card.social{ background: linear-gradient(135deg, rgba(251,191,36,0.06) 0%, rgba(245,158,11,0.04) 100%) }
+.tool-card.pension{ background: linear-gradient(135deg, rgba(168,85,247,0.06) 0%, rgba(147,51,234,0.04) 100%) }
+.tool-card-content{ position:relative; z-index:1; display:flex; align-items:center; gap:24px; flex-wrap:nowrap }
+.tool-icon{ width:88px; height:88px; border-radius:18px; display:flex; align-items:center; justify-content:center; font-size:2.5rem; flex:0 0 88px; transition:all .3s; box-shadow:0 6px 20px rgba(0,0,0,0.08); overflow:hidden }
+.tool-card:hover .tool-icon{ transform: scale(1.05) rotate(3deg) }
+.tool-card.income .tool-icon { background: linear-gradient(135deg,#10b981 0%, #059669 100%) }
+.tool-card.abroad .tool-icon { background: linear-gradient(135deg,#60a5fa 0%, #3b82f6 100%) }
+.tool-card.tax .tool-icon { background: linear-gradient(135deg,#8b5cf6 0%, #7c3aed 100%) }
+.tool-card.healthcare .tool-icon { background: linear-gradient(135deg,#f472b6 0%, #ec4899 100%) }
+.tool-card.activity .tool-icon { background: linear-gradient(135deg,#fb923c 0%, #f97316 100%) }
+.tool-card.social .tool-icon { background: linear-gradient(135deg,#fbbf24 0%, #f59e0b 100%) }
+.tool-card.pension .tool-icon { background: linear-gradient(135deg,#a855f7 0%, #9333ea 100%) }
+.tool-info{ flex:1; min-width:0 }
+.tool-title{ font-size:1.75rem; font-weight:800; margin-bottom:8px; color:var(--text) }
+.tool-description{ color:var(--muted); line-height:1.6; font-size:1rem }
+.badge{ display:inline-block; background: rgba(96,165,250,0.14); color:var(--accent); padding:6px 14px; border-radius:18px; font-size:.78rem; font-weight:700; margin-top:12px; border:1px solid rgba(96,165,250,0.18) }
+.stats-section{ display:flex; gap:20px; justify-content:space-between; align-items:stretch; margin-top:24px }
+.stat-card{ background: var(--card-bg); -webkit-backdrop-filter: blur(6px); backdrop-filter: blur(6px); border:1px solid var(--card-border); border-radius:16px; padding:18px 20px; text-align:center; transition:all .3s; display:flex; flex-direction:column; align-items:center; justify-content:center; gap:8px; flex:1; min-width:150px }
+.stat-card:hover{ transform: translateY(-4px); border-color: rgba(0,0,0,0.08) }
+.stat-value{ font-size:3rem; font-weight:900; color:var(--accent); line-height:1 }
+
+@media (max-width:1024px){ .tools-grid{ grid-template-columns: 1fr } h1{ font-size:2rem } .tool-title{ font-size:1.25rem } .tool-icon{ width:72px; height:72px } }
 
 

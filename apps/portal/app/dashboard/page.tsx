@@ -9,7 +9,8 @@ import {collection, getDocs} from "firebase/firestore";
 import Link from "next/link";
 import {Header} from "@/components/Header";
 // CubeIcon intentionally removed (unused)
-import { getIconComponent, AppIcon } from "@/components/icon-map";
+import { getIconComponent, AppIcon, getIconColor } from "@/components/icon-map";
+import { CARTOON_ICON_MAP } from '@/components/cartoon-icons';
 
 // Use shared icon resolver so Firestore icon names (e.g. "Heart") resolve correctly
 
@@ -180,9 +181,9 @@ export default function DashboardPage() {
 
   if (!mounted || !user) {
     return (
-      <div className="flex min-h-screen items-center justify-center" style={{background: 'linear-gradient(to bottom right, #E8E3DF, #BFCDE0)'}}>
+      <div className="flex min-h-screen items-center justify-center bg-gradient-to-br from-[#E8E3DF] to-[#BFCDE0]">
         <div className="text-center">
-          <div className="animate-spin rounded-full h-12 w-12 border-b-2 mx-auto mb-4" style={{borderColor: '#0B5394'}}></div>
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-[#0B5394] mx-auto mb-4"></div>
           <p className="text-gray-600">Loading dashboard...</p>
         </div>
       </div>
@@ -192,7 +193,7 @@ export default function DashboardPage() {
   
 
   return (
-    <div className="min-h-screen bg-background portal-dashboard">
+    <div className="min-h-screen bg-background portal-dashboard dashboard-redesign">
       <Header />
 
       <main className="max-w-7xl mx-auto px-4 py-12 sm:px-6 lg:px-8">
@@ -200,7 +201,8 @@ export default function DashboardPage() {
 
         {/* Apps Grid */}
         <div>
-          <h2 className="text-2xl font-bold text-gray-900 mb-6">Available Tools</h2>
+          <h2 className="text-3xl font-extrabold text-blue-900 mb-2 text-center">Available Tools</h2>
+          <p className="text-center text-blue-800 mb-6 text-lg font-medium">Plan with Clarity. Live with Confidence.</p>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
             {apps.map((app, index) => {
               // Create different gradients using vibrant standard colors
@@ -247,23 +249,31 @@ export default function DashboardPage() {
                   href={`/apps/${app.id}?name=${encodeURIComponent(app.name)}&url=${encodeURIComponent(app.url)}`}
                   onClick={() => handleAppClick(app)}
                   data-app-id={app.id}
-                  className={`app-tile rounded-lg shadow-lg hover:shadow-xl transition-shadow p-6 block group ${appGradientClass} relative overflow-hidden`}
-                  style={{background: gradient, backgroundImage: gradient}}
+                  className={`app-tile app-tile-unified rounded-2xl shadow-lg hover:shadow-2xl transform transition-all duration-200 hover:scale-105 p-8 md:p-10 block group ${appGradientClass}`}
                 >
                   <div className="flex items-start justify-between">
                     <div className="flex items-start gap-4">
                       <div className="flex-shrink-0">
-                        <AppIcon icon={app.icon} className="h-10 w-10" style={{color: '#111827'}} />
+                        {/* Use filled cartoon icon when available, otherwise fall back to the heroicon-in-circle */}
+                        {CARTOON_ICON_MAP[app.id] ? (
+                          <div className="cartoon-icon">
+                            <AppIcon icon={app.icon} appId={app.id} className="cartoon-svg" />
+                          </div>
+                        ) : (
+                          <div className="h-14 w-14 rounded-full flex items-center justify-center bg-white shadow-sm transition-transform transform group-hover:rotate-6">
+                            <AppIcon icon={app.icon} appId={app.id} className="h-8 w-8" color={getIconColor(app.id || app.name)} />
+                          </div>
+                        )}
                       </div>
-                      
+
                       <div>
-                        <h3 className="text-xl font-bold group-hover:transition-colors" style={{color: '#111827'}} onMouseEnter={(e) => e.currentTarget.style.color = '#000000'} onMouseLeave={(e) => e.currentTarget.style.color = '#111827'}>
+                        <h3 className="text-2xl font-bold text-white">
                           {app.name}
                         </h3>
-                        <p className="mt-2" style={{color: '#111827'}}>{app.description}</p>
+                        <p className="mt-2 text-white/90">{app.description}</p>
                       </div>
                     </div>
-                    <div className="text-2xl" style={{color: '#111827'}}>→</div>
+
                   </div>
                 </Link>
               );
