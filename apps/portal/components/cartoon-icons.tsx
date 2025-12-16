@@ -72,6 +72,17 @@ export function HospitalImage({ size = 56, className = '', variant = 'hospital1'
   );
 }
 
+export function RocketImage({ size = 56, className = '', variant = 'rocket3' }: { size?: number; className?: string; variant?: 'rocket1'|'rocket2'|'rocket3'|'rocket4' }) {
+  // Rocket/activity image renderer (round-square container)
+  const innerSize = Math.round(size * 0.6);
+  const src = `/images/${variant}_trans.png`;
+  return (
+    <div className={`app-tile-icon app-tile-icon--light ${className}`}>
+      <img src={src} alt="Activity" width={innerSize} height={innerSize} />
+    </div>
+  );
+}
+
 export function GlobeIcon({ size = 56, className = '', colorStart = '#60a5fa', colorEnd = '#3b82f6' }: { size?: number; className?: string; colorStart?: string; colorEnd?: string }) {
   return (
     <svg className={className} width={size} height={size} viewBox="0 0 64 64" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Globe">
@@ -195,6 +206,6 @@ export const CARTOON_ICON_MAP: Record<string, React.ComponentType<{ size?: numbe
   'healthcare-cost': (props) => <HospitalImage {...props} variant={'hospital1'} />,
   'healthcare': (props) => <HospitalImage {...props} variant={'hospital1'} />,
   'health': (props) => <HospitalImage {...props} variant={'hospital1'} />,
-  'activity-budget-planner': ActivityRocketIcon,
+  'activity-budget-planner': (props) => <RocketImage {...props} variant={'rocket3'} />,
   'social-security-optimizer': SocialSecurityIcon,
 };
