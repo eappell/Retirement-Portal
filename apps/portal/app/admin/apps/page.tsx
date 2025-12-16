@@ -49,6 +49,7 @@ import {
   Cog6ToothIcon,
 } from "@heroicons/react/24/outline";
 import { AppIcon, getIconColor } from "@/components/icon-map";
+import { CARTOON_ICON_MAP } from '@/components/cartoon-icons';
 
 // Available HeroIcons for app selection
 const AVAILABLE_ICONS = [
