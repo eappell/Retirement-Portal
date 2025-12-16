@@ -219,6 +219,19 @@ export default function DashboardPage() {
                 'linear-gradient(135deg, #fbbf24 0%, #f59e0b 100%)', // Yellow/Amber
                 'linear-gradient(135deg, #a78bfa 0%, #8b5cf6 100%)', // Purple
               ];
+
+              // Pick a deterministic color for the icon background based on app id/name
+              const PALETTE = ['#FFB86C','#60A5FA','#34D399','#F472B6','#FBBF24','#A78BFA','#F97316','#F59E0B','#8B5CF6'];
+              const pickColor = (s?: string) => {
+                const key = (s || '').toLowerCase();
+                let h = 0;
+                for (let i = 0; i < key.length; i++) h = (h << 5) - h + key.charCodeAt(i);
+                const idx = Math.abs(h) % PALETTE.length;
+                return PALETTE[idx];
+              };
+
+              const tileColor = (app.id || app.name || '').toLowerCase().includes('income') ? '#F9F8F6' : pickColor(app.id || app.name);
+
               // For the healthcare app, use a distinct red gradient
               const redGradient = 'linear-gradient(135deg, #fca5a5 0%, #ef4444 100%)';
               const blueGradient = 'linear-gradient(135deg, #60a5fa 0%, #3b82f6 100%)';
@@ -263,16 +276,16 @@ export default function DashboardPage() {
                       <div className="flex-shrink-0">
                         {/* Use filled cartoon icon when available, otherwise fall back to the heroicon-in-circle */}
                         {CARTOON_ICON_MAP[app.id] ? (
-                          <div className="cartoon-icon">
-                            <AppIcon icon={app.icon} appId={app.id} className="cartoon-svg" />
+                          <div className="cartoon-icon" style={{ background: tileColor }}>
+                            <AppIcon icon={app.icon} appId={app.id} className="cartoon-svg" bgColor={tileColor} />
                           </div>
                         ) : ( (app.id || app.name || '').toLowerCase().includes('income') ? (
-                          // Explicit fallback: if app id or name looks like the income estimator, render the processed image asset inside rounded square
-                          <div className="app-tile-icon app-tile-icon--light">
+                          // Explicit fallback: if app id or name looks like the income estimator, render the processed image asset inside rounded square (off-white)
+                          <div className="app-tile-icon app-tile-icon--income">
                             <img src="/images/money1_trans.png" alt={app.name} width={64} height={64} className="block" />
                           </div>
                         ) : (
-                          <div className="app-tile-hero transition-transform transform group-hover:rotate-6">
+                          <div className="app-tile-hero transition-transform transform group-hover:rotate-6" style={{ background: tileColor }}>
                             <AppIcon icon={app.icon} appId={app.id} className="app-tile-hero-icon" color={getIconColor(app.id || app.name)} />
                           </div>
                         ))}

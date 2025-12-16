@@ -32,63 +32,64 @@ export function IncomeBagIcon({ size = 56, className = '', colorStart = '#0EA5A2
 export function IncomeMoneyImage({ size = 84, className = '' }: { size?: number; className?: string }) {
   // Render the processed PNG inside the standard rounded-square icon container
   const innerSize = Math.round(size * 0.76); // 84 -> ~64
+  // Income tile must always have off-white background; the outer wrapper will handle it via CSS class
   return (
-    <div className={`app-tile-icon app-tile-icon--light ${className}`}>
+    <div className={`app-tile-icon app-tile-icon--light ${className}`} style={{ background: '#F9F8F6' }}>
       <img src="/images/money1_trans.png" alt="Income" width={innerSize} height={innerSize} />
     </div>
   );
 } 
 
-export function GlobeImage({ size = 84, className = '', variant = 'globe2' }: { size?: number; className?: string; variant?: 'globe1'|'globe2' }) {
+export function GlobeImage({ size = 84, className = '', variant = 'globe2', bgColor }: { size?: number; className?: string; variant?: 'globe1'|'globe2'; bgColor?: string }) {
   // Use the processed globe image (choose variant). Renders inside the same rounded-square container
   const innerSize = Math.round(size * 0.76);
   const src = `/images/${variant}_trans.png`;
   return (
-    <div className={`app-tile-icon app-tile-icon--light ${className}`}>
+    <div className={`app-tile-icon app-tile-icon--light ${className}`} style={bgColor ? { background: bgColor } : undefined}>
       <img src={src} alt="Globe" width={innerSize} height={innerSize} />
     </div>
   );
 }
 
-export function ChartImage({ size = 84, className = '', variant = 'barchart1' }: { size?: number; className?: string; variant?: 'barchart1'|'barchart2' }) {
+export function ChartImage({ size = 84, className = '', variant = 'barchart1', bgColor }: { size?: number; className?: string; variant?: 'barchart1'|'barchart2'; bgColor?: string }) {
   // Use the processed chart image (choose variant). Renders inside the same rounded-square container
   const innerSize = Math.round(size * 0.76);
   const src = `/images/${variant}_trans.png`;
   return (
-    <div className={`app-tile-icon app-tile-icon--light ${className}`}>
+    <div className={`app-tile-icon app-tile-icon--light ${className}`} style={bgColor ? { background: bgColor } : undefined}>
       <img src={src} alt="Chart" width={innerSize} height={innerSize} />
     </div>
   );
 }
 
-export function HospitalImage({ size = 84, className = '', variant = 'hospital1' }: { size?: number; className?: string; variant?: 'hospital1'|'hospital2'|'hospital3' }) {
+export function HospitalImage({ size = 84, className = '', variant = 'hospital1', bgColor }: { size?: number; className?: string; variant?: 'hospital1'|'hospital2'|'hospital3'; bgColor?: string }) {
   // Healthcare image renderer (round-square container)
   const innerSize = Math.round(size * 0.76);
   const src = `/images/${variant}_trans.png`;
   return (
-    <div className={`app-tile-icon app-tile-icon--light ${className}`}>
+    <div className={`app-tile-icon app-tile-icon--light ${className}`} style={bgColor ? { background: bgColor } : undefined}>
       <img src={src} alt="Healthcare" width={innerSize} height={innerSize} />
     </div>
   );
 }
 
-export function RocketImage({ size = 84, className = '', variant = 'rocket3' }: { size?: number; className?: string; variant?: 'rocket1'|'rocket2'|'rocket3'|'rocket4' }) {
+export function RocketImage({ size = 84, className = '', variant = 'rocket3', bgColor }: { size?: number; className?: string; variant?: 'rocket1'|'rocket2'|'rocket3'|'rocket4'; bgColor?: string }) {
   // Rocket/activity image renderer (round-square container)
   const innerSize = Math.round(size * 0.76);
   const src = `/images/${variant}_trans.png`;
   return (
-    <div className={`app-tile-icon app-tile-icon--light ${className}`}>
+    <div className={`app-tile-icon app-tile-icon--light ${className}`} style={bgColor ? { background: bgColor } : undefined}>
       <img src={src} alt="Activity" width={innerSize} height={innerSize} />
     </div>
   );
 }
 
-export function MoneybagImage({ size = 84, className = '', variant = 'moneybag1' }: { size?: number; className?: string; variant?: 'moneybag1'|'moneybag2'|'moneybag3' }) {
+export function MoneybagImage({ size = 84, className = '', variant = 'moneybag1', bgColor }: { size?: number; className?: string; variant?: 'moneybag1'|'moneybag2'|'moneybag3'; bgColor?: string }) {
   // Moneybag / finance image renderer (round-square container)
   const innerSize = Math.round(size * 0.76);
   const src = `/images/${variant}_trans.png`;
   return (
-    <div className={`app-tile-icon app-tile-icon--light ${className}`}>
+    <div className={`app-tile-icon app-tile-icon--light ${className}`} style={bgColor ? { background: bgColor } : undefined}>
       <img src={src} alt="Money" width={innerSize} height={innerSize} />
     </div>
   );

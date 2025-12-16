@@ -132,13 +132,13 @@ export function getIconColor(name?: string) {
   return '#0b5394'; // default primary blue
 }
 
-export function AppIcon({ icon, className, style, color, appId }: { icon?: string; className?: string; style?: React.CSSProperties; color?: string; appId?: string }) {
+export function AppIcon({ icon, className, style, color, appId, bgColor }: { icon?: string; className?: string; style?: React.CSSProperties; color?: string; appId?: string; bgColor?: string }) {
   const mergedStyle = { ...(style || {}), ...(color ? { color } : {}) } as React.CSSProperties;
 
   // If we have an appId and a cartoon icon for it, render the cartoon icon (filled, colorful)
   if (appId && CARTOON_ICON_MAP[appId]) {
     const Cartoon = CARTOON_ICON_MAP[appId];
-    return <Cartoon className={className} size={84} color={color || getIconColor(appId)} />;
+    return <Cartoon className={className} size={48} color={color || getIconColor(appId)} bgColor={bgColor} />;
   }
 
   if (!icon) {

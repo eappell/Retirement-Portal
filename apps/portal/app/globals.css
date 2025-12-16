@@ -230,6 +230,20 @@ body {
   pointer-events: none;
   mix-blend-mode: overlay;
 }
+
+/* Icon square variants */
+.app-tile-icon { transition: transform 280ms cubic-bezier(.2,.9,.2,1), box-shadow 280ms ease; transform-origin: center; }
+.app-tile-icon--light { background: #F9F8F6; }
+.app-tile-icon--income { background: #F9F8F6 !important; }
+
+/* Cartoon svg wrapper also animates on hover */
+.cartoon-icon { transition: transform 280ms cubic-bezier(.2,.9,.2,1); transform-origin: center; }
+
+/* Hover expansion behaviour to match sampledash (scale card and icon) */
+.app-tile-unified:hover { transform: translateY(-8px) scale(1.02); }
+.app-tile-unified:hover .app-tile-icon { transform: scale(1.12); box-shadow: 0 8px 22px rgba(2,6,23,0.16); }
+.app-tile-unified:hover .cartoon-icon { transform: scale(1.12) rotate(4deg); }
+
 /* Light-mode override: ensure tiles use the unified dark-blue gradient and white text like dark mode */
 .light .app-tile-unified {
   /* keep the same gradient as dark mode */
