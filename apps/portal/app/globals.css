@@ -113,6 +113,7 @@ body {
   background: linear-gradient(135deg, #1e293b 0%, #0f172a 100%);
   position: relative; /* establish containing block for the overlay */
   overflow: hidden;
+  font-family: 'Segoe UI', system-ui, sans-serif;
 }
 
 /* Ensure dark mode uses the same gradient (overrides more specific rules like .dark .portal-dashboard) */
@@ -250,23 +251,24 @@ body {
 }
 
 /* Icon square variants */
-.app-tile-icon { transition: transform 1100ms cubic-bezier(0.0,0.001,0.08,1), box-shadow 800ms ease; transform-origin: center; }
+.app-tile-icon { transition: all 0.4s ease; transform-origin: center; }
 .app-tile-icon--light { background: #F9F8F6; }
 .app-tile-icon--income { background: #F9F8F6 !important; }
 
 /* Cartoon svg wrapper also animates on hover */
-.cartoon-icon { transition: transform 280ms cubic-bezier(.2,.9,.2,1); transform-origin: center; }
+.cartoon-icon { transition: all 0.4s ease; transform-origin: center; }
 
-/* Hover expansion behaviour: very slow ease-in start, initial ramp nearly flat */
+/* Hover expansion behaviour: matches sampledash.html exactly */
 .app-tile-unified {
-  transition: transform 1100ms cubic-bezier(0.0,0.001,0.08,1), box-shadow 800ms ease, filter 800ms ease;
+  transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
   transform-origin: center;
   will-change: transform;
 }
-/* Nearly imperceptible movement; animation starts extremely slowly then eases into the subtle final state */
+/* Hover transform - reduced scale for subtler expansion */
 .app-tile-unified:hover {
-  transform: translateY(-2px) scale(1.005);
-  box-shadow: 0 6px 14px rgba(0, 0, 0, 0.12);
+  transform: translateY(-4px) scale(1.01);
+  border-color: rgba(255, 255, 255, 0.3);
+  box-shadow: 0 12px 28px rgba(0, 0, 0, 0.25);
 }
 /* Icon square background wrapper: use CSS variable --tile-bg to set color */
 .app-tile-icon-bg {
@@ -277,15 +279,15 @@ body {
   align-items: center;
   justify-content: center;
   background: var(--tile-bg, rgba(255,255,255,0.06));
-  transition: transform 1100ms cubic-bezier(0.0,0.001,0.08,1), box-shadow 800ms ease, background 220ms ease;
-  box-shadow: 0 4px 12px rgba(2,6,23,0.08);
+  transition: all 0.4s ease;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
 }
-/* Icon scales very subtly to ~1.02 */
-.app-tile-unified:hover .app-tile-icon-bg { transform: scale(1.02); box-shadow: 0 5px 14px rgba(2,6,23,0.12); }
-/* Cartoon icon fallback animates with a near-flat initial ramp */
-.cartoon-icon { transition: transform 1100ms cubic-bezier(0.0,0.001,0.08,1); transform-origin: center; }
-/* Slight rotate retained but minimal (~1deg) */
-.app-tile-unified:hover .cartoon-icon { transform: scale(1.02) rotate(1deg); }
+/* Icon scales and rotates on hover like sampledash */
+.app-tile-unified:hover .app-tile-icon-bg { transform: scale(1.1) rotate(5deg); }
+/* Cartoon icon fallback animates like sampledash */
+.cartoon-icon { transition: all 0.4s ease; transform-origin: center; }
+/* Icon hover matches sampledash */
+.app-tile-unified:hover .cartoon-icon { transform: scale(1.1) rotate(5deg); }
 
 /* Light-mode override: ensure tiles use the unified dark-blue gradient and white text like dark mode */
 .light .app-tile-unified {
@@ -335,20 +337,10 @@ body {
 
 /* end of customizations removed to restore original colors */
 
-/* Dark-mode override: make dashboard title and tagline white (Available Tools + subtitle)
-   Note: the page uses an h2 and a paragraph for these elements, so include both selectors. */
-.dark .dashboard-redesign .hero-section h1,
-.dark .dashboard-redesign h2.text-3xl.font-extrabold,
-.dark .dashboard-redesign h2 {
-  -webkit-text-fill-color: #ffffff !important;
-  color: #ffffff !important;
-  background: none !important;
-  -webkit-background-clip: unset !important;
-}
+/* Dark-mode override: make dashboard subtitle white; title uses gradient defined inline */
 .dark .dashboard-redesign .subtitle,
-.dark .dashboard-redesign p.text-lg.font-medium,
-.dark .dashboard-redesign p {
-  color: #ffffff !important;
+.dark .dashboard-redesign p.text-lg.font-medium {
+  color: #94a3b8 !important;
 }
 
 

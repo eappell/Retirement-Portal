@@ -62,7 +62,7 @@ export function Header() {
 
   return (
     <header className={`${headerBgClass} sticky top-0 z-50`}>
-      <div className="max-w-7xl mx-auto px-4 py-4 sm:px-6 lg:px-8">
+      <div className="max-w-[1400px] mx-auto px-4 py-4 sm:px-6 lg:px-8">
         <div className="flex items-center">
           {/* Logo/Brand */}
           <Link href="/dashboard" className="flex items-center gap-2">

@@ -208,8 +208,23 @@ export default function DashboardPage() {
 
         {/* Apps Grid */}
         <div>
-          <h2 className="text-3xl font-extrabold text-blue-900 mb-2 text-center">Available Tools</h2>
-          <p className="text-center text-blue-800 mb-6 text-lg font-medium">Plan with Clarity. Live with Confidence.</p>
+          <h2 
+            className="mb-2 text-center"
+            style={{ 
+              fontFamily: "-apple-system, 'system-ui', 'Segoe UI', system-ui, sans-serif", 
+              fontSize: '48px', 
+              fontWeight: 800, 
+              fontStyle: 'normal',
+              letterSpacing: '-0.02em',
+              background: 'linear-gradient(135deg, #c4dfff 0%, #a9cffa 50%, #9ccaff 100%)',
+              WebkitBackgroundClip: 'text',
+              WebkitTextFillColor: 'transparent',
+              backgroundClip: 'text'
+            }}
+          >
+            Available Tools
+          </h2>
+          <p className="text-center text-slate-400" style={{ fontSize: '20px', fontWeight: 500, marginBottom: '50px' }}>Plan with Clarity. Live with Confidence.</p>
           <div className="tools-grid-custom">
             {apps.map((app, index) => {
               // Create different gradients using vibrant standard colors
@@ -269,7 +284,7 @@ export default function DashboardPage() {
                   href={`/apps/${app.id}?name=${encodeURIComponent(app.name)}&url=${encodeURIComponent(app.url)}`}
                   onClick={() => handleAppClick(app)}
                   data-app-id={app.id}
-                  className={`app-tile app-tile-unified rounded-2xl shadow-lg hover:shadow-2xl transform transition-all duration-200 hover:scale-105 p-8 md:p-10 block group ${appGradientClass}`}
+                  className={`app-tile app-tile-unified rounded-2xl shadow-lg hover:shadow-2xl transform transition-all duration-200 hover:scale-105 p-5 md:p-6 block group ${appGradientClass}`}
                 >
                   <div className="flex items-start justify-between">
                     <div className="flex items-start gap-4">
@@ -293,7 +308,7 @@ export default function DashboardPage() {
                       </div>
 
                       <div>
-                        <h3 className="text-2xl font-bold text-white">
+                        <h3 className="text-2xl text-white" style={{ fontWeight: 800 }}>
                           {app.name}
                         </h3>
                         <p className="mt-2 text-white/90">{app.description}</p>
@@ -314,6 +329,18 @@ export default function DashboardPage() {
           <p className="text-gray-600">
             We're constantly adding new retirement planning tools and features to help you plan better.
           </p>
+        </div>
+
+        {/* Sample Dashboard Link */}
+        <div className="mt-8 text-center">
+          <a
+            href="/docs/sampledash.html"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="text-sm text-blue-400 hover:text-blue-300 underline"
+          >
+            View Sample Dashboard Design
+          </a>
         </div>
       </main>
     </div>
