@@ -10,6 +10,7 @@ import Link from "next/link";
 import {Header} from "@/components/Header";
 // CubeIcon intentionally removed (unused)
 import { getIconComponent, AppIcon, getIconColor } from "@/components/icon-map";
+import { CARTOON_ICON_MAP } from '@/components/cartoon-icons';
 
 // Use shared icon resolver so Firestore icon names (e.g. "Heart") resolve correctly
 
@@ -253,9 +254,16 @@ export default function DashboardPage() {
                   <div className="flex items-start justify-between">
                     <div className="flex items-start gap-4">
                       <div className="flex-shrink-0">
-                        <div className="h-14 w-14 rounded-full flex items-center justify-center bg-white shadow-sm transition-transform transform group-hover:rotate-6">
-                          <AppIcon icon={app.icon} appId={app.id} className="h-8 w-8" color={getIconColor(app.id || app.name)} />
-                        </div>
+                        {/* Use filled cartoon icon when available, otherwise fall back to the heroicon-in-circle */}
+                        {CARTOON_ICON_MAP[app.id] ? (
+                          <div className="cartoon-icon">
+                            <AppIcon icon={app.icon} appId={app.id} className="cartoon-svg" />
+                          </div>
+                        ) : (
+                          <div className="h-14 w-14 rounded-full flex items-center justify-center bg-white shadow-sm transition-transform transform group-hover:rotate-6">
+                            <AppIcon icon={app.icon} appId={app.id} className="h-8 w-8" color={getIconColor(app.id || app.name)} />
+                          </div>
+                        )}
                       </div>
 
                       <div>
@@ -265,7 +273,7 @@ export default function DashboardPage() {
                         <p className="mt-2 text-white/90">{app.description}</p>
                       </div>
                     </div>
-                    <div className="text-2xl text-white">→</div>
+
                   </div>
                 </Link>
               );

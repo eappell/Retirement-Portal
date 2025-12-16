@@ -1,7 +1,7 @@
 import React from 'react';
 
 // More detailed, colorful cartoon icons to match the dashboard aesthetic
-export function IncomeBagIcon({ size = 56, className = '', colorStart = '#10b981', colorEnd = '#059669' }: { size?: number; className?: string; colorStart?: string; colorEnd?: string }) {
+export function IncomeBagIcon({ size = 56, className = '', colorStart = '#0EA5A2', colorEnd = '#059669' }: { size?: number; className?: string; colorStart?: string; colorEnd?: string }) {
   return (
     <svg className={className} width={size} height={size} viewBox="0 0 64 64" fill="none" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Income Bag">
       <defs>
@@ -10,13 +10,20 @@ export function IncomeBagIcon({ size = 56, className = '', colorStart = '#10b981
           <stop offset="100%" stopColor={colorEnd} />
         </linearGradient>
         <filter id="f1" x="-20%" y="-20%" width="140%" height="140%">
-          <feDropShadow dx="0" dy="4" stdDeviation="8" floodColor="#07202a" floodOpacity="0.18" />
+          <feDropShadow dx="0" dy="6" stdDeviation="10" floodColor="#022027" floodOpacity="0.18" />
         </filter>
       </defs>
-      <rect x="0" y="0" width="64" height="64" rx="12" fill="url(#g1)" filter="url(#f1)" />
-      <path d="M32 22c-4 0-6 2-6 5 0 2 1.5 3 4 3h4c2.5 0 4-1 4-3 0-3-2-5-6-5z" fill="#fff" opacity="0.96" />
-      <path d="M24 34c2-4 6-6 8-6s6 2 8 6" stroke="#fff" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" opacity="0.96" />
-      <text x="32" y="44" textAnchor="middle" fill="#fff" fontSize="12" fontWeight="700">$</text>
+
+      <rect x="0" y="0" width="64" height="64" rx="14" fill="url(#g1)" filter="url(#f1)" />
+      <g transform="translate(0,0)">
+        <rect x="10" y="12" width="44" height="36" rx="8" fill="#ffffff" opacity="0.06" />
+        <g transform="translate(12,12)">
+          <rect x="0" y="0" width="40" height="40" rx="8" fill="#ffffff" opacity="0.06" />
+          <path d="M20 6c-4 0-6 2-6 5 0 2 1.5 3 4 3h4c2.5 0 4-1 4-3 0-3-2-5-6-5z" fill="#fff" />
+          <path d="M12 20c2-4 6-6 8-6s6 2 8 6" stroke="#fff" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+          <text x="20" y="32" textAnchor="middle" fill="#fff" fontSize="12" fontWeight="700">$</text>
+        </g>
+      </g>
     </svg>
   );
 }
@@ -34,10 +41,12 @@ export function GlobeIcon({ size = 56, className = '', colorStart = '#60a5fa', c
         </filter>
       </defs>
       <rect width="64" height="64" rx="12" fill="url(#g2)" filter="url(#f2)" />
-      <circle cx="32" cy="30" r="12" fill="#fff" opacity="0.08" />
-      <path d="M20 28c3 1 5-3 12-3s9 4 12 3" stroke="#fff" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round" opacity="0.95" />
-      <path d="M32 18v24" stroke="#fff" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round" opacity="0.95" />
-      <path d="M24 20c1.5 3 1.5 8 1.5 8" stroke="#fff" strokeWidth="1.4" strokeLinecap="round" strokeLinejoin="round" opacity="0.9" />
+      <g transform="translate(12,12)">
+        <rect x="0" y="0" width="40" height="40" rx="8" fill="#fff" opacity="0.06" />
+        <circle cx="20" cy="18" r="12" fill="#ffffff" opacity="0.12" />
+        <path d="M8 16c3 1 5-3 12-3s9 4 12 3" stroke="#fff" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round" opacity="0.95" />
+        <path d="M20 6v24" stroke="#fff" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round" opacity="0.95" />
+      </g>
     </svg>
   );
 }
@@ -55,15 +64,17 @@ export function TaxBarsIcon({ size = 56, className = '', colorStart = '#8b5cf6',
         </filter>
       </defs>
       <rect width="64" height="64" rx="12" fill="url(#g3)" filter="url(#f3)" />
-      <rect x="16" y="34" width="6" height="14" rx="2" fill="#fff" opacity="0.96" />
-      <rect x="26" y="26" width="6" height="22" rx="2" fill="#fff" opacity="0.96" />
-      <rect x="36" y="20" width="6" height="28" rx="2" fill="#fff" opacity="0.96" />
-      <rect x="46" y="28" width="6" height="20" rx="2" fill="#fff" opacity="0.96" />
+      <g transform="translate(12,14)">
+        <rect x="0" y="20" width="8" height="18" rx="3" fill="#fff" opacity="0.96" />
+        <rect x="12" y="12" width="8" height="26" rx="3" fill="#fff" opacity="0.96" />
+        <rect x="24" y="6" width="8" height="32" rx="3" fill="#fff" opacity="0.96" />
+        <rect x="36" y="14" width="8" height="24" rx="3" fill="#fff" opacity="0.96" />
+      </g>
     </svg>
   );
 }
 
-export function HealthcareCrossIcon({ size = 56, className = '', colorStart = '#f472b6', colorEnd = '#ec4899' }: { size?: number; className?: string; colorStart?: string; colorEnd?: string }) {
+export function HealthcareCrossIcon({ size = 56, className = '', colorStart = '#fb7185', colorEnd = '#f43f5e' }: { size?: number; className?: string; colorStart?: string; colorEnd?: string }) {
   return (
     <svg className={className} width={size} height={size} viewBox="0 0 64 64" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Healthcare">
       <defs>
@@ -76,9 +87,12 @@ export function HealthcareCrossIcon({ size = 56, className = '', colorStart = '#
         </filter>
       </defs>
       <rect width="64" height="64" rx="12" fill="url(#g4)" filter="url(#f4)" />
-      <rect x="26" y="20" width="12" height="24" rx="2" fill="#fff" />
-      <rect x="20" y="26" width="24" height="12" rx="2" fill="#fff" />
-      <circle cx="32" cy="42" r="3" fill="#fff" />
+      <g transform="translate(12,12)">
+        <rect x="6" y="6" width="40" height="40" rx="8" fill="#fff" opacity="0.06" />
+        <path d="M26 12h12v8H26z" fill="#fff" />
+        <path d="M20 18h24v8H20z" fill="#fff" />
+        <circle cx="32" cy="38" r="3" fill="#fff" />
+      </g>
     </svg>
   );
 }

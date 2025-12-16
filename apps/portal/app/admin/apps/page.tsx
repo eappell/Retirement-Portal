@@ -706,8 +706,16 @@ export default function AdminAppsPage() {
                   <div className="flex items-start justify-between">
                     <div className="flex-1">
                       <div className="flex items-center gap-4">
-                        <div className="p-2 rounded-lg app-tile-icon" /* white icon background with colored icon */>
-                          <AppIcon icon={app.icon} appId={app.id} className="h-6 w-6" color={getIconColor(app.id || app.name)} />
+                        <div className="">
+                          {CARTOON_ICON_MAP[app.id] ? (
+                            <div className="cartoon-icon">
+                              <AppIcon icon={app.icon} appId={app.id} className="cartoon-svg" />
+                            </div>
+                          ) : (
+                            <div className="p-2 rounded-lg app-tile-icon">
+                              <AppIcon icon={app.icon} appId={app.id} className="h-6 w-6" color={getIconColor(app.id || app.name)} />
+                            </div>
+                          )}
                         </div>
                         <div>
                           <div className="flex items-center gap-2">

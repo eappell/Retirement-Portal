@@ -230,10 +230,13 @@ button {
 
 /* Cartoon icon sizing helper */
 .cartoon-icon {
-  display: inline-block;
-  width: 48px;
-  height: 48px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 56px;
+  height: 56px;
 }
+.cartoon-svg { width: 56px; height: 56px; display: block; }
 
 /* Small icon variant when using unified tiles (e.g., admin list) */
 .app-tile-icon {
