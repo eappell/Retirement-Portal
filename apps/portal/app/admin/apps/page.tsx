@@ -707,7 +707,7 @@ export default function AdminAppsPage() {
                     <div className="flex-1">
                       <div className="flex items-center gap-4">
                         <div className="p-2 rounded-lg app-tile-icon" /* white icon background with colored icon */>
-                          <AppIcon icon={app.icon} className="h-6 w-6" color={getIconColor(app.id || app.name)} />
+                          <AppIcon icon={app.icon} appId={app.id} className="h-6 w-6" color={getIconColor(app.id || app.name)} />
                         </div>
                         <div>
                           <div className="flex items-center gap-2">

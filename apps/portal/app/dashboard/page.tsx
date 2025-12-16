@@ -254,7 +254,7 @@ export default function DashboardPage() {
                     <div className="flex items-start gap-4">
                       <div className="flex-shrink-0">
                         <div className="h-14 w-14 rounded-full flex items-center justify-center bg-white shadow-sm transition-transform transform group-hover:rotate-6">
-                          <AppIcon icon={app.icon} className="h-8 w-8" color={getIconColor(app.id || app.name)} />
+                          <AppIcon icon={app.icon} appId={app.id} className="h-8 w-8" color={getIconColor(app.id || app.name)} />
                         </div>
                       </div>
 
