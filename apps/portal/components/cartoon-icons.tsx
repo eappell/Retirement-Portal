@@ -28,6 +28,12 @@ export function IncomeBagIcon({ size = 56, className = '', colorStart = '#0EA5A2
   );
 }
 
+// Use a lightweight image-based icon for the income estimator (first variation)
+export function IncomeMoneyImage({ size = 56, className = '' }: { size?: number; className?: string }) {
+  // We use the processed PNG which has transparency and is sized to 56x56
+  return <img src="/images/money1_trans.png" alt="Income" width={size} height={size} className={className} />;
+}
+
 export function GlobeIcon({ size = 56, className = '', colorStart = '#60a5fa', colorEnd = '#3b82f6' }: { size?: number; className?: string; colorStart?: string; colorEnd?: string }) {
   return (
     <svg className={className} width={size} height={size} viewBox="0 0 64 64" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Globe">
@@ -140,7 +146,7 @@ export const CARTOON_ICON_MAP: Record<string, React.ComponentType<{ size?: numbe
   'retire-abroad': GlobeIcon,
   'retire-abroad-ai': GlobeIcon,
   'tax-impact-analyzer': TaxBarsIcon,
-  'income-estimator': IncomeBagIcon,
+  'income-estimator': IncomeMoneyImage,
   'healthcare-cost': HealthcareCrossIcon,
   'activity-budget-planner': ActivityRocketIcon,
   'social-security-optimizer': SocialSecurityIcon,
