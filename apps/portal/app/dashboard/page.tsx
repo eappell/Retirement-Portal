@@ -262,7 +262,7 @@ export default function DashboardPage() {
                         ) : ( (app.id || app.name || '').toLowerCase().includes('income') ? (
                           // Explicit fallback: if app id or name looks like the income estimator, render the processed image asset inside rounded square
                           <div className="app-tile-icon app-tile-icon--light">
-                            <img src="/images/money1_trans.png" alt={app.name} width={28} height={28} className="block" />
+                            <img src="/images/money1_trans.png" alt={app.name} width={34} height={34} className="block" />
                           </div>
                         ) : (
                           <div className="h-14 w-14 rounded-full flex items-center justify-center bg-white shadow-sm transition-transform transform group-hover:rotate-6">

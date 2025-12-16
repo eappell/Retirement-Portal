@@ -29,9 +29,9 @@ export function IncomeBagIcon({ size = 56, className = '', colorStart = '#0EA5A2
 }
 
 // Use a lightweight image-based icon for the income estimator (first variation)
-export function IncomeMoneyImage({ size = 48, className = '' }: { size?: number; className?: string }) {
+export function IncomeMoneyImage({ size = 56, className = '' }: { size?: number; className?: string }) {
   // Render the processed PNG inside the standard rounded-square icon container
-  const innerSize = Math.round(size * 0.58); // 48 -> ~28
+  const innerSize = Math.round(size * 0.6); // 56 -> ~34
   return (
     <div className={`app-tile-icon app-tile-icon--light ${className}`}>
       <img src="/images/money1_trans.png" alt="Income" width={innerSize} height={innerSize} />
