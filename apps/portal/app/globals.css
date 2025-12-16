@@ -126,16 +126,21 @@ body {
   position: absolute;
   inset: 0;
   pointer-events: none;
-  background-image: radial-gradient(rgba(255,255,255,0.03) 1px, transparent 1px);
-  background-size: 20px 20px;
-  opacity: 0.8;
-  mix-blend-mode: overlay;
+  /* Slightly larger dots and higher alpha so the pattern is visible during testing */
+  background-image: radial-gradient(rgba(255,255,255,0.06) 2px, rgba(0,0,0,0) 2px);
+  background-size: 24px 24px;
+  /* keep overall subtle by limiting opacity */
+  opacity: 0.12;
+  /* use normal blend so rendering is consistent across browsers */
+  mix-blend-mode: normal;
+  z-index: 0;
 }
 
-/* Reduce overlay intensity in dark mode so it remains subtle */
+/* Dark mode variant: slightly reduced alpha to remain understated */
 .dark .dashboard-redesign::before {
-  background-image: radial-gradient(rgba(255,255,255,0.02) 1px, transparent 1px);
-  opacity: 0.6;
+  background-image: radial-gradient(rgba(255,255,255,0.05) 2px, rgba(0,0,0,0) 2px);
+  opacity: 0.10;
+  mix-blend-mode: normal;
 }
 
 /* Ensure the content sits above the overlay */
