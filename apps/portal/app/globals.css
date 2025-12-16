@@ -250,23 +250,24 @@ body {
 }
 
 /* Icon square variants */
-.app-tile-icon { transition: transform 280ms cubic-bezier(.2,.9,.2,1), box-shadow 280ms ease; transform-origin: center; }
+.app-tile-icon { transition: transform 400ms cubic-bezier(0.4,0,0.2,1), box-shadow 400ms ease; transform-origin: center; }
 .app-tile-icon--light { background: #F9F8F6; }
 .app-tile-icon--income { background: #F9F8F6 !important; }
 
 /* Cartoon svg wrapper also animates on hover */
 .cartoon-icon { transition: transform 280ms cubic-bezier(.2,.9,.2,1); transform-origin: center; }
 
-/* Hover expansion behaviour (slower and reduced magnitude) */
+/* Hover expansion behaviour: match sampledash.html easing and transforms */
 .app-tile-unified {
-  transition: transform 1400ms cubic-bezier(.2,.9,.2,1), box-shadow 1200ms ease, filter 1200ms ease;
+  transition: transform 400ms cubic-bezier(0.4,0,0.2,1), box-shadow 400ms ease, filter 400ms ease;
   transform-origin: center;
   will-change: transform;
 }
-/* Reduce translateY and scale by ~40% for a subtler expansion */
+/* Slightly larger but gentler translate/scale consistent with sample */
 .app-tile-unified:hover {
-  transform: translateY(-4px) scale(1.015);
-} 
+  transform: translateY(-8px) scale(1.02);
+  box-shadow: 0 20px 40px rgba(0, 0, 0, 0.28);
+}
 /* Icon square background wrapper: use CSS variable --tile-bg to set color */
 .app-tile-icon-bg {
   width: 84px;
@@ -276,15 +277,15 @@ body {
   align-items: center;
   justify-content: center;
   background: var(--tile-bg, rgba(255,255,255,0.06));
-  transition: transform 1400ms cubic-bezier(.2,.9,.2,1), box-shadow 1200ms ease, background 220ms ease;
+  transition: transform 400ms cubic-bezier(0.4,0,0.2,1), box-shadow 400ms ease, background 220ms ease;
   box-shadow: 0 4px 12px rgba(2,6,23,0.08);
 }
-/* Reduce icon-scale growth to ~1.05 for subtler effect */
-.app-tile-unified:hover .app-tile-icon-bg { transform: scale(1.05); box-shadow: 0 8px 26px rgba(2,6,23,0.18); }
-/* Cartoon icon fallback still animates (slower, subtler) */
-.cartoon-icon { transition: transform 1400ms cubic-bezier(.2,.9,.2,1); transform-origin: center; }
-/* Slight rotate retained but reduced scale */
-.app-tile-unified:hover .cartoon-icon { transform: scale(1.05) rotate(3deg); }
+/* Icon scales to 1.1 on hover similar to sample */
+.app-tile-unified:hover .app-tile-icon-bg { transform: scale(1.1); box-shadow: 0 8px 26px rgba(2,6,23,0.18); }
+/* Cartoon icon fallback animates like the sample */
+.cartoon-icon { transition: transform 400ms cubic-bezier(0.4,0,0.2,1); transform-origin: center; }
+/* Slight rotate retained but matching sample magnitude */
+.app-tile-unified:hover .cartoon-icon { transform: scale(1.1) rotate(5deg); }
 
 /* Light-mode override: ensure tiles use the unified dark-blue gradient and white text like dark mode */
 .light .app-tile-unified {
