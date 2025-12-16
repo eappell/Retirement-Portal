@@ -29,12 +29,12 @@ export function IncomeBagIcon({ size = 56, className = '', colorStart = '#0EA5A2
 }
 
 // Use a lightweight image-based icon for the income estimator (first variation)
-export function IncomeMoneyImage({ size = 84, className = '' }: { size?: number; className?: string }) {
+export function IncomeMoneyImage({ size = 84, className = '', bgColor }: { size?: number; className?: string; color?: string; bgColor?: string }) {
   // Render the processed PNG inside the standard rounded-square icon container
   const innerSize = Math.round(size * 0.76); // 84 -> ~64
   // Income tile must always have off-white background; the outer wrapper will handle it via CSS class
   return (
-    <div className={`app-tile-icon app-tile-icon--light ${className}`} style={{ background: '#F9F8F6' }}>
+    <div className={`app-tile-icon app-tile-icon--light ${className}`} style={{ background: bgColor || '#F9F8F6' }}>
       <img src="/images/money1_trans.png" alt="Income" width={innerSize} height={innerSize} />
     </div>
   );
@@ -203,7 +203,7 @@ export function SocialSecurityIcon({ size = 56, className = '', colorStart = '#f
   );
 }
 
-export const CARTOON_ICON_MAP: Record<string, React.ComponentType<{ size?: number; color?: string; className?: string }>> = {
+export const CARTOON_ICON_MAP: Record<string, React.ComponentType<{ size?: number; color?: string; className?: string; bgColor?: string }>> = {
   'retire-abroad': (props) => <GlobeImage {...props} variant={'globe2'} />,
   'retire-abroad-ai': (props) => <GlobeImage {...props} variant={'globe2'} />,
   'tax-impact-analyzer': (props) => <ChartImage {...props} variant={'barchart1'} />,
