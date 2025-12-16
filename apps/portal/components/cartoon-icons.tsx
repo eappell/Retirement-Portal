@@ -28,6 +28,43 @@ export function IncomeBagIcon({ size = 56, className = '', colorStart = '#0EA5A2
   );
 }
 
+// Use a lightweight image-based icon for the income estimator (first variation)
+export function IncomeMoneyImage({ size = 84, className = '' }: { size?: number; className?: string; color?: string; bgColor?: string }) {
+  // Just render the image - the parent container (.app-tile-icon-bg) handles the background
+  const innerSize = Math.round(size * 0.76); // 84 -> ~64
+  return <img src="/images/money1_trans.png" alt="Income" width={innerSize} height={innerSize} className={className} />;
+} 
+
+export function GlobeImage({ size = 84, className = '', variant = 'globe2' }: { size?: number; className?: string; variant?: 'globe1'|'globe2'; bgColor?: string }) {
+  const innerSize = Math.round(size * 0.76);
+  const src = `/images/${variant}_trans.png`;
+  return <img src={src} alt="Globe" width={innerSize} height={innerSize} className={className} />;
+}
+
+export function ChartImage({ size = 84, className = '', variant = 'barchart1' }: { size?: number; className?: string; variant?: 'barchart1'|'barchart2'; bgColor?: string }) {
+  const innerSize = Math.round(size * 0.76);
+  const src = `/images/${variant}_trans.png`;
+  return <img src={src} alt="Chart" width={innerSize} height={innerSize} className={className} />;
+}
+
+export function HospitalImage({ size = 84, className = '', variant = 'hospital1' }: { size?: number; className?: string; variant?: 'hospital1'|'hospital2'|'hospital3'; bgColor?: string }) {
+  const innerSize = Math.round(size * 0.76);
+  const src = `/images/${variant}_trans.png`;
+  return <img src={src} alt="Healthcare" width={innerSize} height={innerSize} className={className} />;
+}
+
+export function RocketImage({ size = 84, className = '', variant = 'rocket3' }: { size?: number; className?: string; variant?: 'rocket1'|'rocket2'|'rocket3'|'rocket4'; bgColor?: string }) {
+  const innerSize = Math.round(size * 0.76);
+  const src = `/images/${variant}_trans.png`;
+  return <img src={src} alt="Activity" width={innerSize} height={innerSize} className={className} />;
+}
+
+export function MoneybagImage({ size = 84, className = '', variant = 'moneybag1' }: { size?: number; className?: string; variant?: 'moneybag1'|'moneybag2'|'moneybag3'; bgColor?: string }) {
+  const innerSize = Math.round(size * 0.76);
+  const src = `/images/${variant}_trans.png`;
+  return <img src={src} alt="Money" width={innerSize} height={innerSize} className={className} />;
+}
+
 export function GlobeIcon({ size = 56, className = '', colorStart = '#60a5fa', colorEnd = '#3b82f6' }: { size?: number; className?: string; colorStart?: string; colorEnd?: string }) {
   return (
     <svg className={className} width={size} height={size} viewBox="0 0 64 64" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Globe">
@@ -136,12 +173,22 @@ export function SocialSecurityIcon({ size = 56, className = '', colorStart = '#f
   );
 }
 
-export const CARTOON_ICON_MAP: Record<string, React.ComponentType<{ size?: number; color?: string; className?: string }>> = {
-  'retire-abroad': GlobeIcon,
-  'retire-abroad-ai': GlobeIcon,
-  'tax-impact-analyzer': TaxBarsIcon,
-  'income-estimator': IncomeBagIcon,
-  'healthcare-cost': HealthcareCrossIcon,
-  'activity-budget-planner': ActivityRocketIcon,
-  'social-security-optimizer': SocialSecurityIcon,
+export const CARTOON_ICON_MAP: Record<string, React.ComponentType<{ size?: number; color?: string; className?: string; bgColor?: string }>> = {
+  'retire-abroad': (props) => <GlobeImage {...props} variant={'globe2'} />,
+  'retire-abroad-ai': (props) => <GlobeImage {...props} variant={'globe2'} />,
+  'tax-impact-analyzer': (props) => <ChartImage {...props} variant={'barchart1'} />,
+  'tax': (props) => <ChartImage {...props} variant={'barchart1'} />,
+  'income-estimator': IncomeMoneyImage,
+  // Common alternative ids / name variants for the income estimator
+  'income': IncomeMoneyImage,
+  'monthly-retirement-income': IncomeMoneyImage,
+  'monthly-retirement-income-ai': IncomeMoneyImage,
+  'monthly-retirement-income-estimator': IncomeMoneyImage,
+  'monthly-retirement-income-estimator-v1': IncomeMoneyImage,
+  'healthcare-cost': (props) => <HospitalImage {...props} variant={'hospital2'} />,
+  'healthcare': (props) => <HospitalImage {...props} variant={'hospital2'} />,
+  'health': (props) => <HospitalImage {...props} variant={'hospital2'} />,
+  'activity-budget-planner': (props) => <RocketImage {...props} variant={'rocket3'} />,
+  'social-security-optimizer': (props) => <MoneybagImage {...props} variant={'moneybag1'} />,
+  'social-security': (props) => <MoneybagImage {...props} variant={'moneybag1'} />,
 };

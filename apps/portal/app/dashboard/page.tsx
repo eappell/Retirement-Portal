@@ -8,9 +8,7 @@ import {db} from "@/lib/firebase";
 import {collection, getDocs} from "firebase/firestore";
 import Link from "next/link";
 import {Header} from "@/components/Header";
-// CubeIcon intentionally removed (unused)
-import { getIconComponent, AppIcon, getIconColor } from "@/components/icon-map";
-import { CARTOON_ICON_MAP } from '@/components/cartoon-icons';
+import { AppIcon } from "@/components/icon-map";
 
 // Use shared icon resolver so Firestore icon names (e.g. "Heart") resolve correctly
 
@@ -196,52 +194,94 @@ export default function DashboardPage() {
     <div className="min-h-screen bg-background portal-dashboard dashboard-redesign">
       <Header />
 
-      <main className="max-w-7xl mx-auto px-4 py-12 sm:px-6 lg:px-8">
+      {/* Background particles (dark mode only) */}
+      <div className="background-particles" aria-hidden="true">
+        <div className="particle" />
+        <div className="particle" />
+        <div className="particle" />
+      </div>
+
+      <main className="max-w-[1400px] mx-auto px-4 py-12 sm:px-6 lg:px-8">
         {/* User info card removed: information is available in the header */}
 
         {/* Apps Grid */}
         <div>
-          <h2 className="text-3xl font-extrabold text-blue-900 mb-2 text-center">Available Tools</h2>
-          <p className="text-center text-blue-800 mb-6 text-lg font-medium">Plan with Clarity. Live with Confidence.</p>
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+          <h2 
+            className="mb-2 text-center dashboard-title"
+            style={{ 
+              fontFamily: "-apple-system, 'system-ui', 'Segoe UI', system-ui, sans-serif", 
+              fontSize: '48px', 
+              fontWeight: 800, 
+              fontStyle: 'normal',
+              letterSpacing: '-0.02em'
+            }}
+          >
+            Available Tools
+          </h2>
+          <p className="text-center text-slate-400 tagline-with-egg" style={{ fontSize: '20px', fontWeight: 500, marginBottom: '50px', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px' }}>
+            <span>Plan with Clarity.</span>
+            <img src="/images/NesteggOnly-dark.png" alt="" className="tagline-egg" style={{ height: '24px', width: 'auto' }} />
+            <span>Live with Confidence.</span>
+          </p>
+          <div className="tools-grid-custom">
             {apps.map((app, index) => {
-              // Create different gradients using vibrant standard colors
-              const gradients = [
-                'linear-gradient(135deg, #60a5fa 0%, #3b82f6 100%)', // Blue
-                'linear-gradient(135deg, #34d399 0%, #10b981 100%)', // Green
-                'linear-gradient(135deg, #fbbf24 0%, #f59e0b 100%)', // Yellow/Amber
-                'linear-gradient(135deg, #a78bfa 0%, #8b5cf6 100%)', // Purple
-              ];
-              // For the healthcare app, use a distinct red gradient
-              const redGradient = 'linear-gradient(135deg, #fca5a5 0%, #ef4444 100%)';
-              const blueGradient = 'linear-gradient(135deg, #60a5fa 0%, #3b82f6 100%)';
-              const greenGradient = 'linear-gradient(135deg, #34d399 0%, #10b981 100%)';
-
-              // Determine gradient robustly using id or name keywords (handles Firestore variations)
+              // Determine app type from id/name
               const key = `${app.id || ''} ${app.name || ''}`.toLowerCase();
-              // Prefer app-provided gradient if present
-              const computedGradient = key.includes('health') || key.includes('healthcare')
-                ? redGradient
-                : key.includes('income') || key.includes('estimator')
-                ? greenGradient
-                : key.includes('retire') || key.includes('abroad')
-                ? blueGradient
-                : gradients[index % gradients.length];
-              const gradient = app.gradient || computedGradient;
-
-              // Choose a robust classname to apply the gradient via CSS so it persists
-              // Only apply the static per-app class when an explicit gradient is not set in Firestore
-              const appGradientClass = app.gradient
-                ? ''
-                : key.includes('health') || key.includes('healthcare')
-                ? 'app-gradient-healthcare'
-                : key.includes('income') || key.includes('estimator')
-                ? 'app-gradient-income-estimator'
-                : key.includes('retire') || key.includes('abroad')
-                ? 'app-gradient-retire-abroad'
-                : '';
               
+              // Define icon square gradients (light shades), tile backgrounds (very light/subtle), and badges
+              type AppStyle = { iconGradient: string; tileBg: string; badge: string };
+              const getAppStyle = (): AppStyle => {
+                if (key.includes('income') || key.includes('estimator')) {
+                  return {
+                    iconGradient: 'linear-gradient(135deg, #86efac 0%, #4ade80 100%)', // light green
+                    tileBg: 'rgba(134, 239, 172, 0.08)', // very subtle green
+                    badge: 'AI-Powered'
+                  };
+                }
+                if (key.includes('retire') || key.includes('abroad')) {
+                  return {
+                    iconGradient: 'linear-gradient(135deg, #93c5fd 0%, #60a5fa 100%)', // light blue
+                    tileBg: 'rgba(147, 197, 253, 0.08)', // very subtle blue
+                    badge: '100+ Destinations'
+                  };
+                }
+                if (key.includes('tax')) {
+                  return {
+                    iconGradient: 'linear-gradient(135deg, #c4b5fd 0%, #a78bfa 100%)', // light purple
+                    tileBg: 'rgba(196, 181, 253, 0.08)', // very subtle purple
+                    badge: 'Tax Optimization'
+                  };
+                }
+                if (key.includes('health') || key.includes('healthcare')) {
+                  return {
+                    iconGradient: 'linear-gradient(135deg, #fca5a5 0%, #f87171 100%)', // light red
+                    tileBg: 'rgba(252, 165, 165, 0.08)', // very subtle red
+                    badge: 'Personalized'
+                  };
+                }
+                if (key.includes('activity')) {
+                  return {
+                    iconGradient: 'linear-gradient(135deg, #fdba74 0%, #fb923c 100%)', // light orange
+                    tileBg: 'rgba(253, 186, 116, 0.08)', // very subtle orange
+                    badge: '3-Phase Planning'
+                  };
+                }
+                if (key.includes('social') || key.includes('security')) {
+                  return {
+                    iconGradient: 'linear-gradient(135deg, #166534 0%, #15803d 100%)', // dark green
+                    tileBg: 'rgba(22, 101, 52, 0.08)', // very subtle dark green
+                    badge: 'Data-Driven'
+                  };
+                }
+                // Default fallback
+                return {
+                  iconGradient: 'linear-gradient(135deg, #93c5fd 0%, #60a5fa 100%)',
+                  tileBg: 'rgba(147, 197, 253, 0.08)',
+                  badge: ''
+                };
+              };
               
+              const appStyle = getAppStyle();
               
               return (
                 <Link
@@ -249,28 +289,26 @@ export default function DashboardPage() {
                   href={`/apps/${app.id}?name=${encodeURIComponent(app.name)}&url=${encodeURIComponent(app.url)}`}
                   onClick={() => handleAppClick(app)}
                   data-app-id={app.id}
-                  className={`app-tile app-tile-unified rounded-2xl shadow-lg hover:shadow-2xl transform transition-all duration-200 hover:scale-105 p-8 md:p-10 block group ${appGradientClass}`}
+                  className="app-tile app-tile-unified rounded-2xl shadow-lg hover:shadow-2xl transform transition-all duration-200 hover:scale-[1.035] block group"
+                  style={{ padding: '30px', backgroundColor: appStyle.tileBg, maxWidth: '668px', height: '180px' }}
                 >
-                  <div className="flex items-start justify-between">
+                  <div className="flex items-start justify-between h-full">
                     <div className="flex items-start gap-4">
                       <div className="flex-shrink-0">
-                        {/* Use filled cartoon icon when available, otherwise fall back to the heroicon-in-circle */}
-                        {CARTOON_ICON_MAP[app.id] ? (
-                          <div className="cartoon-icon">
-                            <AppIcon icon={app.icon} appId={app.id} className="cartoon-svg" />
-                          </div>
-                        ) : (
-                          <div className="h-14 w-14 rounded-full flex items-center justify-center bg-white shadow-sm transition-transform transform group-hover:rotate-6">
-                            <AppIcon icon={app.icon} appId={app.id} className="h-8 w-8" color={getIconColor(app.id || app.name)} />
-                          </div>
-                        )}
+                        {/* Icon square with gradient background - always use Heroicons from Firestore */}
+                        <div className="app-tile-icon-bg" style={{ background: appStyle.iconGradient }}>
+                          <AppIcon icon={app.icon} className="app-tile-hero-icon" color="#ffffff" />
+                        </div>
                       </div>
 
-                      <div>
-                        <h3 className="text-2xl font-bold text-white">
+                      <div className="flex flex-col">
+                        <h3 className="text-2xl text-white" style={{ fontWeight: 800 }}>
                           {app.name}
                         </h3>
-                        <p className="mt-2 text-white/90">{app.description}</p>
+                        <p className="mt-2 app-description">{app.description}</p>
+                        {appStyle.badge && (
+                          <span className="app-tile-badge mt-3">{appStyle.badge}</span>
+                        )}
                       </div>
                     </div>
 
@@ -282,12 +320,36 @@ export default function DashboardPage() {
           
         </div>
 
-        {/* Coming Soon */}
-        <div className="mt-12 bg-gradient-to-r from-gray-50 to-gray-100 rounded-lg shadow-lg p-8 text-center">
-          <h3 className="text-xl font-bold text-gray-900 mb-2">More Tools Coming Soon</h3>
-          <p className="text-gray-600">
-            We're constantly adding new retirement planning tools and features to help you plan better.
-          </p>
+        {/* Stats Section */}
+        <div className="stats-section mt-12">
+          <div className="stat-card">
+            <div className="stat-value">6</div>
+            <div className="stat-label">Planning Tools</div>
+          </div>
+          <div className="stat-card">
+            <div className="stat-value">AI</div>
+            <div className="stat-label">Powered Insights</div>
+          </div>
+          <div className="stat-card">
+            <div className="stat-value">100%</div>
+            <div className="stat-label">Free to Use</div>
+          </div>
+          <div className="stat-card">
+            <div className="stat-value">∞</div>
+            <div className="stat-label">Possibilities</div>
+          </div>
+        </div>
+
+        {/* Sample Dashboard Link */}
+        <div className="mt-8 text-center">
+          <a
+            href="/docs/sampledash.html"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="text-sm text-blue-400 hover:text-blue-300 underline"
+          >
+            View Sample Dashboard Design
+          </a>
         </div>
       </main>
     </div>

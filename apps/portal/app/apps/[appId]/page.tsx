@@ -188,7 +188,7 @@ export default function AppPage() {
   if (!appId || !appConfig) {
     return (
       <div className="min-h-screen bg-gray-50">
-        <Header />
+        <Header showAppSwitcher />
         <div className="max-w-7xl mx-auto px-4 py-12 sm:px-6 lg:px-8">
           <div className="text-center">
             <p className="text-red-600 font-semibold mb-4">Application not found</p>
@@ -208,7 +208,7 @@ export default function AppPage() {
   if (appConfig?.disabled) {
     return (
       <div className="min-h-screen bg-gray-50">
-        <Header />
+        <Header showAppSwitcher />
         <div className="max-w-7xl mx-auto px-4 py-12 sm:px-6 lg:px-8">
           <div className="text-center">
             <p className="text-red-600 font-semibold mb-4">{appConfig.name || 'This application'} is temporarily offline</p>
@@ -232,7 +232,7 @@ export default function AppPage() {
 
   return (
     <div className="flex flex-col h-screen bg-gray-50">
-      <Header />
+      <Header showAppSwitcher />
 
       {/* App Info Bar */}
       <div className="bg-white border-b border-gray-200">
