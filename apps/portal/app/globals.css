@@ -207,12 +207,28 @@ body {
   transition: filter 180ms ease, box-shadow 180ms ease;
   will-change: filter;
 }
-/* Unified dark-blue gradient for all app tiles */
+/* Unified dark-blue gradient for all app tiles — now glassy and semi-transparent */
 .app-tile-unified {
-  background-image: linear-gradient(135deg, #0B5394 0%, #083653 100%) !important;
+  position: relative;
+  background: rgba(255,255,255,0.04); /* subtle translucent base */
+  -webkit-backdrop-filter: blur(10px);
+  backdrop-filter: blur(10px);
+  border: 1px solid rgba(255,255,255,0.08);
+  border-radius: 20px;
   color: #fff;
-  border: 2px solid rgba(96,165,250,0.24); /* light-blue border (2px) */
   box-shadow: 0 6px 18px rgba(9,38,60,0.12);
+  overflow: hidden;
+}
+
+/* Keep a subtle tint of the original gradient using a pseudo-element */
+.app-tile-unified::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background-image: linear-gradient(135deg, #0B5394 0%, #083653 100%);
+  opacity: 0.10; /* tint strength */
+  pointer-events: none;
+  mix-blend-mode: overlay;
 }
 /* Light-mode override: ensure tiles use the unified dark-blue gradient and white text like dark mode */
 .light .app-tile-unified {
