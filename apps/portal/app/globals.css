@@ -231,15 +231,12 @@ body {
 }
 
 /* Ensure main content sits above the overlay and particles */
-.dashboard-redesign > * {
+/* Use :not(header) to exclude the header from this z-index constraint */
+/* so the header's dropdown can escape its stacking context */
+.dashboard-redesign > main,
+.dashboard-redesign > .background-particles {
   position: relative;
   z-index: 2;
-}
-
-/* Ensure the content sits above the overlay */
-.dashboard-redesign > * {
-  position: relative;
-  z-index: 1;
 }
 
 /* Explicit per-app gradient utility classes to make backgrounds resilient to runtime updates */

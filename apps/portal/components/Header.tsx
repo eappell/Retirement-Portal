@@ -21,6 +21,7 @@ export function Header({ showAppSwitcher = false }: HeaderProps) {
   const { trackEvent } = useAnalytics();
   const { theme, toggleTheme } = useTheme();
   const [isMenuOpen, setIsMenuOpen] = useState(false);
+  const [isProfileMenuOpen, setIsProfileMenuOpen] = useState(false);
 
   const headerBgClass = theme === "light" ? "bg-[#F9F8F6] shadow" : "bg-slate-800 shadow-lg";
   const textPrimary = theme === "light" ? "text-gray-900" : "text-slate-100";
@@ -167,35 +168,43 @@ export function Header({ showAppSwitcher = false }: HeaderProps) {
                     : "Account information"}
                 </div>
               </div>
-              <div className="relative group">
+              <div 
+                className="relative"
+                onMouseEnter={() => setIsProfileMenuOpen(true)}
+                onMouseLeave={() => setIsProfileMenuOpen(false)}
+              >
                 <button className="w-10 h-10 rounded-full flex items-center justify-center font-semibold transition-colors text-white" style={{backgroundColor: '#0B5394'}} onMouseEnter={(e) => e.currentTarget.style.backgroundColor = '#094170'} onMouseLeave={(e) => e.currentTarget.style.backgroundColor = '#0B5394'}>
                   {user?.email ? user.email[0].toUpperCase() : "G"}
                 </button>
-                <div className={`absolute top-full right-0 mt-2 px-2 py-1 ${dropdownBg} ${theme === 'light' ? 'text-black' : 'text-white'} text-xs rounded opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all whitespace-nowrap z-50`}>
-                  Click for menu
-                </div>
-                <div className={`absolute right-0 mt-2 w-48 ${dropdownBg} rounded-lg shadow-lg opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all z-50`}>
-                  <button
-                    onClick={() => handleNavClick("/profile")}
-                    className={`block w-full text-left px-4 py-2 text-sm ${theme === 'light' ? 'text-gray-700 hover:bg-gray-100' : 'text-slate-200 hover:bg-slate-700'} rounded-t-lg`}
+                {isProfileMenuOpen && (
+                  <div 
+                    className={`absolute right-0 top-full w-48 pt-1`}
+                    style={{ zIndex: 9999 }}
                   >
-                    My Profile
-                  </button>
-                  {tier === "admin" && (
-                    <button
-                      onClick={() => handleNavClick("/admin/dashboard")}
-                      className={`block w-full text-left px-4 py-2 text-sm ${theme === 'light' ? 'text-gray-700 hover:bg-gray-100' : 'text-slate-200 hover:bg-slate-700'}`}
-                    >
-                      Admin Dashboard
-                    </button>
-                  )}
-                  <button
-                    onClick={handleLogout}
-                    className={`block w-full text-left px-4 py-2 text-sm ${theme === 'light' ? 'text-red-600 hover:bg-red-50 border-t border-gray-200 rounded-b-lg' : 'text-red-400 hover:bg-slate-700 border-t border-slate-700 rounded-b-lg'}`}
-                  >
-                    Logout
-                  </button>
-                </div>
+                    <div className={`${dropdownBg} rounded-lg shadow-lg border ${theme === 'light' ? 'border-gray-200' : 'border-slate-700'}`}>
+                      <button
+                        onClick={() => handleNavClick("/profile")}
+                        className={`block w-full text-left px-4 py-2 text-sm ${theme === 'light' ? 'text-gray-700 hover:bg-gray-100' : 'text-slate-200 hover:bg-slate-700'} rounded-t-lg`}
+                      >
+                        My Profile
+                      </button>
+                      {tier === "admin" && (
+                        <button
+                          onClick={() => handleNavClick("/admin/dashboard")}
+                          className={`block w-full text-left px-4 py-2 text-sm ${theme === 'light' ? 'text-gray-700 hover:bg-gray-100' : 'text-slate-200 hover:bg-slate-700'}`}
+                        >
+                          Admin Dashboard
+                        </button>
+                      )}
+                      <button
+                        onClick={handleLogout}
+                        className={`block w-full text-left px-4 py-2 text-sm ${theme === 'light' ? 'text-red-600 hover:bg-red-50 border-t border-gray-200 rounded-b-lg' : 'text-red-400 hover:bg-slate-700 border-t border-slate-700 rounded-b-lg'}`}
+                      >
+                        Logout
+                      </button>
+                    </div>
+                  </div>
+                )}
               </div>
             </div>
           </div>
