@@ -305,8 +305,8 @@ export default function AdminDashboard() {
 
       <main className="max-w-7xl mx-auto px-4 py-12 sm:px-6 lg:px-8">
         <div className="mb-8">
-          <h1 className="text-3xl font-bold text-gray-900">Admin Dashboard</h1>
-          <p className="text-gray-600 mt-2">System analytics and user management</p>
+          <h1 className="text-3xl font-bold admin-heading">Admin Dashboard</h1>
+          <p className="mt-2 admin-subheading">System analytics and user management</p>
         </div>
 
         {/* Users Modal */}

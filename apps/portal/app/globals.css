@@ -8,6 +8,8 @@
   --secondary: #BFCDE0;
   --accent: #E8E3DF;
   --neutral: #D2CAC1;
+  --admin-heading: #2A354A;
+  --admin-subheading: #6b5e62;
 }
 
 @theme inline {
@@ -27,6 +29,8 @@
 .dark {
   --background: #293757;
   --foreground: #FEFCFD;
+  --admin-heading: #F9F8F6;
+  --admin-subheading: #d1d5db;
 }
 
 .dark body {
@@ -612,4 +616,23 @@ p.app-description {
   width: fit-content;
 }
 
+/* Admin page headers - override gradient text effect */
+.admin-heading {
+  background: none !important;
+  -webkit-background-clip: unset !important;
+  -webkit-text-fill-color: #2A354A !important;
+  background-clip: unset !important;
+}
+
+.dark .admin-heading {
+  -webkit-text-fill-color: #F9F8F6 !important;
+}
+
+.admin-subheading {
+  color: #6b5e62;
+}
+
+.dark .admin-subheading {
+  color: #F9F8F6;
+}
 

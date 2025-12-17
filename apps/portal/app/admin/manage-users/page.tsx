@@ -104,8 +104,8 @@ export default function ManageUsersPage() {
       <main className="max-w-7xl mx-auto px-4 py-12 sm:px-6 lg:px-8">
         <div className="mb-8 flex items-center justify-between">
           <div>
-            <h1 className="text-3xl font-bold text-gray-900">Manage Users</h1>
-            <p className="text-gray-600 mt-2">Create, edit, delete, and manage user tiers</p>
+            <h1 className="text-3xl font-bold admin-heading">Manage Users</h1>
+            <p className="mt-2 admin-subheading">Create, edit, delete, and manage user tiers</p>
           </div>
           <div className="flex items-center gap-2">
             <button

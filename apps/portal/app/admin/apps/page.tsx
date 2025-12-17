@@ -349,8 +349,8 @@ export default function AdminAppsPage() {
 
         <div className="mb-8 flex items-center justify-between">
           <div>
-            <h1 className="text-3xl font-bold text-gray-900">Application Manager</h1>
-            <p className="text-gray-600 mt-2">Manage available applications and their settings</p>
+            <h1 className="text-3xl font-bold admin-heading">Application Manager</h1>
+            <p className="mt-2 admin-subheading">Manage available applications and their settings</p>
           </div>
           <div className="flex items-center gap-2">
             <button
