@@ -220,6 +220,14 @@ body {
   background-clip: text;
 }
 
+/* Utility to disable gradient text clipping (use on pages where legibility is needed) */
+.no-text-clip {
+  background: none !important;
+  -webkit-background-clip: initial !important;
+  -webkit-text-fill-color: inherit !important;
+  background-clip: initial !important;
+}
+
 /* Tagline nest egg - show appropriate version for theme */
 .tagline-egg-dark {
   display: none;
