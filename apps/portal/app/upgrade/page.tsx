@@ -13,7 +13,7 @@ const PLANS = [
     period: "forever",
     description: "Perfect for getting started",
     features: [
-      "5 queries per day",
+      "5 AI queries per day",
       "Basic retirement calculations",
       "View ads to support development",
       "Community forum access",
@@ -29,7 +29,7 @@ const PLANS = [
     period: "/month",
     description: "For those close to retirement",
     features: [
-      "100 queries per day",
+      "100 AI queries per day",
       "All basic features",
       "Ad-free experience",
       "Monthly analysis reports",
@@ -236,7 +236,7 @@ export default function UpgradePage() {
             <div>
               <h3 className="font-semibold text-gray-900 mb-2">Is there a free trial?</h3>
               <p className="text-gray-600">
-                Yes! Start with our Free plan with 5 queries per day. No credit card required.
+                Yes! Start with our Free plan with 5 AI queries per day. No credit card required.
               </p>
             </div>
 
