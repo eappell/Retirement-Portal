@@ -22,12 +22,12 @@ export function Header({ showAppSwitcher = false }: HeaderProps) {
   const { theme, toggleTheme } = useTheme();
   const [isMenuOpen, setIsMenuOpen] = useState(false);
 
-  const headerBgClass = theme === "light" ? "bg-white shadow" : "bg-slate-800 shadow-lg";
+  const headerBgClass = theme === "light" ? "bg-[#F9F8F6] shadow" : "bg-slate-800 shadow-lg";
   const textPrimary = theme === "light" ? "text-gray-900" : "text-slate-100";
   const textSecondary = theme === "light" ? "text-gray-600" : "text-slate-400";
   const linkText = theme === "light" ? "text-gray-700 hover:text-purple-600" : "text-slate-300 hover:text-purple-400";
   const borderColor = theme === "light" ? "border-gray-200" : "border-slate-700";
-  const dropdownBg = theme === "light" ? "bg-white" : "bg-slate-800";
+  const dropdownBg = theme === "light" ? "bg-[#F9F8F6]" : "bg-slate-800";
 
   const handleLogout = async () => {
     await trackEvent({

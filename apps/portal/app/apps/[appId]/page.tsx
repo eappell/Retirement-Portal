@@ -5,6 +5,7 @@ import { useRouter, useSearchParams, useParams } from "next/navigation";
 import { useAuth } from "@/lib/auth";
 import { useUserTier } from "@/lib/useUserTier";
 import { useAnalytics } from "@/lib/useAnalytics";
+import { useTheme } from "@/lib/theme";
 import { Header } from "@/components/Header";
 import { IFrameWrapper } from "@/components/IFrameWrapper";
 import { db } from "@/lib/firebase";
@@ -82,6 +83,7 @@ export default function AppPage() {
   const { user } = useAuth();
   const { tier, loading: tierLoading } = useUserTier();
   const { trackEvent } = useAnalytics();
+  const { theme } = useTheme();
   const [mounted, setMounted] = useState(false);
   const [appTitle, setAppTitle] = useState<string>("");
   const [appDescription, setAppDescription] = useState<string>("");
@@ -235,18 +237,24 @@ export default function AppPage() {
       <Header showAppSwitcher />
 
       {/* App Info Bar */}
-      <div className="bg-white border-b border-gray-200">
+      <div 
+        className="border-b"
+        style={{ 
+          backgroundColor: theme === 'light' ? '#F9F8F6' : '#1e293b',
+          borderColor: theme === 'light' ? '#e5e7eb' : '#334155'
+        }}
+      >
         <div className="max-w-7xl mx-auto px-4 py-3 sm:px-6 lg:px-8 flex items-center justify-between">
           <div className="flex items-center gap-4 flex-1">
             {/* App Icon */}
-            <AppIcon icon={appConfig.icon} className="h-8 w-8 text-gray-700 dark:text-gray-300" />
+            <AppIcon icon={appConfig.icon} className={`h-8 w-8 ${theme === 'light' ? 'text-gray-700' : 'text-gray-300'}`} />
             {/* App Name and Description */}
             <div className="flex-1">
-              <h2 className="text-lg font-semibold text-gray-900">
+              <h2 className={`text-lg font-semibold ${theme === 'light' ? 'text-gray-900' : 'text-white'}`}>
                 {appConfig.name}
               </h2>
               {appConfig.description && (
-                <p className="text-sm text-gray-600">{appConfig.description}</p>
+                <p className={`text-sm ${theme === 'light' ? 'text-gray-600' : 'text-gray-400'}`}>{appConfig.description}</p>
               )}
             </div>
           </div>
