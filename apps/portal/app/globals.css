@@ -50,8 +50,10 @@ body {
 }
 
 /* Dark mode component overrides */
+/* Force header to use the same opaque light color to ensure consistent legibility */
 .dark header {
-  @apply bg-slate-800 border-slate-700;
+  background-color: #ededed !important;
+  border-color: #ededed !important;
 }
 
 .dark .bg-white {
