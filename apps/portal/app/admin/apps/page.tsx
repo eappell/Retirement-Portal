@@ -90,6 +90,33 @@ interface App {
   disabled?: boolean;
 }
 
+// Dev mode settings stored in localStorage
+interface DevSettings {
+  [appId: string]: {
+    enabled: boolean;
+    port: string;
+  };
+}
+
+const DEV_SETTINGS_KEY = 'portal-dev-settings';
+
+function getDevSettings(): DevSettings {
+  if (typeof window === 'undefined') return {};
+  try {
+    const stored = localStorage.getItem(DEV_SETTINGS_KEY);
+    return stored ? JSON.parse(stored) : {};
+  } catch {
+    return {};
+  }
+}
+
+function saveDevSettings(settings: DevSettings) {
+  if (typeof window === 'undefined') return;
+  localStorage.setItem(DEV_SETTINGS_KEY, JSON.stringify(settings));
+  // Dispatch event so other components (like dashboard) can react
+  window.dispatchEvent(new CustomEvent('dev-settings-changed', { detail: settings }));
+}
+
 export default function AdminAppsPage() {
   const router = useRouter();
   const { user } = useAuth();
@@ -117,10 +144,25 @@ export default function AdminAppsPage() {
   const [error, setError] = useState<string>("");
   const [success, setSuccess] = useState<string>("");
   const [updateLoadingAppId, setUpdateLoadingAppId] = useState<string | null>(null);
+  
+  // Dev mode state
+  const [devSettings, setDevSettings] = useState<DevSettings>({});
+  const [showDevPopover, setShowDevPopover] = useState<string | null>(null);
 
   useEffect(() => {
     setMounted(true);
+    // Load dev settings from localStorage
+    setDevSettings(getDevSettings());
   }, []);
+
+  const updateDevSetting = (appId: string, enabled: boolean, port: string) => {
+    const newSettings = {
+      ...devSettings,
+      [appId]: { enabled, port }
+    };
+    setDevSettings(newSettings);
+    saveDevSettings(newSettings);
+  };
 
   useEffect(() => {
     if (mounted && (!user || tierLoading)) {
@@ -540,7 +582,7 @@ export default function AdminAppsPage() {
         {/* Apps List */}
         <div className="space-y-4">
           {apps.map((app) => (
-            <div key={app.id} className="bg-white rounded-lg shadow-lg overflow-hidden">
+            <div key={app.id} className={`bg-white rounded-lg shadow-lg ${isEditing === app.id ? 'overflow-hidden' : 'overflow-visible'}`}>
               {isEditing === app.id && editForm ? (
                 // Edit Mode
                 <div className="p-8">
@@ -717,6 +759,11 @@ export default function AdminAppsPage() {
                             {app.disabled && (
                               <span className="bg-red-100 text-red-800 px-2 py-1 rounded text-xs font-semibold">Disabled</span>
                             )}
+                            {devSettings[app.id]?.enabled && (
+                              <span className="bg-orange-100 text-orange-800 px-2 py-1 rounded text-xs font-semibold">
+                                🔧 Dev: localhost:{devSettings[app.id]?.port || '3000'}
+                              </span>
+                            )}
                           </div>
                           <p className="text-gray-600">{app.description}</p>
                           <div className="mt-2 flex gap-4 text-xs text-gray-500">
@@ -724,12 +771,12 @@ export default function AdminAppsPage() {
                               {app.id}
                             </span>
                             <a
-                              href={app.url}
+                              href={devSettings[app.id]?.enabled ? `http://localhost:${devSettings[app.id]?.port || '3000'}` : app.url}
                               target="_blank"
                               rel="noopener noreferrer"
                               className="text-indigo-600 hover:text-indigo-700 underline"
                             >
-                              {app.url}
+                              {devSettings[app.id]?.enabled ? `http://localhost:${devSettings[app.id]?.port || '3000'}` : app.url}
                             </a>
                             {app.freeAllowed && (
                               <span className="bg-green-100 text-green-800 px-2 py-1 rounded">
@@ -740,7 +787,67 @@ export default function AdminAppsPage() {
                         </div>
                       </div>
                     </div>
-                    <div className="flex gap-2">
+                    <div className="flex gap-2 items-start">
+                      {/* Dev Mode Button */}
+                      <div className="relative">
+                        <button
+                          onClick={() => setShowDevPopover(showDevPopover === app.id ? null : app.id)}
+                          className={`inline-flex items-center gap-1 font-semibold py-2 px-3 rounded-lg transition-colors text-sm ${
+                            devSettings[app.id]?.enabled 
+                              ? 'bg-orange-500 hover:bg-orange-600 text-white' 
+                              : 'bg-gray-200 hover:bg-gray-300'
+                          }`}
+                          style={{ color: devSettings[app.id]?.enabled ? undefined : '#374151' }}
+                          title="Development Mode Settings"
+                        >
+                          🔧 Dev
+                        </button>
+                        {showDevPopover === app.id && (
+                          <div className="absolute right-0 top-full mt-2 w-64 bg-white dark:bg-slate-800 rounded-lg shadow-xl border border-gray-200 dark:border-slate-700 p-4 z-[9999]">
+                            <div className="flex items-center justify-between mb-3">
+                              <span className="font-semibold text-gray-900 dark:text-gray-100 text-sm">Dev Mode</span>
+                              <button
+                                onClick={() => setShowDevPopover(null)}
+                                className="text-gray-400 hover:text-gray-600 dark:hover:text-gray-300"
+                              >
+                                <XMarkIcon className="h-4 w-4" />
+                              </button>
+                            </div>
+                            <div className="flex items-center gap-3 mb-2">
+                              <label className="flex items-center gap-2">
+                                <input
+                                  type="checkbox"
+                                  checked={devSettings[app.id]?.enabled || false}
+                                  onChange={(e) => updateDevSetting(
+                                    app.id, 
+                                    e.target.checked, 
+                                    devSettings[app.id]?.port || '3000'
+                                  )}
+                                  className="rounded border-gray-300 text-orange-600 focus:ring-orange-500"
+                                />
+                                <span className="text-sm text-gray-700 dark:text-gray-200">localhost:</span>
+                              </label>
+                              <input
+                                type="text"
+                                maxLength={5}
+                                value={devSettings[app.id]?.port || '3000'}
+                                onChange={(e) => updateDevSetting(
+                                  app.id,
+                                  devSettings[app.id]?.enabled || false,
+                                  e.target.value
+                                )}
+                                placeholder="3000"
+                                className="w-16 px-2 py-1 text-sm border border-gray-300 dark:border-slate-600 rounded focus:ring-orange-500 focus:border-orange-500 bg-white dark:bg-slate-700 text-gray-900 dark:text-gray-100"
+                              />
+                            </div>
+                            {devSettings[app.id]?.enabled && (
+                              <p className="text-xs text-orange-600 dark:text-orange-400">
+                                Portal will load: http://localhost:{devSettings[app.id]?.port || '3000'}
+                              </p>
+                            )}
+                          </div>
+                        )}
+                      </div>
                       <button
                         onClick={() => handleEdit(app)}
                         className="inline-flex items-center gap-2 text-white font-semibold py-2 px-4 rounded-lg transition-colors"

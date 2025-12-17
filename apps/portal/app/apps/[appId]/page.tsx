@@ -80,7 +80,7 @@ export default function AppPage() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const params = useParams();
-  const { user } = useAuth();
+  const { user, loading: authLoading } = useAuth();
   const { tier, loading: tierLoading } = useUserTier();
   const { trackEvent } = useAnalytics();
   const { theme } = useTheme();
@@ -114,10 +114,11 @@ export default function AppPage() {
   }, []);
 
   useEffect(() => {
-    if (mounted && !user) {
+    // Only redirect to login if auth has finished loading and there's no user
+    if (mounted && !authLoading && !user) {
       router.push("/");
     }
-  }, [user, mounted, router]);
+  }, [user, mounted, authLoading, router]);
 
   // Load app configuration from Firestore
   useEffect(() => {

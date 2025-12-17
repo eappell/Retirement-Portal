@@ -12,6 +12,34 @@ import { AppIcon } from "@/components/icon-map";
 
 // Use shared icon resolver so Firestore icon names (e.g. "Heart") resolve correctly
 
+// Dev settings interface (matches admin apps page)
+interface DevSettings {
+  [appId: string]: {
+    enabled: boolean;
+    port: string;
+  };
+}
+
+const DEV_SETTINGS_KEY = 'portal-dev-settings';
+
+function getDevSettings(): DevSettings {
+  if (typeof window === 'undefined') return {};
+  try {
+    const stored = localStorage.getItem(DEV_SETTINGS_KEY);
+    return stored ? JSON.parse(stored) : {};
+  } catch {
+    return {};
+  }
+}
+
+function getEffectiveUrl(app: { id: string; url: string }, devSettings: DevSettings): string {
+  const setting = devSettings[app.id];
+  if (setting?.enabled && setting.port) {
+    return `http://localhost:${setting.port}`;
+  }
+  return app.url;
+}
+
 interface App {
   id: string;
   name: string;
@@ -67,23 +95,37 @@ const DEFAULT_APPS: App[] = [
 
 export default function DashboardPage() {
   const router = useRouter();
-  const {user} = useAuth();
+  const {user, loading: authLoading} = useAuth();
   
   const {trackEvent} = useAnalytics();
   const [mounted, setMounted] = useState(false);
   const [apps, setApps] = useState<App[]>(DEFAULT_APPS);
   const [loadingApps, setLoadingApps] = useState(true);
+  const [devSettings, setDevSettings] = useState<DevSettings>({});
  
 
   useEffect(() => {
     setMounted(true);
+    // Load dev settings from localStorage
+    setDevSettings(getDevSettings());
+    
+    // Listen for dev settings changes from admin page
+    const handleDevSettingsChange = (e: CustomEvent<DevSettings>) => {
+      setDevSettings(e.detail);
+    };
+    window.addEventListener('dev-settings-changed', handleDevSettingsChange as EventListener);
+    
+    return () => {
+      window.removeEventListener('dev-settings-changed', handleDevSettingsChange as EventListener);
+    };
   }, []);
 
   useEffect(() => {
-    if (mounted && !user) {
+    // Only redirect to login if auth has finished loading and there's no user
+    if (mounted && !authLoading && !user) {
       router.push("/");
     }
-  }, [user, mounted, router]);
+  }, [user, mounted, authLoading, router]);
 
  
 
@@ -283,16 +325,23 @@ export default function DashboardPage() {
               };
               
               const appStyle = getAppStyle();
+              const effectiveUrl = getEffectiveUrl(app, devSettings);
+              const isDevMode = devSettings[app.id]?.enabled;
               
               return (
                 <Link
                   key={app.id}
-                  href={`/apps/${app.id}?name=${encodeURIComponent(app.name)}&url=${encodeURIComponent(app.url)}`}
+                  href={`/apps/${app.id}?name=${encodeURIComponent(app.name)}&url=${encodeURIComponent(effectiveUrl)}`}
                   onClick={() => handleAppClick(app)}
                   data-app-id={app.id}
                   className="app-tile app-tile-unified rounded-2xl shadow-lg hover:shadow-2xl transform transition-all duration-200 hover:scale-[1.035] block group"
-                  style={{ padding: '30px', backgroundColor: appStyle.tileBg, maxWidth: '668px', height: '180px' }}
+                  style={{ padding: '30px', backgroundColor: appStyle.tileBg, maxWidth: '668px', height: '180px', position: 'relative' }}
                 >
+                  {isDevMode && (
+                    <div className="absolute top-2 right-2 bg-orange-500 text-white text-xs font-bold px-2 py-1 rounded">
+                      🔧 DEV
+                    </div>
+                  )}
                   <div className="flex items-start justify-between h-full">
                     <div className="flex items-start gap-4">
                       <div className="flex-shrink-0">
