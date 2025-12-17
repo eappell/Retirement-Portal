@@ -70,7 +70,7 @@ export function Header({ showAppSwitcher = false }: HeaderProps) {
       <div className="max-w-[1400px] mx-auto px-4 py-4 sm:px-6 lg:px-8">
         <div className="flex items-center">
           {/* Logo/Brand */}
-          <Link href="/dashboard" className="flex items-center gap-2">
+          <Link href="/dashboard" className="flex items-center gap-2 -ml-5">
             <img
               src={theme === "light" ? "/images/no-tagline-black.png" : "/images/no-tagline-white.png"}
               alt="RetireWise"
@@ -87,7 +87,7 @@ export function Header({ showAppSwitcher = false }: HeaderProps) {
           <nav className="hidden md:flex items-center gap-4">
             {!user?.isAnonymous && !tierLoading && tier !== "paid" && tier !== "admin" && (
               <div className="group relative">
-                <Link href="/upgrade" className={`${linkText} font-medium transition-colors`}>
+                <Link href="/upgrade" className="inline-flex items-center px-3 py-1.5 bg-purple-600 text-white rounded-md text-sm font-medium hover:bg-purple-700 focus:outline-none focus:ring-2 focus:ring-purple-300 mr-4 transition">
                   Upgrade
                 </Link>
                 <div className="absolute top-full left-0 mt-2 px-2 py-1 bg-gray-900 text-white text-xs rounded opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all whitespace-nowrap">
