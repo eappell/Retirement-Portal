@@ -45,11 +45,11 @@ export default function Home() {
 
   // Default list of visible apps and their computed default gradients
   const DEFAULT_APPS: {id: string, name: string, gradient?: string, url?: string, icon?: string, disabled?: boolean}[] = [
-    { id: 'income-estimator', name: 'Monthly Retirement Income Estimator', gradient: 'linear-gradient(135deg, #34d399 0%, #10b981 100%)', url: 'http://localhost:5173/', icon: '📊', disabled: false },
-    { id: 'retire-abroad', name: 'Retire Abroad AI Recommendations', gradient: 'linear-gradient(135deg, #60a5fa 0%, #3b82f6 100%)', url: 'https://retire-abroad-ai.vercel.app/', icon: '🌍', disabled: false },
-    { id: 'tax-impact-analyzer', name: 'Tax Impact Analyzer', gradient: 'linear-gradient(135deg, #fbbf24 0%, #f59e0b 100%)', url: 'http://localhost:3001/', icon: '💰', disabled: false },
-    { id: 'social-security', name: 'Social Security Optimization', gradient: 'linear-gradient(135deg, #a78bfa 0%, #8b5cf6 100%)', url: 'https://social-security.example/', icon: '👥', disabled: false },
-    { id: 'healthcare-cost', name: 'Healthcare Cost Calculator', gradient: 'linear-gradient(135deg, #fca5a5 0%, #ef4444 100%)', url: 'https://healthcare-cost.vercel.app/', icon: '❤️', disabled: false },
+    { id: 'income-estimator', name: 'Monthly Retirement Income Estimator', gradient: 'linear-gradient(135deg, #34d399 0%, #10b981 100%)', url: 'http://localhost:5173/', icon: 'CurrencyDollarIcon', disabled: false },
+    { id: 'retire-abroad', name: 'Retire Abroad AI Recommendations', gradient: 'linear-gradient(135deg, #60a5fa 0%, #3b82f6 100%)', url: 'https://retire-abroad-ai.vercel.app/', icon: 'GlobeAltIcon', disabled: false },
+    { id: 'tax-impact-analyzer', name: 'Tax Impact Analyzer', gradient: 'linear-gradient(135deg, #fbbf24 0%, #f59e0b 100%)', url: 'http://localhost:3001/', icon: 'CalculatorIcon', disabled: false },
+    { id: 'social-security', name: 'Social Security Optimization', gradient: 'linear-gradient(135deg, #a78bfa 0%, #8b5cf6 100%)', url: 'https://social-security.example/', icon: 'UserGroupIcon', disabled: false },
+    { id: 'healthcare-cost', name: 'Healthcare Cost Calculator', gradient: 'linear-gradient(135deg, #fca5a5 0%, #ef4444 100%)', url: 'https://healthcare-cost.vercel.app/', icon: 'HeartIcon', disabled: false },
   ];
 
   const normalizeText = (s?: string) => (s || '').toLowerCase().replace(/[^a-z0-9 ]/g, ' ');
@@ -88,41 +88,31 @@ export default function Home() {
   }).concat(apps.filter((a) => !DEFAULT_APPS.some((d) => matchesDefault(d, a))).map(a => ({ id: a.id, name: a.name, gradient: a.gradient || '', url: a.url || '', icon: a.icon || '📦', disabled: a.disabled })));
 
   const appNodes = displayApps.filter(a => !a.disabled).map((app) => {
-    const gradients = {
+    const gradients: Record<string, string> = {
       'healthcare-cost': 'linear-gradient(135deg, #fca5a5 0%, #ef4444 100%)',
       'income-estimator': 'linear-gradient(135deg, #34d399 0%, #10b981 100%)',
       'retire-abroad': 'linear-gradient(135deg, #60a5fa 0%, #3b82f6 100%)',
       'tax-impact-analyzer': 'linear-gradient(135deg, #fbbf24 0%, #f59e0b 100%)',
       default: 'linear-gradient(135deg, #a78bfa 0%, #8b5cf6 100%)',
-    } as Record<string, string>;
+    };
 
     const key = `${app.id || ''} ${app.name || ''}`.toLowerCase();
-    const computed = key.includes('health') || key.includes('healthcare')
-      ? gradients['healthcare-cost']
-      : key.includes('income') || key.includes('estimator')
-      ? gradients['income-estimator']
-      : key.includes('retire') || key.includes('abroad')
-      ? gradients['retire-abroad']
-      : gradients.default;
-
-    const appGradientClass = (app as any).gradient
-      ? ''
-      : key.includes('health') || key.includes('healthcare')
-      ? 'app-gradient-healthcare'
-      : key.includes('income') || key.includes('estimator')
-      ? 'app-gradient-income-estimator'
-      : key.includes('retire') || key.includes('abroad')
-      ? 'app-gradient-retire-abroad'
-      : '';
-    const gradient = (app as any).gradient || computed;
+    const gradient = app.gradient || (
+      key.includes('health') || key.includes('healthcare')
+        ? gradients['healthcare-cost']
+        : key.includes('income') || key.includes('estimator')
+        ? gradients['income-estimator']
+        : key.includes('retire') || key.includes('abroad')
+        ? gradients['retire-abroad']
+        : key.includes('tax')
+        ? gradients['tax-impact-analyzer']
+        : gradients.default
+    );
 
     return (
-      <div key={app.id} data-app-id={app.id} className={`flex flex-col items-start justify-between rounded-lg overflow-hidden ${appGradientClass}`} style={{background: gradient, backgroundImage: gradient}}>
-        <div className="px-3 py-2 text-sm font-medium text-white flex items-center gap-3">
-          <AppIcon icon={app.icon} className="h-6 w-6" />
-          <span>{app.name}</span>
-        </div>
-        
+      <div key={app.id} data-app-id={app.id} className="flex items-center gap-3 rounded-lg px-3 py-2" style={{ background: gradient }}>
+        <AppIcon icon={app.icon} className="h-5 w-5" color="#000000" />
+        <span className="text-sm font-medium text-black">{app.name}</span>
       </div>
     );
   });
