@@ -5,11 +5,13 @@ import Link from "next/link";
 import {useRouter} from "next/navigation";
 import {useAuth} from "@/lib/auth";
 import {useAnalytics} from "@/lib/useAnalytics";
+import {useTheme} from "@/lib/theme";
 
 export default function SignupPage() {
   const router = useRouter();
   const {signup} = useAuth();
   const {trackEvent} = useAnalytics();
+  const {theme} = useTheme();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
@@ -52,12 +54,16 @@ export default function SignupPage() {
   };
 
   return (
-    <div className="flex min-h-screen items-center justify-center bg-gradient-to-br from-blue-50 to-indigo-100 px-4">
+    <div className="flex min-h-screen items-center justify-center px-4" style={{background: 'linear-gradient(to bottom right, #E8E3DF, #BFCDE0)'}}>
       <div className="max-w-md w-full">
         <div className="bg-white rounded-lg shadow-lg p-8 space-y-6">
           <div className="text-center">
-            <h1 className="text-2xl font-bold text-gray-900">Create Account</h1>
-            <p className="text-gray-600 mt-2">Join the retirement planning community</p>
+            <img 
+              src={theme === "dark" ? "/images/large-dark.png" : "/images/large-light.png"} 
+              alt="RetireWise" 
+              className="h-16 w-auto mx-auto mb-2"
+            />
+            <p className="text-gray-600 mt-2">Plan with Clarity. Live with Confidence.</p>
           </div>
 
           {error && (

@@ -49,8 +49,12 @@ export default function LoginPage() {
       <div className="max-w-md w-full">
         <div className="bg-white rounded-lg shadow-lg p-8 space-y-6">
           <div className="text-center">
-            <h1 className="text-2xl font-bold text-gray-900">Sign In</h1>
-            <p className="text-gray-600 mt-2">Welcome back to RetireWise</p>
+            <img 
+              src={theme === "dark" ? "/images/large-dark.png" : "/images/large-light.png"} 
+              alt="RetireWise" 
+              className="h-16 w-auto mx-auto mb-2"
+            />
+            <p className="text-gray-600 mt-2">Plan with Clarity. Live with Confidence.</p>
           </div>
 
           {error && (

@@ -119,8 +119,6 @@ export function getIconComponent(name?: string) {
   return CalculatorIcon;
 }
 
-import { CARTOON_ICON_MAP } from './cartoon-icons';
-
 export function getIconColor(name?: string) {
   if (!name) return '#ffffff';
   const key = name.toLowerCase();
@@ -134,12 +132,6 @@ export function getIconColor(name?: string) {
 
 export function AppIcon({ icon, className, style, color, appId, bgColor }: { icon?: string; className?: string; style?: React.CSSProperties; color?: string; appId?: string; bgColor?: string }) {
   const mergedStyle = { ...(style || {}), ...(color ? { color } : {}) } as React.CSSProperties;
-
-  // If we have an appId and a cartoon icon for it, render the cartoon icon (filled, colorful)
-  if (appId && CARTOON_ICON_MAP[appId]) {
-    const Cartoon = CARTOON_ICON_MAP[appId];
-    return <Cartoon className={className} size={48} color={color || getIconColor(appId)} bgColor={bgColor} />;
-  }
 
   if (!icon) {
     const C = CalculatorIcon;

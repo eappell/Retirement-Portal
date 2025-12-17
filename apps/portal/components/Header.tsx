@@ -72,7 +72,7 @@ export function Header({ showAppSwitcher = false }: HeaderProps) {
           {/* Logo/Brand */}
           <Link href="/dashboard" className="flex items-center gap-2">
             <img
-              src={theme === "light" ? "/no-tagline-black.png" : "/no-tagline-white.png"}
+              src={theme === "light" ? "/images/no-tagline-black.png" : "/images/no-tagline-white.png"}
               alt="RetireWise"
               className="h-10 w-auto"
             />

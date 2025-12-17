@@ -4,12 +4,14 @@ import {useState} from "react";
 import {useRouter} from "next/navigation";
 import {useAuth} from "@/lib/auth";
 import {useAnalytics} from "@/lib/useAnalytics";
+import {useTheme} from "@/lib/theme";
 import Link from "next/link";
 
 export default function GuestPage() {
   const router = useRouter();
   const {loginAnonymously} = useAuth();
   const {trackEvent} = useAnalytics();
+  const {theme} = useTheme();
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
 
@@ -36,12 +38,16 @@ export default function GuestPage() {
   };
 
   return (
-    <div className="flex min-h-screen items-center justify-center bg-gradient-to-br from-blue-50 to-indigo-100 px-4">
+    <div className="flex min-h-screen items-center justify-center px-4" style={{background: 'linear-gradient(to bottom right, #E8E3DF, #BFCDE0)'}}>
       <div className="max-w-md w-full">
         <div className="bg-white rounded-lg shadow-lg p-8 space-y-6">
           <div className="text-center">
-            <h1 className="text-2xl font-bold text-gray-900">Continue as Guest</h1>
-            <p className="text-gray-600 mt-2">Try our tools without signing up</p>
+            <img 
+              src={theme === "dark" ? "/images/large-dark.png" : "/images/large-light.png"} 
+              alt="RetireWise" 
+              className="h-16 w-auto mx-auto mb-2"
+            />
+            <p className="text-gray-600 mt-2">Plan with Clarity. Live with Confidence.</p>
           </div>
 
           <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">

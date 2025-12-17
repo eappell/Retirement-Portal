@@ -220,7 +220,8 @@ export default function DashboardPage() {
           </h2>
           <p className="text-center text-slate-400 tagline-with-egg" style={{ fontSize: '20px', fontWeight: 500, marginBottom: '50px', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px' }}>
             <span>Plan with Clarity.</span>
-            <img src="/images/NesteggOnly-dark.png" alt="" className="tagline-egg" style={{ height: '24px', width: 'auto' }} />
+            <img src="/images/NesteggOnly-dark.png" alt="" className="tagline-egg tagline-egg-dark" style={{ height: '24px', width: 'auto' }} />
+            <img src="/images/Nestegg-light.png" alt="" className="tagline-egg tagline-egg-light" style={{ height: '24px', width: 'auto' }} />
             <span>Live with Confidence.</span>
           </p>
           <div className="tools-grid-custom">
