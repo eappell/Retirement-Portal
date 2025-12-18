@@ -50,10 +50,11 @@ body {
 }
 
 /* Dark mode component overrides */
-/* Force header to use the same opaque light color to ensure consistent legibility */
+/* Header background in dark mode: use a deep navy (#1A2A40) for the navbar and matching border */
 .dark header {
-  background-color: #ededed !important;
-  border-color: #ededed !important;
+  background-color: #1A2A40 !important;
+  border-color: #1A2A40 !important;
+  color: #ffffff !important;
 }
 
 .dark .bg-white {
