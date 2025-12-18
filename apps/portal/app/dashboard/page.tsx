@@ -9,6 +9,7 @@ import {collection, getDocs} from "firebase/firestore";
 import Link from "next/link";
 import {Header} from "@/components/Header";
 import { AppIcon } from "@/components/icon-map";
+import { useTheme } from '@/lib/theme';
 
 // Use shared icon resolver so Firestore icon names (e.g. "Heart") resolve correctly
 
@@ -93,9 +94,11 @@ const DEFAULT_APPS: App[] = [
   },
 ];
 
+
 export default function DashboardPage() {
   const router = useRouter();
   const {user, loading: authLoading} = useAuth();
+  const { theme } = useTheme();
   
   const {trackEvent} = useAnalytics();
   const [mounted, setMounted] = useState(false);
@@ -120,12 +123,16 @@ export default function DashboardPage() {
     };
   }, []);
 
+  // Allow bypassing auth redirect in tests by appending ?testMode=1 to the URL
+  const testMode = (typeof window !== 'undefined') && new URLSearchParams(window.location.search).get('testMode') === '1';
+
   useEffect(() => {
     // Only redirect to login if auth has finished loading and there's no user
-    if (mounted && !authLoading && !user) {
+    // but allow `testMode` to force-render the dashboard for visual tests.
+    if (mounted && !authLoading && !user && !testMode) {
       router.push("/");
     }
-  }, [user, mounted, authLoading, router]);
+  }, [user, mounted, authLoading, router, testMode]);
 
  
 
@@ -236,12 +243,16 @@ export default function DashboardPage() {
     <div className="min-h-screen bg-background portal-dashboard dashboard-redesign">
       <Header />
 
-      {/* Background particles (dark mode only) */}
+      {/* Background particles */}
       <div className="background-particles" aria-hidden="true">
-        <div className="particle" />
-        <div className="particle" />
-        <div className="particle" />
+        <div className={"particle" + (theme === 'light' ? ' particle-light' : '')} />
+        <div className={"particle" + (theme === 'light' ? ' particle-light' : '')} />
+        <div className={"particle" + (theme === 'light' ? ' particle-light' : '')} />
+        <div className={"particle" + (theme === 'light' ? ' particle-light' : '')} />
+        <div className={"particle" + (theme === 'light' ? ' particle-light' : '')} />
       </div>
+
+
 
       <main className="max-w-[1400px] mx-auto px-4 py-12 sm:px-6 lg:px-8">
         {/* User info card removed: information is available in the header */}

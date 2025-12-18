@@ -115,6 +115,8 @@ body {
 }
 
 /* Dashboard redesign background + subtle pattern overlay */
+/* NOTE: Visual tests (Playwright) assert particles exist and colors/visibility. See `apps/portal/tests/visual/dashboard.spec.ts`.
+   If you remove or rename `.background-particles` or `.particle`, update those tests. */
 .dashboard-redesign {
   /* base gradient (matches your example) */
   background: linear-gradient(135deg, #1e293b 0%, #0f172a 100%);
@@ -194,68 +196,85 @@ body {
 }
 
 /* Light mode: stronger, pastel blobs that are visible on near-white backgrounds */
-.light .dashboard-redesign .background-particles .particle,
-:root.light .dashboard-redesign .background-particles .particle {
+html.light .dashboard-redesign .background-particles .particle-light,
+:root.light .dashboard-redesign .background-particles .particle-light {
   opacity: 0.98 !important;
   filter: blur(10px) !important;
   mix-blend-mode: normal !important;
   /* neutral base; specific colors set on nth-child rules below */
-  background: radial-gradient(circle, rgba(99,102,241,0.36) 0%, rgba(236,72,153,0.16) 40%, transparent 80%) !important;
+  background: radial-gradient(circle, rgba(99,102,241,0.36) 0%, rgba(96,165,250,0.16) 40%, transparent 80%) !important;
   box-shadow: 0 8px 48px rgba(99,102,241,0.12) !important;
   border: 1px solid rgba(0,0,0,0.03) !important;
 }
 /* Per-particle tuning for variety and better visibility */
-.light .dashboard-redesign .background-particles .particle:nth-child(1) {
+html.light .dashboard-redesign .background-particles .particle-light:nth-child(1) {
   width: 320px; height: 320px; top: 8%; left: 8%;
   background: radial-gradient(circle, rgba(99,102,241,0.72) 0%, rgba(99,102,241,0.28) 40%, transparent 80%) !important;
 }
-.light .dashboard-redesign .background-particles .particle:nth-child(2) {
+html.light .dashboard-redesign .background-particles .particle-light:nth-child(2) {
   width: 240px; height: 240px; top: 55%; left: 65%;
-  background: radial-gradient(circle, rgba(236,72,153,0.72) 0%, rgba(236,72,153,0.36) 40%, transparent 80%) !important;
+  background: radial-gradient(circle, rgba(96,165,250,0.72) 0%, rgba(96,165,250,0.36) 40%, transparent 80%) !important;
 }
-.light .dashboard-redesign .background-particles .particle:nth-child(3) {
+/* Light mode: all pastel blue blobs */
+html.light .dashboard-redesign .background-particles .particle-light,
+:root.light .dashboard-redesign .background-particles .particle-light {
+  opacity: 0.95 !important;
+  filter: blur(10px) !important;
+  mix-blend-mode: normal !important;
+  background: radial-gradient(circle, rgba(96,165,250,0.36) 0%, rgba(99,102,241,0.14) 48%, transparent 80%) !important;
+  box-shadow: 0 8px 48px rgba(99,102,241,0.10) !important;
+  border: 1px solid rgba(0,0,0,0.02) !important;
+}
+html.light .dashboard-redesign .background-particles .particle-light:nth-child(1) {
+  width: 320px; height: 320px; top: 8%; left: 8%;
+  background: radial-gradient(circle, rgba(99,102,241,0.72) 0%, rgba(96,165,250,0.32) 40%, transparent 80%) !important;
+}
+html.light .dashboard-redesign .background-particles .particle-light:nth-child(2) {
+  width: 240px; height: 240px; top: 55%; left: 65%;
+  background: radial-gradient(circle, rgba(96,165,250,0.68) 0%, rgba(96,165,250,0.30) 40%, transparent 80%) !important;
+}
+html.light .dashboard-redesign .background-particles .particle-light:nth-child(3) {
   width: 280px; height: 280px; top: 30%; left: 78%;
-  background: radial-gradient(circle, rgba(99,102,241,0.68) 0%, rgba(99,102,241,0.28) 40%, transparent 80%) !important;
+  background: radial-gradient(circle, rgba(59,130,246,0.68) 0%, rgba(96,165,250,0.28) 40%, transparent 80%) !important;
 }
-.light .dashboard-redesign .background-particles .particle:nth-child(4) {
+html.light .dashboard-redesign .background-particles .particle-light:nth-child(4) {
   width: 180px; height: 180px; top: 20%; left: 45%;
-  background: radial-gradient(circle, rgba(99,102,241,0.56) 0%, rgba(236,72,153,0.18) 40%, transparent 80%) !important;
+  background: radial-gradient(circle, rgba(96,165,250,0.56) 0%, rgba(96,165,250,0.20) 40%, transparent 80%) !important;
 }
-.light .dashboard-redesign .background-particles .particle:nth-child(5) {
+html.light .dashboard-redesign .background-particles .particle-light:nth-child(5) {
   width: 200px; height: 200px; top: 68%; left: 20%;
-  background: radial-gradient(circle, rgba(236,72,153,0.64) 0%, rgba(236,72,153,0.26) 40%, transparent 80%) !important;
-}
-/* DEBUG: add visible numbered labels for each particle in light mode so we can confirm which ones are rendering */
-.light .dashboard-redesign .background-particles .particle::before {
-  content: "";
-  position: absolute;
-  inset: 0;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  font-size: 22px;
-  color: rgba(255,255,255,0.95);
-  text-shadow: 0 1px 0 rgba(0,0,0,0.2);
-  opacity: 0.0; /* hide numeric content, keep box visible via outline */
-}
-.light .dashboard-redesign .background-particles .particle:nth-child(1)::before { content: "1"; opacity: 1; }
-.light .dashboard-redesign .background-particles .particle:nth-child(2)::before { content: "2"; opacity: 1; }
-.light .dashboard-redesign .background-particles .particle:nth-child(3)::before { content: "3"; opacity: 1; }
-.light .dashboard-redesign .background-particles .particle:nth-child(4)::before { content: "4"; opacity: 1; }
-.light .dashboard-redesign .background-particles .particle:nth-child(5)::before { content: "5"; opacity: 1; }
-/* add faint contrasting ring so blobs are visible even if their fill is subtle */
-.light .dashboard-redesign .background-particles .particle {
-  outline: 2px dashed rgba(0,0,0,0.06) !important;
-}
+  background: radial-gradient(circle, rgba(59,130,246,0.64) 0%, rgba(96,165,250,0.22) 40%, transparent 80%) !important;
+} 
  
 
-/* Dark mode particles: soft blue glow */
+/* Force all light-mode particles to blue (override any residual pink) */
+html.light .dashboard-redesign .background-particles .particle-light,
+:root.light .dashboard-redesign .background-particles .particle-light {
+  background-image: radial-gradient(circle, rgba(99,102,241,0.72) 0%, rgba(96,165,250,0.28) 40%, transparent 80%) !important;
+}
+
+/* Dark mode particles: stronger blue glow + pulsation and livelier float */
 .dark .dashboard-redesign .background-particles .particle,
 :root.dark .dashboard-redesign .background-particles .particle {
-  background: radial-gradient(circle, rgba(96,165,250,0.32) 0%, transparent 70%) !important;
-  opacity: 0.28 !important;
-  filter: blur(36px) !important;
+  /* stronger, richer blue at center + softer outer falloff */
+  background: radial-gradient(circle, rgba(59,130,246,0.95) 0%, rgba(96,165,250,0.55) 45%, transparent 85%) !important;
+  /* more visible over dark backgrounds */
+  opacity: 0.82 !important;
+  /* keep blur but less diffuse so shape is more readable */
+  filter: blur(14px) !important;
   mix-blend-mode: screen !important;
+  /* pronounced glow to increase contrast against background */
+  box-shadow: 0 20px 120px rgba(59,130,246,0.28) !important;
+  border: 1px solid rgba(255,255,255,0.04) !important;
+  /* add a short pulsating animation in addition to the slow float */
+  animation: dashboard-float 18s infinite ease-in-out, dashboard-pulse 6s infinite cubic-bezier(.4,0,.2,1) alternate;
+  will-change: transform, opacity, box-shadow;
+}
+
+@keyframes dashboard-pulse {
+  0% { transform: scale(1); opacity: 0.75; box-shadow: 0 12px 80px rgba(59,130,246,0.18); }
+  50% { transform: scale(1.06); opacity: 0.95; box-shadow: 0 28px 160px rgba(59,130,246,0.32); }
+  100% { transform: scale(1); opacity: 0.80; box-shadow: 0 12px 80px rgba(59,130,246,0.18); }
 }
 
 .particle:nth-child(1) { width: 300px; height: 300px; top: 10%; left: 10%; animation-delay: 0s; }
@@ -319,17 +338,8 @@ body {
   position: absolute;
   inset: 0;
   pointer-events: none;
-  z-index: 3; /* DEBUG: temporarily raise above main content for visibility (reverted after debug) */
+  z-index: 1; /* particles sit above decorative overlay but below main content */
 } 
-
-/* DEBUG: Make particles visually obvious in light mode (red outline + top stacking) */
-.light .dashboard-redesign .background-particles .particle,
-:root.light .dashboard-redesign .background-particles .particle {
-  outline: 3px solid rgba(255, 0, 0, 0.9) !important;
-  z-index: 4 !important;
-  position: absolute !important;
-}
-
 
 /* Explicit per-app gradient utility classes to make backgrounds resilient to runtime updates */
 .app-gradient-healthcare {

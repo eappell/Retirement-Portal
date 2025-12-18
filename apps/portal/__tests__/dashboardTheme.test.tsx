@@ -33,6 +33,6 @@ describe('Dashboard theme styles', () => {
     await waitFor(() => expect(container.querySelector('.background-particles')).toBeTruthy());
 
     const particles = container.querySelectorAll('.background-particles .particle');
-    expect(particles.length).toBeGreaterThanOrEqual(3);
+    expect(particles.length).toBeGreaterThanOrEqual(5);
   });
 });
