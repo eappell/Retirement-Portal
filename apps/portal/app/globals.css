@@ -153,15 +153,12 @@ body {
 
 /* Animated background particles (copied from docs/sampledash.html) */
 .background-particles {
-  position: fixed;
-  top: 0;
-  left: 0;
-  width: 100%;
-  height: 100%;
+  position: absolute;
+  inset: 0;
   pointer-events: none;
-  z-index: 1; /* sit above the overlay (z-index:0) but below content (z-index:2) */
+  z-index: 0; /* below content but above decorative overlay */
   overflow: hidden;
-}
+} 
 
 /* Tools grid similar to sample: 2 columns on wide screens, 1 column on narrow screens */
 .tools-grid-custom {
@@ -187,21 +184,36 @@ body {
 .background-particles {
   display: block;
 }
-/* Light mode particles - subtle gray blobs */
+/* Base particle styles (shared) */
 .particle {
   position: absolute;
-  background: radial-gradient(circle, rgba(200, 200, 200, 0.6) 0%, transparent 70%);
   border-radius: 50%;
+  filter: blur(28px);
   animation: dashboard-float 20s infinite ease-in-out;
+  mix-blend-mode: normal; /* default blend for best compatibility */
 }
-/* Dark mode particles - blue blobs */
-.dark .particle {
-  background: radial-gradient(circle, rgba(96, 165, 250, 0.3) 0%, transparent 70%);
+
+/* Light mode: stronger, cooler pastel blobs that are visible on near-white backgrounds */
+.light .dashboard-redesign .background-particles .particle,
+:root.light .dashboard-redesign .background-particles .particle {
+  background: radial-gradient(circle, rgba(11, 83, 148, 0.22) 0%, rgba(99,102,241,0.12) 40%, transparent 80%) !important;
+  opacity: 1 !important; /* fully visible */
+  filter: blur(14px) !important; /* less blur for clearer shapes */
+  mix-blend-mode: normal !important; /* render directly on top of white background */
+}
+
+/* Dark mode particles: soft blue glow */
+.dark .dashboard-redesign .background-particles .particle,
+:root.dark .dashboard-redesign .background-particles .particle {
+  background: radial-gradient(circle, rgba(96,165,250,0.32) 0%, transparent 70%) !important;
+  opacity: 0.28 !important;
+  filter: blur(36px) !important;
+  mix-blend-mode: screen !important;
 }
 
 .particle:nth-child(1) { width: 300px; height: 300px; top: 10%; left: 10%; animation-delay: 0s; }
-.particle:nth-child(2) { width: 200px; height: 200px; top: 60%; left: 70%; animation-delay: 5s; }
-.particle:nth-child(3) { width: 250px; height: 250px; top: 30%; left: 80%; animation-delay: 10s; }
+.particle:nth-child(2) { width: 220px; height: 220px; top: 60%; left: 70%; animation-delay: 5s; }
+.particle:nth-child(3) { width: 260px; height: 260px; top: 30%; left: 80%; animation-delay: 10s; }
 
 @keyframes dashboard-float {
   0%, 100% { transform: translate(0, 0) scale(1); opacity: 0.3; }
@@ -248,11 +260,20 @@ body {
 /* Ensure main content sits above the overlay and particles */
 /* Use :not(header) to exclude the header from this z-index constraint */
 /* so the header's dropdown can escape its stacking context */
-.dashboard-redesign > main,
-.dashboard-redesign > .background-particles {
+.dashboard-redesign > main {
   position: relative;
   z-index: 2;
 }
+.dashboard-redesign::before {
+  /* keep overlay behind particles */
+  z-index: 0;
+}
+.dashboard-redesign > .background-particles {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  z-index: 1; /* place particles above the decorative overlay but below main content */
+} 
 
 /* Explicit per-app gradient utility classes to make backgrounds resilient to runtime updates */
 .app-gradient-healthcare {
@@ -397,6 +418,22 @@ body {
   color: #4b5563 !important;
 }
 
+/* DEBUG: Temporary, high-visibility light-mode blob to confirm CSS is applied. Remove after verification. */
+:root.light .dashboard-redesign .background-particles::after,
+.light .dashboard-redesign .background-particles::after {
+  content: "";
+  position: absolute;
+  width: 360px;
+  height: 360px;
+  top: 12%;
+  right: 10%;
+  border-radius: 50%;
+  background: rgba(236, 72, 153, 0.28);
+  filter: blur(8px);
+  z-index: 2; /* intentionally above particles so it's obvious */
+  pointer-events: none;
+}
+
 /* end of customizations removed to restore original colors */
 
 /* Dark-mode override: make dashboard subtitle white; title uses gradient defined inline */
@@ -508,11 +545,32 @@ button {
 }
 
 .background-particles { position: absolute; inset: 0; pointer-events: none; z-index: 0; overflow: hidden; }
-.particle { position: absolute; background: radial-gradient(circle, rgba(96, 165, 250, 0.3) 0%, transparent 70%); border-radius: 50%; animation: float 20s infinite ease-in-out; }
+.particle {
+  position: absolute;
+  border-radius: 50%;
+  filter: blur(36px);
+  mix-blend-mode: screen;
+  animation: dashboard-float 20s infinite ease-in-out;
+  opacity: 0.36;
+  background: radial-gradient(circle, rgba(200,200,200,0.6) 0%, transparent 70%); /* light-mode blobs fallback */
+}
+/* Scoped theme overrides with higher specificity to prevent other rules from overriding */
+.light .dashboard-redesign .background-particles .particle,
+:root.light .dashboard-redesign .background-particles .particle {
+  background: radial-gradient(circle, rgba(200,200,200,0.6) 0%, transparent 70%) !important;
+  filter: blur(36px) !important;
+  mix-blend-mode: screen !important;
+  opacity: 0.36 !important;
+}
+.dark .dashboard-redesign .background-particles .particle,
+:root.dark .dashboard-redesign .background-particles .particle {
+  background: radial-gradient(circle, rgba(96,165,250,0.32) 0%, transparent 70%) !important;
+  opacity: 0.28 !important;
+}
 .particle:nth-child(1) { width: 300px; height: 300px; top: 10%; left: 10%; animation-delay: 0s; }
-.particle:nth-child(2) { width: 200px; height: 200px; top: 60%; left: 70%; animation-delay: 5s; }
-.particle:nth-child(3) { width: 250px; height: 250px; top: 30%; left: 80%; animation-delay: 10s; }
-@keyframes float { 0%,100%{ transform: translate(0,0) scale(1); opacity: .3 } 33%{ transform: translate(50px,-50px) scale(1.1); opacity:.5 } 66%{ transform: translate(-30px,30px) scale(.9); opacity:.4 } }
+.particle:nth-child(2) { width: 220px; height: 220px; top: 60%; left: 70%; animation-delay: 5s; }
+.particle:nth-child(3) { width: 260px; height: 260px; top: 30%; left: 80%; animation-delay: 10s; }
+/* Reuse dashboard-float keyframes (defined earlier in the file) */
 .container{ max-width:1400px; margin:0 auto; padding:0 20px; position:relative; z-index:1; padding-top:40px; }
 .hero-section { margin-bottom:48px; text-align:center; }
 h1{ font-size:3rem; font-weight:800; margin-bottom:16px; background:var(--title-gradient); -webkit-background-clip:text; -webkit-text-fill-color:transparent; background-clip:text; letter-spacing:-0.02em }
