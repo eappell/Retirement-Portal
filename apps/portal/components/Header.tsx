@@ -23,8 +23,8 @@ export function Header({ showAppSwitcher = false }: HeaderProps) {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [isProfileMenuOpen, setIsProfileMenuOpen] = useState(false);
 
-  const headerBgClass = theme === "dark" ? "bg-[#1A2A40] shadow" : "bg-[#ededed] shadow";
-  const headerBorderClass = theme === "dark" ? "border-b border-[#1A2A40]" : "border-b border-[#ededed]";
+  const headerBgClass = theme === "dark" ? "bg-[#1A2A40] shadow" : "bg-white shadow";
+  const headerBorderClass = theme === "dark" ? "border-b border-[#1A2A40]" : "border-b border-white";
   const textPrimary = theme === "light" ? "text-gray-900" : "text-slate-100";
   const textSecondary = theme === "light" ? "text-gray-600" : "text-slate-400";
   const linkText = theme === "light" ? "text-gray-700 hover:text-purple-600" : "text-slate-300 hover:text-purple-400";
