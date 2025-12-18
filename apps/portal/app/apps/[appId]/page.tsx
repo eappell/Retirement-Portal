@@ -245,7 +245,7 @@ export default function AppPage() {
           borderColor: theme === 'light' ? '#e5e7eb' : '#334155'
         }}
       >
-        <div className="max-w-7xl mx-auto px-4 py-3 sm:px-6 lg:px-8 flex items-center justify-between">
+        <div className="max-w-[1400px] mx-auto px-4 py-3 sm:px-6 lg:px-8 flex items-center justify-between -ml-5">
           <div className="flex items-center gap-4 flex-1">
             {/* App Icon */}
             <AppIcon icon={appConfig.icon} className={`h-8 w-8 ${theme === 'light' ? 'text-gray-700' : 'text-gray-300'}`} />
