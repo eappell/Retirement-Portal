@@ -26,4 +26,13 @@ describe('Dashboard theme styles', () => {
     // Ensure the redesign wrapper exists when the dashboard mounts
     expect(container.querySelector('.dashboard-redesign')).toBeTruthy();
   });
+
+  test('renders decorative background particles (3 blurred blobs)', async () => {
+    const { container } = render(<DashboardPage />);
+
+    await waitFor(() => expect(container.querySelector('.background-particles')).toBeTruthy());
+
+    const particles = container.querySelectorAll('.background-particles .particle');
+    expect(particles.length).toBeGreaterThanOrEqual(5);
+  });
 });

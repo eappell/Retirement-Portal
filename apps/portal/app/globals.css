@@ -115,6 +115,8 @@ body {
 }
 
 /* Dashboard redesign background + subtle pattern overlay */
+/* NOTE: Visual tests (Playwright) assert particles exist and colors/visibility. See `apps/portal/tests/visual/dashboard.spec.ts`.
+   If you remove or rename `.background-particles` or `.particle`, update those tests. */
 .dashboard-redesign {
   /* base gradient (matches your example) */
   background: linear-gradient(135deg, #1e293b 0%, #0f172a 100%);
@@ -153,15 +155,12 @@ body {
 
 /* Animated background particles (copied from docs/sampledash.html) */
 .background-particles {
-  position: fixed;
-  top: 0;
-  left: 0;
-  width: 100%;
-  height: 100%;
+  position: absolute;
+  inset: 0;
   pointer-events: none;
-  z-index: 1; /* sit above the overlay (z-index:0) but below content (z-index:2) */
+  z-index: 0; /* below content but above decorative overlay */
   overflow: hidden;
-}
+} 
 
 /* Tools grid similar to sample: 2 columns on wide screens, 1 column on narrow screens */
 .tools-grid-custom {
@@ -187,21 +186,100 @@ body {
 .background-particles {
   display: block;
 }
-/* Light mode particles - subtle gray blobs */
+/* Base particle styles (shared) */
 .particle {
   position: absolute;
-  background: radial-gradient(circle, rgba(200, 200, 200, 0.6) 0%, transparent 70%);
   border-radius: 50%;
+  filter: blur(28px);
   animation: dashboard-float 20s infinite ease-in-out;
+  mix-blend-mode: normal; /* default blend for best compatibility */
 }
-/* Dark mode particles - blue blobs */
-.dark .particle {
-  background: radial-gradient(circle, rgba(96, 165, 250, 0.3) 0%, transparent 70%);
+
+/* Light mode: stronger, pastel blobs that are visible on near-white backgrounds */
+html.light .dashboard-redesign .background-particles .particle-light,
+:root.light .dashboard-redesign .background-particles .particle-light {
+  opacity: 0.98 !important;
+  filter: blur(10px) !important;
+  mix-blend-mode: normal !important;
+  /* neutral base; specific colors set on nth-child rules below */
+  background: radial-gradient(circle, rgba(99,102,241,0.36) 0%, rgba(96,165,250,0.16) 40%, transparent 80%) !important;
+  box-shadow: 0 8px 48px rgba(99,102,241,0.12) !important;
+  border: 1px solid rgba(0,0,0,0.03) !important;
+}
+/* Per-particle tuning for variety and better visibility */
+html.light .dashboard-redesign .background-particles .particle-light:nth-child(1) {
+  width: 320px; height: 320px; top: 8%; left: 8%;
+  background: radial-gradient(circle, rgba(99,102,241,0.72) 0%, rgba(99,102,241,0.28) 40%, transparent 80%) !important;
+}
+html.light .dashboard-redesign .background-particles .particle-light:nth-child(2) {
+  width: 240px; height: 240px; top: 55%; left: 65%;
+  background: radial-gradient(circle, rgba(96,165,250,0.72) 0%, rgba(96,165,250,0.36) 40%, transparent 80%) !important;
+}
+/* Light mode: all pastel blue blobs */
+html.light .dashboard-redesign .background-particles .particle-light,
+:root.light .dashboard-redesign .background-particles .particle-light {
+  opacity: 0.95 !important;
+  filter: blur(10px) !important;
+  mix-blend-mode: normal !important;
+  background: radial-gradient(circle, rgba(96,165,250,0.36) 0%, rgba(99,102,241,0.14) 48%, transparent 80%) !important;
+  box-shadow: 0 8px 48px rgba(99,102,241,0.10) !important;
+  border: 1px solid rgba(0,0,0,0.02) !important;
+}
+html.light .dashboard-redesign .background-particles .particle-light:nth-child(1) {
+  width: 320px; height: 320px; top: 8%; left: 8%;
+  background: radial-gradient(circle, rgba(99,102,241,0.72) 0%, rgba(96,165,250,0.32) 40%, transparent 80%) !important;
+}
+html.light .dashboard-redesign .background-particles .particle-light:nth-child(2) {
+  width: 240px; height: 240px; top: 55%; left: 65%;
+  background: radial-gradient(circle, rgba(96,165,250,0.68) 0%, rgba(96,165,250,0.30) 40%, transparent 80%) !important;
+}
+html.light .dashboard-redesign .background-particles .particle-light:nth-child(3) {
+  width: 280px; height: 280px; top: 30%; left: 78%;
+  background: radial-gradient(circle, rgba(59,130,246,0.68) 0%, rgba(96,165,250,0.28) 40%, transparent 80%) !important;
+}
+html.light .dashboard-redesign .background-particles .particle-light:nth-child(4) {
+  width: 180px; height: 180px; top: 20%; left: 45%;
+  background: radial-gradient(circle, rgba(96,165,250,0.56) 0%, rgba(96,165,250,0.20) 40%, transparent 80%) !important;
+}
+html.light .dashboard-redesign .background-particles .particle-light:nth-child(5) {
+  width: 200px; height: 200px; top: 68%; left: 20%;
+  background: radial-gradient(circle, rgba(59,130,246,0.64) 0%, rgba(96,165,250,0.22) 40%, transparent 80%) !important;
+} 
+ 
+
+/* Force all light-mode particles to blue (override any residual pink) */
+html.light .dashboard-redesign .background-particles .particle-light,
+:root.light .dashboard-redesign .background-particles .particle-light {
+  background-image: radial-gradient(circle, rgba(99,102,241,0.72) 0%, rgba(96,165,250,0.28) 40%, transparent 80%) !important;
+}
+
+/* Dark mode particles: stronger blue glow + pulsation and livelier float */
+.dark .dashboard-redesign .background-particles .particle,
+:root.dark .dashboard-redesign .background-particles .particle {
+  /* stronger, richer blue at center + softer outer falloff */
+  background: radial-gradient(circle, rgba(59,130,246,0.95) 0%, rgba(96,165,250,0.55) 45%, transparent 85%) !important;
+  /* more visible over dark backgrounds */
+  opacity: 0.82 !important;
+  /* keep blur but less diffuse so shape is more readable */
+  filter: blur(14px) !important;
+  mix-blend-mode: screen !important;
+  /* pronounced glow to increase contrast against background */
+  box-shadow: 0 20px 120px rgba(59,130,246,0.28) !important;
+  border: 1px solid rgba(255,255,255,0.04) !important;
+  /* add a short pulsating animation in addition to the slow float */
+  animation: dashboard-float 18s infinite ease-in-out, dashboard-pulse 6s infinite cubic-bezier(.4,0,.2,1) alternate;
+  will-change: transform, opacity, box-shadow;
+}
+
+@keyframes dashboard-pulse {
+  0% { transform: scale(1); opacity: 0.75; box-shadow: 0 12px 80px rgba(59,130,246,0.18); }
+  50% { transform: scale(1.06); opacity: 0.95; box-shadow: 0 28px 160px rgba(59,130,246,0.32); }
+  100% { transform: scale(1); opacity: 0.80; box-shadow: 0 12px 80px rgba(59,130,246,0.18); }
 }
 
 .particle:nth-child(1) { width: 300px; height: 300px; top: 10%; left: 10%; animation-delay: 0s; }
-.particle:nth-child(2) { width: 200px; height: 200px; top: 60%; left: 70%; animation-delay: 5s; }
-.particle:nth-child(3) { width: 250px; height: 250px; top: 30%; left: 80%; animation-delay: 10s; }
+.particle:nth-child(2) { width: 220px; height: 220px; top: 60%; left: 70%; animation-delay: 5s; }
+.particle:nth-child(3) { width: 260px; height: 260px; top: 30%; left: 80%; animation-delay: 10s; }
 
 @keyframes dashboard-float {
   0%, 100% { transform: translate(0, 0) scale(1); opacity: 0.3; }
@@ -248,11 +326,20 @@ body {
 /* Ensure main content sits above the overlay and particles */
 /* Use :not(header) to exclude the header from this z-index constraint */
 /* so the header's dropdown can escape its stacking context */
-.dashboard-redesign > main,
-.dashboard-redesign > .background-particles {
+.dashboard-redesign > main {
   position: relative;
   z-index: 2;
 }
+.dashboard-redesign::before {
+  /* keep overlay behind particles */
+  z-index: 0;
+}
+.dashboard-redesign > .background-particles {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  z-index: 1; /* particles sit above decorative overlay but below main content */
+} 
 
 /* Explicit per-app gradient utility classes to make backgrounds resilient to runtime updates */
 .app-gradient-healthcare {
@@ -508,11 +595,32 @@ button {
 }
 
 .background-particles { position: absolute; inset: 0; pointer-events: none; z-index: 0; overflow: hidden; }
-.particle { position: absolute; background: radial-gradient(circle, rgba(96, 165, 250, 0.3) 0%, transparent 70%); border-radius: 50%; animation: float 20s infinite ease-in-out; }
+.particle {
+  position: absolute;
+  border-radius: 50%;
+  filter: blur(36px);
+  mix-blend-mode: screen;
+  animation: dashboard-float 20s infinite ease-in-out;
+  opacity: 0.36;
+  background: radial-gradient(circle, rgba(200,200,200,0.6) 0%, transparent 70%); /* light-mode blobs fallback */
+}
+/* Scoped theme overrides with higher specificity to prevent other rules from overriding */
+.light .dashboard-redesign .background-particles .particle,
+:root.light .dashboard-redesign .background-particles .particle {
+  background: radial-gradient(circle, rgba(200,200,200,0.6) 0%, transparent 70%) !important;
+  filter: blur(36px) !important;
+  mix-blend-mode: screen !important;
+  opacity: 0.36 !important;
+}
+.dark .dashboard-redesign .background-particles .particle,
+:root.dark .dashboard-redesign .background-particles .particle {
+  background: radial-gradient(circle, rgba(96,165,250,0.32) 0%, transparent 70%) !important;
+  opacity: 0.28 !important;
+}
 .particle:nth-child(1) { width: 300px; height: 300px; top: 10%; left: 10%; animation-delay: 0s; }
-.particle:nth-child(2) { width: 200px; height: 200px; top: 60%; left: 70%; animation-delay: 5s; }
-.particle:nth-child(3) { width: 250px; height: 250px; top: 30%; left: 80%; animation-delay: 10s; }
-@keyframes float { 0%,100%{ transform: translate(0,0) scale(1); opacity: .3 } 33%{ transform: translate(50px,-50px) scale(1.1); opacity:.5 } 66%{ transform: translate(-30px,30px) scale(.9); opacity:.4 } }
+.particle:nth-child(2) { width: 220px; height: 220px; top: 60%; left: 70%; animation-delay: 5s; }
+.particle:nth-child(3) { width: 260px; height: 260px; top: 30%; left: 80%; animation-delay: 10s; }
+/* Reuse dashboard-float keyframes (defined earlier in the file) */
 .container{ max-width:1400px; margin:0 auto; padding:0 20px; position:relative; z-index:1; padding-top:40px; }
 .hero-section { margin-bottom:48px; text-align:center; }
 h1{ font-size:3rem; font-weight:800; margin-bottom:16px; background:var(--title-gradient); -webkit-background-clip:text; -webkit-text-fill-color:transparent; background-clip:text; letter-spacing:-0.02em }
