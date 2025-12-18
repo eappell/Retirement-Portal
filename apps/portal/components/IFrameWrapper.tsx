@@ -390,21 +390,30 @@ export function IFrameWrapper({
       
       if (event.data?.type === "TOOLBAR_BUTTONS") {
         console.log("Received TOOLBAR_BUTTONS, count:", event.data.buttons?.length);
-        setToolbarButtons(event.data.buttons || []);
+        // Filter out any print buttons (we manage printing differently in the portal)
+        const filteredButtons = (event.data.buttons || []).filter((b: ToolbarButton) => b.id !== 'print');
+        setToolbarButtons(filteredButtons);
         // Inject buttons into the app header placeholder
         const placeholder = document.getElementById("app-toolbar-placeholder");
         if (placeholder) {
           placeholder.innerHTML = "";
-          event.data.buttons?.forEach((button: ToolbarButton) => {
+          filteredButtons?.forEach((button: ToolbarButton) => {
             const buttonEl = document.createElement("div");
             buttonEl.className = "group relative inline-flex";
 
             const btn = document.createElement("button");
             btn.className =
               "inline-flex items-center justify-center p-2 rounded-md transition-colors";
-            btn.style.color = "#46494c";
+            // Set initial color based on current theme so spinners are visible in dark mode
+            const isDark = document.documentElement.classList.contains("dark");
+            // Use a darker icon color in light mode for the download button specifically
+            const lightIconColor = button.id === 'download_pdf' ? '#111827' : '#46494c';
+            btn.style.color = isDark ? "#FEFCFD" : lightIconColor;
             btn.setAttribute("aria-label", button.label);
-            btn.title = button.tooltip || button.label;
+            // Ensure download button tooltip is exactly 'Download PDF'
+            btn.title = button.id === 'download_pdf' ? 'Download PDF' : (button.tooltip || button.label);
+            // expose id so we can find and update it from message handlers
+            btn.setAttribute('data-button-id', button.id);
 
             // Add icon - support both SVG strings and emoji
             if (button.icon.trim().startsWith("<svg")) {
@@ -412,17 +421,19 @@ export function IFrameWrapper({
               const iconContainer = document.createElement("div");
               iconContainer.innerHTML = button.icon;
               iconContainer.className = "h-5 w-5";
+              // Store original icon HTML so we can restore it after spinner
+              btn.setAttribute('data-orig-icon-html', iconContainer.innerHTML || '');
+
               // Apply color to SVG element
               const svg = iconContainer.querySelector("svg");
               if (svg) {
-                // Set initial color based on theme
-                const isDark = document.documentElement.classList.contains("dark");
-                svg.style.color = isDark ? "#FEFCFD" : "#46494c";
+                // Set initial color based on theme (download button uses darker color in light mode)
+                svg.style.color = isDark ? "#FEFCFD" : (button.id === 'download_pdf' ? "#111827" : "#46494c");
                 
                 // Watch for theme changes
                 const observer = new MutationObserver(() => {
-                  const isDark = document.documentElement.classList.contains("dark");
-                  svg.style.color = isDark ? "#FEFCFD" : "#46494c";
+                  const dark = document.documentElement.classList.contains("dark");
+                  svg.style.color = dark ? "#FEFCFD" : (button.id === 'download_pdf' ? "#111827" : "#46494c");
                 });
                 observer.observe(document.documentElement, { attributes: true, attributeFilter: ['class'] });
               }
@@ -431,6 +442,7 @@ export function IFrameWrapper({
               // Emoji or other text icon
               btn.textContent = button.icon;
               btn.className += " text-lg";
+              btn.setAttribute('data-orig-icon-html', button.icon);
             }
 
             // Add click handler
@@ -449,11 +461,12 @@ export function IFrameWrapper({
             buttonEl.appendChild(btn);
 
             // Add tooltip if provided
-            if (button.tooltip) {
+            const tooltipText = button.id === 'download_pdf' ? 'Download PDF' : (button.tooltip || button.label);
+            if (tooltipText) {
               const tooltip = document.createElement("span");
               tooltip.className =
                 "absolute top-full mt-2 left-1/2 transform -translate-x-1/2 bg-gray-800 dark:bg-slate-700 text-white text-xs rounded py-1 px-2 whitespace-nowrap z-40 invisible group-hover:visible opacity-0 group-hover:opacity-100 transition-none pointer-events-none";
-              tooltip.textContent = button.tooltip;
+              tooltip.textContent = tooltipText;
               buttonEl.appendChild(tooltip);
             }
 
@@ -471,6 +484,70 @@ export function IFrameWrapper({
             "*"
           );
         }
+      } else if (event.data?.type === 'TOOLBAR_BUTTON_STATE') {
+        // Update a specific toolbar button's icon/state (e.g., show spinner while loading)
+        const buttonId = event.data.buttonId;
+        const state = event.data.state; // 'loading' | 'idle' | 'error'
+        try {
+          const btn = document.querySelector(`button[data-button-id="${buttonId}"]`);
+          if (btn) {
+            const iconContainer = btn.querySelector('div.h-5.w-5');
+            const orig = btn.getAttribute('data-orig-icon-html') || '';
+            if (state === 'loading') {
+              // spinner SVG
+              const spinner = `<svg class="animate-spin h-5 w-5" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4" fill="none"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v4a4 4 0 00-4 4H4z"></path></svg>`;
+              if (iconContainer) {
+                iconContainer.innerHTML = spinner;
+                // Ensure spinner color is visible in dark mode (download button uses darker spinner in light mode)
+                const svg = iconContainer.querySelector('svg');
+                if (svg) {
+                  const isDark = document.documentElement.classList.contains('dark');
+                  svg.style.color = isDark ? '#FEFCFD' : (buttonId === 'download_pdf' ? '#111827' : '#46494c');
+                }
+              } else {
+                // replace button text
+                btn.innerHTML = spinner;
+                const svg = btn.querySelector('svg');
+                if (svg) {
+                  const isDark = document.documentElement.classList.contains('dark');
+                  svg.style.color = isDark ? '#FEFCFD' : (buttonId === 'download_pdf' ? '#111827' : '#46494c');
+                }
+              }
+              btn.setAttribute('disabled', 'true');
+              btn.setAttribute('aria-busy', 'true');
+            } else {
+              // restore original icon
+              if (iconContainer) {
+                iconContainer.innerHTML = orig;
+                // Re-apply color and reattach theme observer so restored SVG matches theme
+                const svg = iconContainer.querySelector('svg');
+                if (svg) {
+                  const isDark = document.documentElement.classList.contains('dark');
+                  svg.style.color = isDark ? '#FEFCFD' : (buttonId === 'download_pdf' ? '#111827' : '#46494c');
+                  const observer = new MutationObserver(() => {
+                    const dark = document.documentElement.classList.contains('dark');
+                    svg.style.color = dark ? '#FEFCFD' : (buttonId === 'download_pdf' ? '#111827' : '#46494c');
+                  });
+                  observer.observe(document.documentElement, { attributes: true, attributeFilter: ['class'] });
+                }
+              } else if (orig) {
+                btn.innerHTML = orig;
+                const svg = btn.querySelector('svg');
+                if (svg) {
+                  const isDark = document.documentElement.classList.contains('dark');
+                  svg.style.color = isDark ? '#FEFCFD' : (buttonId === 'download_pdf' ? '#111827' : '#46494c');
+                  const observer = new MutationObserver(() => {
+                    const dark = document.documentElement.classList.contains('dark');
+                    svg.style.color = dark ? '#FEFCFD' : (buttonId === 'download_pdf' ? '#111827' : '#46494c');
+                  });
+                  observer.observe(document.documentElement, { attributes: true, attributeFilter: ['class'] });
+                }
+              }
+              btn.removeAttribute('disabled');
+              btn.removeAttribute('aria-busy');
+            }
+          }
+        } catch (e) { /* ignore */ }
       }
       // Allow iframe to request portal navigation
       if (event.data?.type === 'NAVIGATE' && event.data?.path) {
