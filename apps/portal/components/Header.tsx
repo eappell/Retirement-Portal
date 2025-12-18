@@ -23,7 +23,8 @@ export function Header({ showAppSwitcher = false }: HeaderProps) {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [isProfileMenuOpen, setIsProfileMenuOpen] = useState(false);
 
-  const headerBgClass = "bg-[#ededed] shadow";
+  const headerBgClass = theme === "dark" ? "bg-[#1A2A40] shadow" : "bg-[#ededed] shadow";
+  const headerBorderClass = theme === "dark" ? "border-b border-[#1A2A40]" : "border-b border-[#ededed]";
   const textPrimary = theme === "light" ? "text-gray-900" : "text-slate-100";
   const textSecondary = theme === "light" ? "text-gray-600" : "text-slate-400";
   const linkText = theme === "light" ? "text-gray-700 hover:text-purple-600" : "text-slate-300 hover:text-purple-400";
@@ -66,7 +67,7 @@ export function Header({ showAppSwitcher = false }: HeaderProps) {
   };
 
   return (
-    <header className={`${headerBgClass} sticky top-0 z-50 bg-opacity-100 backdrop-blur-none border-b border-[#ededed]`}>
+    <header className={`${headerBgClass} sticky top-0 z-50 bg-opacity-100 backdrop-blur-none ${headerBorderClass}`}>
       <div className="max-w-[1400px] mx-auto px-4 py-4 sm:px-6 lg:px-8">
         <div className="flex items-center">
           {/* Logo/Brand */}
