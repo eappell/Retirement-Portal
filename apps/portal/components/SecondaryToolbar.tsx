@@ -28,7 +28,7 @@ export const SecondaryToolbar: React.FC<SecondaryToolbarProps> = ({
 
   return (
     <div className="sticky top-16 z-10 bg-white dark:bg-slate-800 border-b border-gray-200 dark:border-slate-700 py-3 shadow-sm">
-      <div className="max-w-[1400px] mx-auto px-4 sm:px-6 lg:px-8 flex items-center gap-2 -ml-5">
+      <div className="max-w-[1400px] mx-auto px-4 py-3 sm:px-6 lg:px-8 flex items-center gap-2">
         {buttons.map((button) => (
           <div key={button.id} className="group relative">
             <button
