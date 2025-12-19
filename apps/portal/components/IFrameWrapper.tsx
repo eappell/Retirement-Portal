@@ -497,13 +497,14 @@ export function IFrameWrapper({
       const btn = document.createElement("button");
       
       // Explicitly handle colors based on theme state, bypassing CSS dark mode issues
-      const isDark = theme === 'dark';
+      // Check both context theme and DOM class to be sure
+      const isDark = theme === 'dark' || document.documentElement.classList.contains('dark');
       
       // Base classes
       let className = "inline-flex items-center justify-center p-2 rounded-md transition-colors ";
       
       if (isDark) {
-        className += "text-gray-50 hover:bg-gray-100 hover:text-gray-900";
+        className += "!text-gray-50 hover:!bg-gray-100 hover:!text-gray-900";
       } else {
         // Light mode - force specific colors
         const textColor = button.id === 'download_pdf' ? '!text-gray-900' : '!text-[#4B5563]';
