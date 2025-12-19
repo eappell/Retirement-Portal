@@ -411,11 +411,11 @@ export function IFrameWrapper({
         try {
           const btn = document.querySelector(`button[data-button-id="${buttonId}"]`);
           if (btn) {
-            const iconContainer = btn.querySelector('div.h-5.w-5');
+            const iconContainer = btn.querySelector('div');
             const orig = btn.getAttribute('data-orig-icon-html') || '';
             if (state === 'loading') {
               // spinner SVG
-              const spinner = `<svg class="animate-spin h-5 w-5" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4" fill="none"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v4a4 4 0 00-4 4H4z"></path></svg>`;
+              const spinner = `<svg class="animate-spin h-[26px] w-[26px]" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4" fill="none"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v4a4 4 0 00-4 4H4z"></path></svg>`;
               if (iconContainer) {
                 iconContainer.innerHTML = spinner;
                 // Ensure spinner color is visible in dark mode (download button uses darker spinner in light mode)
@@ -519,12 +519,12 @@ export function IFrameWrapper({
       if (button.icon.trim().startsWith("<svg")) {
         const iconContainer = document.createElement("div");
         iconContainer.innerHTML = button.icon;
-        iconContainer.className = "h-5 w-5";
+        iconContainer.className = "h-[26px] w-[26px]";
         btn.setAttribute('data-orig-icon-html', iconContainer.innerHTML || '');
         btn.appendChild(iconContainer);
       } else {
         btn.textContent = button.icon;
-        btn.className += " text-lg";
+        btn.className += " text-[26px]";
         btn.setAttribute('data-orig-icon-html', button.icon);
       }
 
