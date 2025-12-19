@@ -390,8 +390,8 @@ export function IFrameWrapper({
       
       if (event.data?.type === "TOOLBAR_BUTTONS") {
         console.log("Received TOOLBAR_BUTTONS, count:", event.data.buttons?.length);
-        // Filter out any print buttons (we manage printing differently in the portal)
-        const filteredButtons = (event.data.buttons || []).filter((b: ToolbarButton) => b.id !== 'print');
+        // Allow all buttons including print
+        const filteredButtons = event.data.buttons || [];
         setToolbarButtons(filteredButtons);
         // Inject buttons into the app header placeholder
         const placeholder = document.getElementById("app-toolbar-placeholder");
