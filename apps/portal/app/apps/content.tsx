@@ -21,6 +21,12 @@ const APP_REGISTRY = {
     description: "Plan your retirement in another country with AI recommendations",
     freeAllowed: true,
   },
+  "longevity-drawdown-planner": {
+    name: "Longevity & Drawdown Planner",
+    url: "http://localhost:3000/",
+    description: "Personalized longevity and withdrawal strategy planner",
+    freeAllowed: true,
+  },
 };
 
 export default function AppPageContent() {
