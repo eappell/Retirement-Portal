@@ -449,18 +449,6 @@ export default function DashboardPage() {
             <div className="stat-label">Possibilities</div>
           </div>
         </div>
-
-        {/* Sample Dashboard Link */}
-        <div className="mt-8 text-center">
-          <a
-            href="/docs/sampledash.html"
-            target="_blank"
-            rel="noopener noreferrer"
-            className="text-sm text-blue-400 hover:text-blue-300 underline"
-          >
-            View Sample Dashboard Design
-          </a>
-        </div>
       </main>
     </div>
   );
