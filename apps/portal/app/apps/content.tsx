@@ -21,6 +21,12 @@ const APP_REGISTRY = {
     description: "Plan your retirement in another country with AI recommendations",
     freeAllowed: true,
   },
+  "pension-vs-lumpsum-analyzer": {
+    name: "Pension vs. Lump Sum Analyzer",
+    url: "http://localhost:3002/",
+    description: "Compare pension vs lump sum options with detailed analysis",
+    freeAllowed: true,
+  },
   "longevity-drawdown-planner": {
     name: "Longevity & Drawdown Planner",
     url: "http://localhost:3000/",
@@ -147,13 +153,15 @@ export default function AppPageContent() {
       </div>
 
       {/* iFrame Container */}
-      <div className="flex-1 overflow-hidden">
-        <IFrameWrapper
-          appId={appId}
-          appName={app.name}
-          appUrl={`${app.url}${app.url.includes('?') ? '&' : '?'}embedded=true`}
-          description={app.description}
-        />
+      <div className="flex-1 overflow-hidden flex justify-center">
+        <div className="w-full max-w-7xl">
+          <IFrameWrapper
+            appId={appId}
+            appName={app.name}
+            appUrl={`${app.url}${app.url.includes('?') ? '&' : '?'}embedded=true`}
+            description={app.description}
+          />
+        </div>
       </div>
     </div>
   );
