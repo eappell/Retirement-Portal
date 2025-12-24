@@ -89,10 +89,11 @@ export default function Header({ showAppSwitcher = false }: HeaderProps) {
       {/* Full-bleed background using fixed positioning so it spans the entire viewport */}
       {/* Use pointer-events-none so it doesn't intercept clicks; shadow for separation */}
       <div className={`fixed top-0 left-0 right-0 z-40 pointer-events-none ${headerBgClass} bg-opacity-100 backdrop-blur-none ${headerBorderClass} shadow-sm h-20`} />
-      {/* NOTE: header content itself remains in a constrained container below and will be sticky */}
+      {/* NOTE: header content itself is fixed and centered, and will not scroll */}
 
-      <div id="portal-header-content" className="sticky top-0 z-50 bg-transparent max-w-[1400px] mx-auto px-4 py-4 sm:px-6 lg:px-8">
-        <div className="flex items-center">
+      <div id="portal-header-content" className="fixed top-0 left-0 right-0 z-50 bg-transparent">
+        <div className="max-w-[1400px] mx-auto px-4 py-4 sm:px-6 lg:px-8">
+          <div className="flex items-center">
           {/* Logo/Brand */}
           <Link href="/dashboard" className="flex items-center gap-2 -ml-5">
             <Image
