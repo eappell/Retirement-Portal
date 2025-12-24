@@ -44,7 +44,9 @@ export default function Footer() {
       <div className="py-3" style={{ backgroundColor: bgColor, borderTop: `1px solid ${borderColor}` }}>
         <div className="max-w-[1400px] mx-auto px-4 flex justify-start items-center">
           <div className="pl-2">
-            <Image src={src} alt="RetireWise" height={80} priority className="w-auto object-contain" />
+            <Link href="/dashboard" aria-label="Go to portal dashboard">
+              <Image src={src} alt="RetireWise" height={80} priority className="w-auto object-contain" />
+            </Link>
           </div>
         </div>
       </div>
