@@ -50,6 +50,7 @@ interface App {
   freeAllowed?: boolean;
   gradient?: string;
   disabled?: boolean;
+  badge?: string;
 }
 
 const DEFAULT_APPS: App[] = [
@@ -62,6 +63,7 @@ const DEFAULT_APPS: App[] = [
     freeAllowed: true,
     gradient: 'linear-gradient(135deg, #34d399 0%, #10b981 100%)',
     disabled: false,
+    badge: "AI-Powered",
   },
   {
     id: "retire-abroad",
@@ -72,6 +74,7 @@ const DEFAULT_APPS: App[] = [
     freeAllowed: true,
     gradient: 'linear-gradient(135deg, #60a5fa 0%, #3b82f6 100%)',
     disabled: false,
+    badge: "100+ Destinations",
   },
   {
     id: "tax-impact-analyzer",
@@ -81,16 +84,18 @@ const DEFAULT_APPS: App[] = [
     url: "http://localhost:3001/",
     freeAllowed: true,
     disabled: false,
+    badge: "Tax Optimization",
   },
   {
-    id: "healthcare-cost",
-    name: "Healthcare Cost Estimator",
-    description: "Plan for your retirement healthcare expenses",
-    icon: "❤️",
-    url: "https://healthcare-cost.vercel.app/",
+    id: "pension-vs-lumpsum-analyzer",
+    name: "Pension vs. Lump Sum Analyzer",
+    description: "Compare pension vs lump sum options with detailed analysis",
+    icon: "💰",
+    url: "http://localhost:3002/",
     freeAllowed: true,
-    gradient: 'linear-gradient(135deg, #fca5a5 0%, #ef4444 100%)',
+    gradient: 'linear-gradient(135deg, #f59e0b 0%, #d97706 100%)',
     disabled: false,
+    badge: "Data-Driven",
   },
 ];
 
@@ -160,6 +165,7 @@ export default function DashboardPage() {
             freeAllowed: data.freeAllowed,
             gradient: data.gradient,
             disabled: data.disabled,
+            badge: data.badge,
           });
         });
 
@@ -195,9 +201,10 @@ export default function DashboardPage() {
                   freeAllowed: typeof override.freeAllowed === 'boolean' ? override.freeAllowed : d.freeAllowed,
                   gradient: override.gradient || d.gradient,
                   disabled: typeof override.disabled === 'boolean' ? override.disabled : d.disabled,
+                  badge: override.badge || d.badge,
                 }
               : d;
-          }).concat(loadedApps.filter((a) => !DEFAULT_APPS.some((d) => matchesDefault(d, a))).map(a => ({ id: a.id, name: a.name, description: a.description, icon: a.icon || '📦', url: a.url || '', freeAllowed: a.freeAllowed, gradient: a.gradient || '', disabled: a.disabled })));
+          }).concat(loadedApps.filter((a) => !DEFAULT_APPS.some((d) => matchesDefault(d, a))).map(a => ({ id: a.id, name: a.name, description: a.description, icon: a.icon || '📦', url: a.url || '', freeAllowed: a.freeAllowed, gradient: a.gradient || '', disabled: a.disabled, badge: a.badge || '' })));
           // Hide disabled apps from the dashboard list
           const visible = merged.filter(a => !a.disabled);
           setApps(visible);
@@ -284,7 +291,49 @@ export default function DashboardPage() {
               
               // Define icon square gradients (light shades), tile backgrounds (very light/subtle), and badges
               type AppStyle = { iconGradient: string; tileBg: string; badge: string };
-              const getAppStyle = (): AppStyle => {
+              const getAppStyle = (app: App, key: string): AppStyle => {
+                // Use badge from database if available, otherwise fallback to defaults based on app type
+                if (app.badge) {
+                  // Determine colors based on existing logic for consistency
+                  
+                  if (key.includes('income') || key.includes('estimator')) {
+                    return {
+                      iconGradient: 'linear-gradient(135deg, #86efac 0%, #4ade80 100%)',
+                      tileBg: 'rgba(134, 239, 172, 0.08)',
+                      badge: app.badge
+                    };
+                  }
+                  if (key.includes('retire') || key.includes('abroad')) {
+                    return {
+                      iconGradient: 'linear-gradient(135deg, #93c5fd 0%, #60a5fa 100%)',
+                      tileBg: 'rgba(147, 197, 253, 0.08)',
+                      badge: app.badge
+                    };
+                  }
+                  if (key.includes('tax')) {
+                    return {
+                      iconGradient: 'linear-gradient(135deg, #c4b5fd 0%, #a78bfa 100%)',
+                      tileBg: 'rgba(196, 181, 253, 0.08)',
+                      badge: app.badge
+                    };
+                  }
+                  if (key.includes('health') || key.includes('healthcare')) {
+                    return {
+                      iconGradient: 'linear-gradient(135deg, #fca5a5 0%, #f87171 100%)',
+                      tileBg: 'rgba(252, 165, 165, 0.08)',
+                      badge: app.badge
+                    };
+                  }
+                  // Default fallback
+                  return {
+                    iconGradient: 'linear-gradient(135deg, #93c5fd 0%, #60a5fa 100%)',
+                    tileBg: 'rgba(147, 197, 253, 0.08)',
+                    badge: app.badge
+                  };
+                }
+                
+                // Fallback to hardcoded badges for backward compatibility
+                
                 if (key.includes('income') || key.includes('estimator')) {
                   return {
                     iconGradient: 'linear-gradient(135deg, #86efac 0%, #4ade80 100%)', // light green
@@ -335,7 +384,7 @@ export default function DashboardPage() {
                 };
               };
               
-              const appStyle = getAppStyle();
+              const appStyle = getAppStyle(app, key);
               const effectiveUrl = getEffectiveUrl(app, devSettings);
               const isDevMode = devSettings[app.id]?.enabled;
               
@@ -399,18 +448,6 @@ export default function DashboardPage() {
             <div className="stat-value">∞</div>
             <div className="stat-label">Possibilities</div>
           </div>
-        </div>
-
-        {/* Sample Dashboard Link */}
-        <div className="mt-8 text-center">
-          <a
-            href="/docs/sampledash.html"
-            target="_blank"
-            rel="noopener noreferrer"
-            className="text-sm text-blue-400 hover:text-blue-300 underline"
-          >
-            View Sample Dashboard Design
-          </a>
         </div>
       </main>
     </div>

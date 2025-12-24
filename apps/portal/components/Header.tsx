@@ -73,9 +73,9 @@ export function Header({ showAppSwitcher = false }: HeaderProps) {
           {/* Logo/Brand */}
           <Link href="/dashboard" className="flex items-center gap-2 -ml-5">
             <img
-              src={theme === "light" ? "/images/RetireWise-Logo-sm-black-tag.png" : "/images/RetireWise-Logo-sm-white-tag.png"}
+              src={theme === "light" ? "/images/RetireWise-Logo-sm-black-notag.png" : "/images/RetireWise-Logo-sm-white-notag.png"}
               alt="RetireWise"
-              className="h-10 w-auto"
+              className="h-[65px] w-auto transform origin-left"
             />
           </Link>
 
