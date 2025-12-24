@@ -80,14 +80,14 @@ export default function Footer() {
             </Link>
           </div>
 
-          {/* Apps list shown in footer (names only), hidden on small screens */}
-          <nav aria-label="Applications" className="hidden md:flex flex-col gap-1 mt-2">
+          {/* Apps list shown in footer (names only), hidden on small screens; scrollable area to cap height */}
+          <nav aria-label="Applications" className="hidden md:flex flex-col gap-1 mt-2 max-h-28 overflow-y-auto pr-2 footer-apps">
             {appsLoading && <span className="text-sm text-gray-400">Loading…</span>}
             {!appsLoading && apps.map((a) => (
               <Link
                 key={a.id}
                 href={`/apps/${encodeURIComponent(a.id)}?name=${encodeURIComponent(a.name)}&url=${encodeURIComponent(a.url)}`}
-                className={`text-sm hover:underline ${theme === 'light' ? 'text-gray-700' : 'text-gray-200'}`}
+                className={`text-sm hover:underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-purple-500 ${theme === 'light' ? 'text-gray-700' : 'text-gray-200'}`}
               >
                 {a.name}
               </Link>
