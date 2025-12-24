@@ -26,10 +26,17 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en">
+    <html lang="en" suppressHydrationWarning>
       <body className={`${geistSans.variable} ${geistMono.variable} antialiased`} suppressHydrationWarning>
-        {/* Remove any rp-extension attribute injected by browser extensions before React hydrates */}
-        <Script id="strip-rp-extension" strategy="beforeInteractive">{`document.documentElement.removeAttribute('rp-extension');`}</Script>
+        {/* Remove any attributes injected by browser extensions before React hydrates */}
+        <Script id="strip-extension-attributes" strategy="beforeInteractive">{`
+          const html = document.documentElement;
+          // Remove common extension attributes
+          html.removeAttribute('rp-extension');
+          html.removeAttribute('data-be-installed');
+          // Remove any style attributes that might be added
+          html.removeAttribute('style');
+        `}</Script>
         <RootLayoutClient>{children}</RootLayoutClient>
       </body>
     </html>

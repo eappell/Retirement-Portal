@@ -88,6 +88,7 @@ interface App {
   firestoreId?: string; // Firestore document ID
   gradient?: string;
   disabled?: boolean;
+  badge?: string;
 }
 
 // Dev mode settings stored in localStorage
@@ -138,6 +139,7 @@ export default function AdminAppsPage() {
     freeAllowed: true,
     gradient: ''
     , disabled: false,
+    badge: "",
   });
   const [newGradientStart, setNewGradientStart] = useState('#34d399');
   const [newGradientEnd, setNewGradientEnd] = useState('#10b981');
@@ -200,6 +202,7 @@ export default function AdminAppsPage() {
           freeAllowed: data.freeAllowed,
           gradient: data.gradient,
           disabled: data.disabled,
+          badge: data.badge,
           firestoreId: doc.id,
         });
       });
@@ -239,8 +242,7 @@ export default function AdminAppsPage() {
           icon: editForm.icon,
           freeAllowed: editForm.freeAllowed,
             gradient: editForm.gradient || `linear-gradient(135deg, ${editGradientStart} 0%, ${editGradientEnd} 100%)`,
-            disabled: !!editForm.disabled,
-        });
+            disabled: !!editForm.disabled,          badge: editForm.badge || "",        });
       }
 
       setApps(apps.map((app) => (app.id === appId ? editForm : app)));
@@ -322,6 +324,7 @@ export default function AdminAppsPage() {
         freeAllowed: newApp.freeAllowed ?? true,
         gradient: newApp.gradient || `linear-gradient(135deg, ${newGradientStart} 0%, ${newGradientEnd} 100%)`,
         disabled: !!newApp.disabled,
+        badge: newApp.badge || "",
         createdAt: new Date(),
       });
 
@@ -334,6 +337,7 @@ export default function AdminAppsPage() {
         freeAllowed: newApp.freeAllowed ?? true,
         gradient: newApp.gradient || `linear-gradient(135deg, ${newGradientStart} 0%, ${newGradientEnd} 100%)`,
         disabled: !!newApp.disabled,
+        badge: newApp.badge || "",
         firestoreId: docRef.id,
       };
 
@@ -349,6 +353,7 @@ export default function AdminAppsPage() {
         icon: "📦",
         freeAllowed: true,
         gradient: '',
+        badge: "",
       });
       setNewGradientStart('#34d399');
       setNewGradientEnd('#10b981');
@@ -455,6 +460,19 @@ export default function AdminAppsPage() {
                 className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-indigo-500 focus:border-indigo-500"
                 placeholder="Brief description of what this app does"
                 rows={3}
+              />
+            </div>
+
+            <div className="mb-6">
+              <label className="block text-sm font-medium text-gray-700 mb-2">
+                Badge Text
+              </label>
+              <input
+                type="text"
+                value={newApp.badge || ""}
+                onChange={(e) => setNewApp({ ...newApp, badge: e.target.value })}
+                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-indigo-500 focus:border-indigo-500"
+                placeholder="e.g., AI-Powered, Personalized, Data-Driven"
               />
             </div>
 
@@ -621,6 +639,19 @@ export default function AdminAppsPage() {
                       onChange={(e) => setEditForm({ ...editForm, description: e.target.value })}
                       className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-indigo-500 focus:border-indigo-500"
                       rows={3}
+                    />
+                  </div>
+
+                  <div className="mb-6">
+                    <label className="block text-sm font-medium text-gray-700 mb-2">
+                      Badge Text
+                    </label>
+                    <input
+                      type="text"
+                      value={editForm.badge || ""}
+                      onChange={(e) => setEditForm({ ...editForm, badge: e.target.value })}
+                      className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-indigo-500 focus:border-indigo-500"
+                      placeholder="e.g., AI-Powered, Personalized, Data-Driven"
                     />
                   </div>
 
