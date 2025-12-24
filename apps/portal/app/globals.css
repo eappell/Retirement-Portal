@@ -393,8 +393,15 @@ html.light .dashboard-redesign .background-particles .particle-light,
 
 /* Footer theme variables and helpers */
 .footer-theme {
+  /* Provide explicit, opaque defaults in case data-attrs aren't applied */
+  --footer-bg: #f9f8f7;
+  --footer-border: #e5e7eb;
   background-color: var(--footer-bg);
   border-top: 1px solid var(--footer-border);
+}
+.dark .footer-theme {
+  --footer-bg: #001021;
+  --footer-border: #334155;
 }
 .footer-theme a { text-decoration: none; }
 .footer-theme nav a { display: inline-block; padding: 4px 0; }
