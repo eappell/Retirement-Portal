@@ -36,9 +36,12 @@ export default function Footer() {
     };
   }, []);
 
+  const bgColor = theme === 'light' ? '#dedede' : '#001021';
+  const borderColor = theme === 'light' ? '#e5e7eb' : '#334155';
+
   return (
     <footer id="portal-footer" className="fixed left-0 right-0 bottom-0 z-40">
-      <div className="bg-[#dedede] dark:bg-[#001021] border-t border-gray-200 dark:border-slate-700 py-3">
+      <div className="py-3" style={{ backgroundColor: bgColor, borderTop: `1px solid ${borderColor}` }}>
         <div className="max-w-[1400px] mx-auto px-4 flex justify-center">
           <Image src={src} alt="RetireWise" height={80} priority className="w-auto object-contain" />
         </div>
