@@ -3,6 +3,7 @@
 import React, { useEffect } from "react";
 import Link from "next/link";
 import { useTheme } from "@/lib/theme";
+import { useAppNav } from "@/contexts/AppNavContext";
 
 export default function AppNavBar() {
   const { theme } = useTheme();
