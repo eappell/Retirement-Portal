@@ -28,6 +28,7 @@ import {
   BoltIcon,
 } from "@heroicons/react/24/outline";
 import { AppIcon } from "@/components/icon-map";
+import SetAppNavContent from "@/components/SetAppNavContent";
 
 // Available HeroIcons mapping
 const AVAILABLE_ICONS = [
