@@ -27,10 +27,10 @@ export default function AppNavBar() {
   return (
     <div>
       {/* full-width fixed background */}
-      <div className={`appnav-fixed ${bgClass}`} />
+      <div className={`appnav-fixed ${bgClass}`} style={{ top: 'var(--portal-header-height)', height: 'var(--portal-appnav-height)' }} />
       {/* content container */}
-      <div id="portal-appnav" className="appnav-content">
-        <div className="max-w-[1400px] mx-auto px-4 sm:px-6 lg:px-8 flex items-center justify-between">
+      <div id="portal-appnav" className="appnav-content" style={{ top: 'var(--portal-header-height)', height: 'var(--portal-appnav-height)' }}>
+        <div className="max-w-[1400px] mx-auto px-4 sm:px-6 lg:px-8 flex items-center justify-between h-full">
           <div className="text-sm text-gray-500">App navigation or controls go here</div>
           <div className="text-sm text-gray-500">(Optional actions)</div>
         </div>
