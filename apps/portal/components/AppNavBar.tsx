@@ -24,15 +24,32 @@ export default function AppNavBar() {
 
   const bgClass = theme === 'light' ? 'bg-white border-b border-gray-100' : 'bg-slate-900 border-b border-slate-700';
 
+  const { content } = useAppNav();
+
   return (
     <div>
       {/* full-width fixed background */}
-      <div className={`appnav-fixed ${bgClass}`} style={{ top: 'var(--portal-header-height)', height: 'var(--portal-appnav-height)' }} />
+      <div className={`appnav-fixed ${bgClass}`} />
       {/* content container */}
-      <div id="portal-appnav" className="appnav-content" style={{ top: 'var(--portal-header-height)', height: 'var(--portal-appnav-height)' }}>
+      <div id="portal-appnav" className="appnav-content">
         <div className="max-w-[1400px] mx-auto px-4 sm:px-6 lg:px-8 flex items-center justify-between h-full">
-          <div className="text-sm text-gray-500">App navigation or controls go here</div>
-          <div className="text-sm text-gray-500">(Optional actions)</div>
+          <div className="flex items-center gap-4 flex-1">
+            {/* App Icon */}
+            <div className="flex items-center justify-center h-8 w-8">
+              {content?.icon}
+            </div>
+            <div className="flex-1">
+              <h2 className={`text-lg font-semibold ${theme === 'light' ? 'text-gray-900' : 'text-white'}`}>
+                {content?.title}
+              </h2>
+              {content?.description && (
+                <p className={`text-sm ${theme === 'light' ? 'text-gray-600' : 'text-gray-400'}`}>{content.description}</p>
+              )}
+            </div>
+          </div>
+          <div className="flex items-center gap-3">
+            {content?.actions}
+          </div>
         </div>
       </div>
     </div>
