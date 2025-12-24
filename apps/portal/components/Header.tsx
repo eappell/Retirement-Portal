@@ -288,3 +288,6 @@ export default function Header({ showAppSwitcher = false }: HeaderProps) {
     </header>
   );
 }
+
+// Provide a named export for compatibility with callers that import { Header }
+export { Header };
