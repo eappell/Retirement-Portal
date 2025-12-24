@@ -1,11 +1,13 @@
 "use client";
 
-import React, { useEffect } from "react";
+import React, { useEffect, useState } from "react";
 import Image from "next/image";
 import Link from "next/link";
 import { useTheme } from "@/lib/theme";
 import logoBlack from "../public/images/RetireWise-Logo-80h-black-tag.png";
 import logoWhite from "../public/images/RetireWise-Logo-80h-white-tag.png";
+import { db } from "@/lib/firebase";
+import { collection, getDocs } from "firebase/firestore";
 
 export default function Footer() {
   const { theme } = useTheme();
@@ -40,15 +42,57 @@ export default function Footer() {
   const bgColor = theme === 'light' ? '#f9f8f7' : '#001021';
   const borderColor = theme === 'light' ? '#e5e7eb' : '#334155';
 
+  const [apps, setApps] = useState<{id:string;name:string;url:string}[]>([]);
+  const [appsLoading, setAppsLoading] = useState(true);
+
+  useEffect(() => {
+    let mounted = true;
+    (async () => {
+      try {
+        setAppsLoading(true);
+        const appsRef = collection(db, "apps");
+        const snap = await getDocs(appsRef);
+        const items: {id:string;name:string;url:string}[] = [];
+        snap.forEach(doc => {
+          const data = doc.data() as any;
+          const id = data.id || doc.id;
+          if (id === 'portal') return;
+          if (typeof data.url === 'string' && data.url.includes('/portal')) return;
+          items.push({ id, name: data.name || id, url: data.url || '' });
+        });
+        if (mounted) setApps(items.sort((a,b)=>a.name.localeCompare(b.name)));
+      } catch (e) {
+        console.warn('Failed to load apps for footer', e);
+      } finally {
+        if (mounted) setAppsLoading(false);
+      }
+    })();
+    return () => { mounted = false; };
+  }, []);
+
   return (
     <footer id="portal-footer" className="fixed left-0 right-0 bottom-0 z-40">
-      <div className="py-3" style={{ backgroundColor: bgColor, borderTop: `1px solid ${borderColor}` }}>
-        <div className="max-w-[1400px] mx-auto px-4 flex justify-start items-center">
+      <div className="py-3 footer-theme" style={{ ['--footer-bg' as any]: bgColor, ['--footer-border' as any]: borderColor }}>
+        <div className="max-w-[1400px] mx-auto px-4 flex justify-start items-start gap-6">
           <div className="pl-2">
             <Link href="/dashboard" aria-label="Go to portal dashboard">
               <Image src={src} alt="RetireWise" height={80} priority className="w-auto object-contain" />
             </Link>
           </div>
+
+          {/* Apps list shown in footer (names only), hidden on small screens */}
+          <nav aria-label="Applications" className="hidden md:flex flex-col gap-1 mt-2">
+            {appsLoading && <span className="text-sm text-gray-400">Loading…</span>}
+            {!appsLoading && apps.map((a) => (
+              <Link
+                key={a.id}
+                href={`/apps/${encodeURIComponent(a.id)}?name=${encodeURIComponent(a.name)}&url=${encodeURIComponent(a.url)}`}
+                className={`text-sm hover:underline ${theme === 'light' ? 'text-gray-700' : 'text-gray-200'}`}
+              >
+                {a.name}
+              </Link>
+            ))}
+          </nav>
         </div>
       </div>
     </footer>

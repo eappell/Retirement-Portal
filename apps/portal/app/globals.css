@@ -391,6 +391,15 @@ html.light .dashboard-redesign .background-particles .particle-light,
 /* Cartoon svg wrapper also animates on hover */
 .cartoon-icon { transition: all 0.4s ease; transform-origin: center; }
 
+/* Footer theme variables and helpers */
+.footer-theme {
+  background-color: var(--footer-bg);
+  border-top: 1px solid var(--footer-border);
+}
+.footer-theme a { text-decoration: none; }
+.footer-theme nav a { display: inline-block; padding: 4px 0; }
+.footer-theme nav a:hover { text-decoration: underline; }
+
 /* Hover expansion behaviour: matches sampledash.html exactly */
 .app-tile-unified {
   transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
