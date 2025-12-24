@@ -42,8 +42,10 @@ export default function Footer() {
   return (
     <footer id="portal-footer" className="fixed left-0 right-0 bottom-0 z-40">
       <div className="py-3" style={{ backgroundColor: bgColor, borderTop: `1px solid ${borderColor}` }}>
-        <div className="max-w-[1400px] mx-auto px-4 flex justify-center">
-          <Image src={src} alt="RetireWise" height={80} priority className="w-auto object-contain" />
+        <div className="max-w-[1400px] mx-auto px-4 flex justify-start items-center">
+          <div className="pl-2">
+            <Image src={src} alt="RetireWise" height={80} priority className="w-auto object-contain" />
+          </div>
         </div>
       </div>
     </footer>
