@@ -75,7 +75,7 @@ export function Header({ showAppSwitcher = false }: HeaderProps) {
             <img
               src={theme === "light" ? "/images/RetireWise-Logo-sm-black-tag.png" : "/images/RetireWise-Logo-sm-white-tag.png"}
               alt="RetireWise"
-              className="h-10 w-auto transform origin-left scale-110"
+              className="h-[65px] w-auto transform origin-left"
             />
           </Link>
 
