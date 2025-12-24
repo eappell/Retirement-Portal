@@ -69,6 +69,21 @@ export function Header({ showAppSwitcher = false }: HeaderProps) {
     return "Free";
   };
 
+  // expose header height so other components can position relative to it
+  useEffect(() => {
+    const el = document.getElementById('portal-header-content');
+    if (!el) return;
+    const setHeight = () => {
+      const h = el.offsetHeight;
+      document.documentElement.style.setProperty('--portal-header-height', `${h}px`);
+    };
+    setHeight();
+    const ro = new ResizeObserver(setHeight);
+    ro.observe(el);
+    const t = setTimeout(setHeight, 500);
+    return () => { ro.disconnect(); clearTimeout(t); };
+  }, []);
+
   return (
     <header className="relative z-50">
       {/* Full-bleed background using fixed positioning so it spans the entire viewport */}
@@ -76,7 +91,7 @@ export function Header({ showAppSwitcher = false }: HeaderProps) {
       <div className={`fixed top-0 left-0 right-0 z-40 pointer-events-none ${headerBgClass} bg-opacity-100 backdrop-blur-none ${headerBorderClass} shadow-sm h-20`} />
       {/* NOTE: header content itself remains in a constrained container below and will be sticky */}
 
-      <div className="sticky top-0 z-50 bg-transparent max-w-[1400px] mx-auto px-4 py-4 sm:px-6 lg:px-8">
+      <div id="portal-header-content" className="sticky top-0 z-50 bg-transparent max-w-[1400px] mx-auto px-4 py-4 sm:px-6 lg:px-8">
         <div className="flex items-center">
           {/* Logo/Brand */}
           <Link href="/dashboard" className="flex items-center gap-2 -ml-5">

@@ -404,6 +404,40 @@ html.light .dashboard-redesign .background-particles .particle-light,
   --footer-border: #334155;
 }
 .footer-theme a { text-decoration: none; }
+
+/* Portal layout helpers: header/appnav sizing and main content spacing */
+:root {
+  --portal-header-height: 80px; /* default header height */
+  --portal-appnav-height: 70px; /* default app-nav height */
+}
+
+/* Ensure main content area is offset by header+appnav (so it's not obscured) */
+.main-portal-content {
+  padding-top: calc(var(--portal-header-height) + var(--portal-appnav-height));
+  min-height: calc(100vh - var(--portal-footer-height, 0px) - (var(--portal-header-height) + var(--portal-appnav-height)));
+}
+
+/* AppNav fixed background helper: begin below header and use appnav height */
+.appnav-fixed {
+  position: fixed;
+  left: 0;
+  right: 0;
+  top: var(--portal-header-height);
+  height: var(--portal-appnav-height);
+  z-index: 45;
+  pointer-events: none;
+}
+
+/* AppNav content container (sticky below header) */
+.appnav-content {
+  position: sticky;
+  top: var(--portal-header-height);
+  z-index: 50;
+  height: var(--portal-appnav-height);
+  display: flex;
+  align-items: center;
+}
+
 .footer-theme nav a { display: block; padding: 4px 0; }
 .footer-theme nav a:hover { text-decoration: underline; }
 
