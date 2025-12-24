@@ -54,8 +54,8 @@ export default function AppsNav() {
   }, []);
 
   return (
-    <nav aria-label="Applications" className="hidden md:block w-56 shrink-0">
-      <div className={`rounded-md ${theme === 'light' ? 'bg-white' : 'bg-slate-900'} border ${theme === 'light' ? 'border-gray-100' : 'border-slate-700'} p-3 sticky top-24`}>
+    <nav aria-label="Applications" className="hidden md:block w-56 shrink-0 h-screen">
+      <div className={`h-full rounded-md ${theme === 'light' ? 'bg-white' : 'bg-slate-900'} border ${theme === 'light' ? 'border-gray-100' : 'border-slate-700'} p-3 sticky top-20`}> 
         <h3 className={`text-sm font-semibold mb-2 ${theme === 'light' ? 'text-gray-700' : 'text-gray-200'}`}>Applications</h3>
         <div className="flex flex-col gap-1">
           {loading && <div className="text-sm text-gray-400">Loading…</div>}
