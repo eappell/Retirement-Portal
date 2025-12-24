@@ -76,7 +76,7 @@ export function Header({ showAppSwitcher = false }: HeaderProps) {
           {/* Logo/Brand */}
           <Link href="/dashboard" className="flex items-center gap-2 -ml-5">
             <Image
-              src={theme === "light" ? require('../public/images/RetireWise-Logo-sm-black-notag.png') : require('../public/images/RetireWise-Logo-sm-white-notag.png')}
+              src={theme === "light" ? logoSmBlack : logoSmWhite}
               alt="RetireWise"
               height={65}
               className="w-auto transform origin-left"
