@@ -237,31 +237,12 @@ export default function AppPage() {
     <div className="flex flex-col h-screen bg-gray-50">
       <Header showAppSwitcher />
 
-      {/* App Info Bar */}
-      <div 
-        className="border-b"
-        style={{ 
-          backgroundColor: theme === 'light' ? '#F9F8F6' : '#1e293b',
-          borderColor: theme === 'light' ? '#e5e7eb' : '#334155'
-        }}
-      >
-        <div className="max-w-[1400px] mx-auto px-4 py-3 sm:px-6 lg:px-8 flex items-center justify-between">
-          <div className="flex items-center gap-4 flex-1">
-            {/* App Icon */}
-            <AppIcon icon={appConfig.icon} className={`h-8 w-8 ${theme === 'light' ? 'text-gray-700' : 'text-gray-300'}`} />
-            {/* App Name and Description */}
-            <div className="flex-1">
-              <h2 className={`text-lg font-semibold ${theme === 'light' ? 'text-gray-900' : 'text-white'}`}>
-                {appConfig.name}
-              </h2>
-              {appConfig.description && (
-                <p className={`text-sm ${theme === 'light' ? 'text-gray-600' : 'text-gray-400'}`}>{appConfig.description}</p>
-              )}
-            </div>
-          </div>
-          <div id="app-toolbar-placeholder" className="flex-shrink-0 flex items-center gap-2" />
-        </div>
-      </div>
+      {/* App Info Bar is now provided by AppNavBar via context */}
+      {/* Set AppNav content for this page */}
+      <SetAppNavContent config={appConfig} name={finalAppName} />
+
+      {/* Toolbar placeholder (actions may appear here via the AppNav context) */}
+      <div id="app-toolbar-placeholder" className="flex-shrink-0 flex items-center gap-2" />
 
       {/* iFrame Container */}
       <div className="flex-1 overflow-hidden">
