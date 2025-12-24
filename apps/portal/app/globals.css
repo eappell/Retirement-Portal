@@ -404,7 +404,7 @@ html.light .dashboard-redesign .background-particles .particle-light,
   --footer-border: #334155;
 }
 .footer-theme a { text-decoration: none; }
-.footer-theme nav a { display: inline-block; padding: 4px 0; }
+.footer-theme nav a { display: block; padding: 4px 0; }
 .footer-theme nav a:hover { text-decoration: underline; }
 
 /* Scrollable footer apps list */
