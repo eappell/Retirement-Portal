@@ -2,6 +2,7 @@
 
 import React, { useEffect } from "react";
 import Image from "next/image";
+import Link from "next/link";
 import { useTheme } from "@/lib/theme";
 import logoBlack from "../public/images/RetireWise-Logo-80h-black-tag.png";
 import logoWhite from "../public/images/RetireWise-Logo-80h-white-tag.png";
