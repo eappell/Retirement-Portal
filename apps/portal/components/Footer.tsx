@@ -36,7 +36,7 @@ export default function Footer() {
     };
   }, []);
 
-  const bgColor = theme === 'light' ? '#dedede' : '#001021';
+  const bgColor = theme === 'light' ? '#f9f8f7' : '#001021';
   const borderColor = theme === 'light' ? '#e5e7eb' : '#334155';
 
   return (
