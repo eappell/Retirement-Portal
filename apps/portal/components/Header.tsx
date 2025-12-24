@@ -72,7 +72,8 @@ export function Header({ showAppSwitcher = false }: HeaderProps) {
   return (
     <header className="relative z-50">
       {/* Full-bleed background so header color spans the viewport while content remains constrained */}
-      <div className={`sticky top-0 left-1/2 -translate-x-1/2 w-screen z-40 ${headerBgClass} bg-opacity-100 backdrop-blur-none ${headerBorderClass}`} />
+      {/* Added a subtle shadow for separation from the page content */}
+      <div className={`sticky top-0 left-1/2 -translate-x-1/2 w-screen z-40 ${headerBgClass} bg-opacity-100 backdrop-blur-none ${headerBorderClass} shadow-sm`} />
 
       <div className="relative max-w-[1400px] mx-auto px-4 py-4 sm:px-6 lg:px-8 z-50">
         <div className="flex items-center">
