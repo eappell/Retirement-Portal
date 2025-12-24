@@ -7,6 +7,9 @@ import { useAuth } from "@/lib/auth";
 import { useUserTier } from "@/lib/useUserTier";
 import { useAnalytics } from "@/lib/useAnalytics";
 import { useTheme } from "@/lib/theme";
+import Image from "next/image";
+import logoSmBlack from "../public/images/RetireWise-Logo-sm-black-notag.png";
+import logoSmWhite from "../public/images/RetireWise-Logo-sm-white-notag.png";
 import { AppSwitcher } from "./AppSwitcher";
 import { SunIcon, MoonIcon } from "@heroicons/react/24/outline";
 
@@ -72,10 +75,11 @@ export function Header({ showAppSwitcher = false }: HeaderProps) {
         <div className="flex items-center">
           {/* Logo/Brand */}
           <Link href="/dashboard" className="flex items-center gap-2 -ml-5">
-            <img
-              src={theme === "light" ? "/images/RetireWise-Logo-sm-black-notag.png" : "/images/RetireWise-Logo-sm-white-notag.png"}
+            <Image
+              src={theme === "light" ? require('../public/images/RetireWise-Logo-sm-black-notag.png') : require('../public/images/RetireWise-Logo-sm-white-notag.png')}
               alt="RetireWise"
-              className="h-[65px] w-auto transform origin-left"
+              height={65}
+              className="w-auto transform origin-left"
             />
           </Link>
 
