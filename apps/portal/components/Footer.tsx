@@ -12,7 +12,7 @@ export default function Footer() {
     <footer className="mt-8 py-6">
       <div className="max-w-[1400px] mx-auto px-4">
         <div className="flex justify-center">
-          <img src={src} alt="RetireWise" className="h-[65px] w-auto object-contain" />
+          <img src={src} alt="RetireWise" className="h-[80px] w-auto object-contain" />
         </div>
       </div>
     </footer>
