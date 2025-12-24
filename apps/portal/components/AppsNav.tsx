@@ -56,7 +56,8 @@ export default function AppsNav() {
   return (
     <nav aria-label="Applications" className="hidden md:block w-56 shrink-0 h-screen relative">
       {/* Fixed full-height background panel that reaches the left edge of the browser */}
-      <div className={`hidden md:block fixed left-0 top-0 h-screen w-56 pointer-events-none z-10 ${theme === 'light' ? 'bg-white border-r border-gray-100' : 'bg-slate-900 border-r border-slate-700'}`} />
+      {/* Start below the header and use remaining viewport height */}
+      <div className={`hidden md:block fixed left-0 top-20 h-[calc(100vh-5rem)] w-56 pointer-events-none z-10 ${theme === 'light' ? 'bg-white border-r border-gray-100' : 'bg-slate-900 border-r border-slate-700'}`} />
       <div className={`h-full rounded-md relative z-20 ${theme === 'light' ? 'bg-white' : 'bg-slate-900'} border ${theme === 'light' ? 'border-gray-100' : 'border-slate-700'} p-3 sticky top-20`}> 
         <h3 className={`text-sm font-semibold mb-2 ${theme === 'light' ? 'text-gray-700' : 'text-gray-200'}`}>Applications</h3>
         <div className="flex flex-col gap-1">
