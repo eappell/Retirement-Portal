@@ -1,6 +1,6 @@
 "use client";
 
-import React from "react";
+import React, { useEffect } from "react";
 import Image from "next/image";
 import { useTheme } from "@/lib/theme";
 import logoBlack from "../public/images/RetireWise-Logo-80h-black-tag.png";
