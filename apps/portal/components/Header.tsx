@@ -17,7 +17,7 @@ interface HeaderProps {
   showAppSwitcher?: boolean;
 }
 
-export function Header({ showAppSwitcher = false }: HeaderProps) {
+export default function Header({ showAppSwitcher = false }: HeaderProps) {
   const router = useRouter();
   const { user, logout } = useAuth();
   const { tier, loading: tierLoading } = useUserTier();
