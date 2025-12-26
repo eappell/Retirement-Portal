@@ -407,14 +407,25 @@ html.light .dashboard-redesign .background-particles .particle-light,
 
 /* Portal layout helpers: header/appnav sizing and main content spacing */
 :root {
-  --portal-header-height: 80px; /* default header height */
-  --portal-appnav-height: 70px; /* default app-nav height */
+  --portal-header-height: 100px; /* header height: 100px */
+  --portal-appnav-height: 73px; /* app-nav height: 73px */
 }
 
 /* Ensure main content area is offset by header+appnav (so it's not obscured) */
 .main-portal-content {
   padding-top: calc(var(--portal-header-height) + var(--portal-appnav-height));
   min-height: calc(100vh - var(--portal-footer-height, 0px) - (var(--portal-header-height) + var(--portal-appnav-height)));
+}
+
+/* Full-bleed header background (fixed so it spans viewport) */
+.portal-header-bg {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: var(--portal-header-height);
+  z-index: 40;
+  pointer-events: none;
 }
 
 /* AppNav fixed background helper: begin below header and use appnav height */
@@ -428,9 +439,9 @@ html.light .dashboard-redesign .background-particles .particle-light,
   pointer-events: none;
 }
 
-/* AppNav content container (fixed below header) */
+/* AppNav content container (sticky below header) */
 .appnav-content {
-  position: fixed;
+  position: sticky;
   left: 0;
   right: 0;
   top: var(--portal-header-height);
@@ -442,7 +453,7 @@ html.light .dashboard-redesign .background-particles .particle-light,
 
 /* Header content helpers */
 #portal-header-content {
-  position: fixed;
+  position: sticky;
   top: 0;
   left: 0;
   right: 0;
