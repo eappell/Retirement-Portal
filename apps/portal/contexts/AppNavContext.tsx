@@ -1,38 +1,58 @@
 "use client";
 
-import React, { createContext, useContext, useState, ReactNode, useEffect } from "react";
+import React, { useContext, useEffect, useState } from "react";
 
 export type AppNavState = {
   title?: string;
   description?: string;
-  actions?: ReactNode;
   visible?: boolean;
+  // actions or toolbar buttons can be added here later
+  actions?: any[];
 };
 
 type AppNavContextValue = {
   state: AppNavState;
-  setState: (s: AppNavState) => void;
+  setState: React.Dispatch<React.SetStateAction<AppNavState>>;
 };
 
-const AppNavContext = createContext<AppNavContextValue | undefined>(undefined);
+const defaultValue: AppNavContextValue = {
+  state: { visible: false },
+  // eslint-disable-next-line @typescript-eslint/no-empty-function
+  setState: () => {},
+};
 
-export const AppNavProvider = ({ children }: { children: ReactNode }) => {
+const AppNavContext = React.createContext<AppNavContextValue>(defaultValue);
+
+export function AppNavProvider({ children }: { children: React.ReactNode }) {
   const [state, setState] = useState<AppNavState>({ visible: false });
+
   return <AppNavContext.Provider value={{ state, setState }}>{children}</AppNavContext.Provider>;
-};
+}
 
-export const useAppNav = () => {
-  const ctx = useContext(AppNavContext);
-  if (!ctx) throw new Error("useAppNav must be used within AppNavProvider");
-  return ctx;
-};
+export function useAppNav() {
+  return useContext(AppNavContext);
+}
 
-// Component apps can render to set the app nav content while mounted.
-export function SetAppNavContent({ title, description, actions }: { title?: string; description?: string; actions?: ReactNode }) {
+// A small client component to declaratively set AppNav content from pages.
+export function SetAppNavContent({
+  title,
+  description,
+  visible = true,
+}: {
+  title?: string;
+  description?: string;
+  visible?: boolean;
+}) {
   const { setState } = useAppNav();
+
   useEffect(() => {
-    setState({ title, description, actions, visible: true });
-    return () => setState({ visible: false });
-  }, [title, description, actions, setState]);
+    // Set on mount/update
+    setState((prev) => ({ ...prev, title, description, visible }));
+    return () => {
+      // Clear visibility on unmount to avoid leaving stale content
+      setState((prev) => ({ ...prev, visible: false }));
+    };
+  }, [title, description, visible, setState]);
+
   return null;
 }
