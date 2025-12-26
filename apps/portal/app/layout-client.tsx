@@ -15,17 +15,17 @@ export default function RootLayoutClient({children}: {children: React.ReactNode}
       <AuthProvider>
         <ToastProvider>
           <AppNavProvider>
-            <Header />
-            <AppNavBar />
+          <Header />
+          <AppNavBar />
 
-            <div className="main-portal-content">
-              <div className="max-w-[1400px] mx-auto px-4 py-6 sm:px-6 lg:px-8">
-                <main>{children}</main>
-              </div>
+          <div className="main-portal-content">
+            <div className="max-w-[1400px] mx-auto px-4 py-6 sm:px-6 lg:px-8">
+              <main>{children}</main>
             </div>
+          </div>
+        </AppNavProvider>
 
-            <Footer />
-          </AppNavProvider>
+        <Footer />
         </ToastProvider>
       </AuthProvider>
     </ThemeProvider>
