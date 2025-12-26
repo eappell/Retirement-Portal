@@ -8,6 +8,7 @@ import { useAnalytics } from "@/lib/useAnalytics";
 import { useTheme } from "@/lib/theme";
 import { Header } from "@/components/Header";
 import { IFrameWrapper } from "@/components/IFrameWrapper";
+import { SetAppNavContent } from "@/contexts/AppNavContext";
 import { db } from "@/lib/firebase";
 import { collection, getDocs, query, where } from "firebase/firestore";
 import {
@@ -28,7 +29,6 @@ import {
   BoltIcon,
 } from "@heroicons/react/24/outline";
 import { AppIcon } from "@/components/icon-map";
-import SetAppNavContent from "@/components/SetAppNavContent";
 
 // Available HeroIcons mapping
 const AVAILABLE_ICONS = [
@@ -238,12 +238,8 @@ export default function AppPage() {
     <div className="flex flex-col h-screen bg-gray-50">
       <Header showAppSwitcher />
 
-      {/* App Info Bar is now provided by AppNavBar via context */}
-      {/* Set AppNav content for this page */}
-      <SetAppNavContent config={appConfig} name={finalAppName} />
-
-      {/* Toolbar placeholder (actions may appear here via the AppNav context) */}
-      <div id="app-toolbar-placeholder" className="flex-shrink-0 flex items-center gap-2" />
+      {/* Use the portal AppNav instead of a local info bar */}
+      <SetAppNavContent title={finalAppName} description={appConfig.description} />
 
       {/* iFrame Container */}
       <div className="flex-1 overflow-hidden">

@@ -7,6 +7,7 @@ import { useUserTier } from "@/lib/useUserTier";
 import { useTheme } from "@/lib/theme";
 import { auth } from "@/lib/firebase";
 import { ToolbarButton } from "./SecondaryToolbar";
+import { useAppNav } from "@/contexts/AppNavContext";
 
 interface IFrameWrapperProps {
   appId: string;
@@ -30,6 +31,7 @@ export function IFrameWrapper({
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string>("");
   const [toolbarButtons, setToolbarButtons] = useState<ToolbarButton[]>([]);
+  const { setState } = useAppNav();
 
   useEffect(() => {
     const getAuthToken = async () => {
@@ -234,6 +236,16 @@ export function IFrameWrapper({
         return;
       }
 
+      // Allow apps to publish metadata (title/description) to the portal app nav
+      if (event.data?.type === 'APP_METADATA') {
+        try {
+          setState(prev => ({ ...prev, title: event.data.title || appName, description: event.data.description || description, visible: true }));
+        } catch (e) {
+          console.warn('[IFrameWrapper] failed to set AppNav metadata', e);
+        }
+        return;
+      }
+
       // Allow iframe to request saved app state (selected countries, retirement data)
       if (event.data?.type === 'REQUEST_APP_STATE') {
         try {
@@ -393,6 +405,33 @@ export function IFrameWrapper({
         // Allow all buttons including print
         const filteredButtons = event.data.buttons || [];
         setToolbarButtons(filteredButtons);
+
+        // Also publish actions into the portal's AppNav so buttons appear in the app nav
+        try {
+          const actions = (
+            <div className="flex items-center gap-2">
+              {filteredButtons.map((button: ToolbarButton) => (
+                <button
+                  key={button.id}
+                  data-button-id={button.id}
+                  aria-label={button.label}
+                  title={button.tooltip || button.label}
+                  onClick={() => {
+                    if (iframeRef.current) {
+                      iframeRef.current.contentWindow?.postMessage({ type: 'TOOLBAR_BUTTON_CLICKED', buttonId: button.id }, '*');
+                    }
+                  }}
+                  className={`inline-flex items-center justify-center px-3 py-1.5 rounded-md text-sm font-medium transition ${theme === 'light' ? 'text-gray-700 hover:bg-gray-100' : 'text-slate-300 hover:bg-slate-700'}`}
+                >
+                  {button.label}
+                </button>
+              ))}
+            </div>
+          );
+          setState(prev => ({ ...prev, actions, visible: true }));
+        } catch (e) {
+          console.warn('[IFrameWrapper] failed to set AppNav actions', e);
+        }
       } else if (event.data?.type === "TOOLBAR_BUTTON_ACTION") {
         // Forward button actions back to iframe if needed
         if (iframeRef.current) {
