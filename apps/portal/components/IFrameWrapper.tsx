@@ -520,7 +520,10 @@ export function IFrameWrapper({
     };
 
     window.addEventListener("message", handleMessage);
-    return () => window.removeEventListener("message", handleMessage);
+    return () => {
+      window.removeEventListener("message", handleMessage);
+      try { setState({ visible: false }); } catch (e) { /* ignore */ }
+    };
   }, []);
 
   // Render toolbar buttons when config or theme changes
