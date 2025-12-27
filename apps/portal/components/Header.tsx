@@ -36,9 +36,9 @@ export function Header({ showAppSwitcher = false }: HeaderProps) {
   const borderColor = theme === "light" ? "border-gray-200" : "border-slate-700";
   const dropdownBg = theme === "light" ? "bg-[#F9F8F6]" : "bg-slate-800";
 
-  // Use the 80px tagged logo and compute a width that matches a fixed display height of 80px
-  // so the header logo renders at 80px high (crisp on retina displays).
-  const logoSrc = theme === "light" ? logo80Black : logo80White;
+  // Use the small no-tag logo variants for the header, but render them at a fixed display height of 80px
+  // so they appear at the correct size while retaining crispness on Retina displays.
+  const logoSrc = theme === "light" ? logoSmBlack : logoSmWhite;
   const logoMeta: any = logoSrc;
   const logoWidthFor80 = (logoMeta?.width && logoMeta?.height) ? Math.round((logoMeta.width / logoMeta.height) * 80) : undefined;
 
