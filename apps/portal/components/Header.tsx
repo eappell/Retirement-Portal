@@ -10,6 +10,8 @@ import { useTheme } from "@/lib/theme";
 import Image from "next/image";
 import logoSmBlack from "../public/images/RetireWise-Logo-sm-black-notag.png";
 import logoSmWhite from "../public/images/RetireWise-Logo-sm-white-notag.png";
+import logo80Black from "../public/images/RetireWise-Logo-80h-black-tag.png";
+import logo80White from "../public/images/RetireWise-Logo-80h-white-tag.png";
 import { AppSwitcher } from "./AppSwitcher";
 import { SunIcon, MoonIcon } from "@heroicons/react/24/outline";
 
@@ -33,6 +35,12 @@ export function Header({ showAppSwitcher = false }: HeaderProps) {
   const linkText = theme === "light" ? "text-gray-700 hover:text-purple-600" : "text-slate-300 hover:text-purple-400";
   const borderColor = theme === "light" ? "border-gray-200" : "border-slate-700";
   const dropdownBg = theme === "light" ? "bg-[#F9F8F6]" : "bg-slate-800";
+
+  // Use the 80px tagged logo and compute a width that matches a fixed display height of 80px
+  // so the header logo renders at 80px high (crisp on retina displays).
+  const logoSrc = theme === "light" ? logo80Black : logo80White;
+  const logoMeta: any = logoSrc;
+  const logoWidthFor80 = (logoMeta?.width && logoMeta?.height) ? Math.round((logoMeta.width / logoMeta.height) * 80) : undefined;
 
   const handleLogout = async () => {
     await trackEvent({
@@ -76,10 +84,12 @@ export function Header({ showAppSwitcher = false }: HeaderProps) {
           {/* Logo/Brand */}
           <Link href="/dashboard" className="flex items-center gap-2 -ml-5">
             <Image
-              src={theme === "light" ? require('../public/images/RetireWise-Logo-sm-black-notag.png') : require('../public/images/RetireWise-Logo-sm-white-notag.png')}
+              src={logoSrc}
               alt="RetireWise"
-              height={65}
-              className="w-auto transform origin-left"
+              width={logoWidthFor80}
+              height={80}
+              className="w-auto h-auto object-contain transform origin-left"
+              priority
             />
           </Link>
 
