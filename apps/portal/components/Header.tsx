@@ -36,11 +36,12 @@ export function Header({ showAppSwitcher = false }: HeaderProps) {
   const borderColor = theme === "light" ? "border-gray-200" : "border-slate-700";
   const dropdownBg = theme === "light" ? "bg-[#F9F8F6]" : "bg-slate-800";
 
-  // Use the small no-tag logo variants for the header, but render them at a fixed display height of 80px
+  // Use the small no-tag logo variants for the header, but render them at a fixed display height of 65px
   // so they appear at the correct size while retaining crispness on Retina displays.
   const logoSrc = theme === "light" ? logoSmBlack : logoSmWhite;
   const logoMeta: any = logoSrc;
-  const logoWidthFor80 = (logoMeta?.width && logoMeta?.height) ? Math.round((logoMeta.width / logoMeta.height) * 80) : undefined;
+  const LOGO_DISPLAY_HEIGHT = 65;
+  const logoWidthFor65 = (logoMeta?.width && logoMeta?.height) ? Math.round((logoMeta.width / logoMeta.height) * LOGO_DISPLAY_HEIGHT) : undefined;
 
   const handleLogout = async () => {
     await trackEvent({
@@ -86,9 +87,9 @@ export function Header({ showAppSwitcher = false }: HeaderProps) {
             <Image
               src={logoSrc}
               alt="RetireWise"
-              width={logoWidthFor80}
-              height={80}
-              className="w-auto h-[80px] min-h-[80px] object-contain transform origin-left"
+              width={logoWidthFor65}
+              height={LOGO_DISPLAY_HEIGHT}
+              className="w-auto h-[65px] min-h-[65px] object-contain transform origin-left"
               priority
             />
           </Link>
