@@ -10,11 +10,12 @@ export default function Footer() {
   const { theme } = useTheme();
 
   const src = theme === "light" ? logoBlack : logoWhite;
-  // If the imported image object contains width/height metadata, use those so Next/Image serves
-  // the image at its native resolution (preserving full resolution on high-DPI screens).
+  // If the imported image object contains width/height metadata, compute a width that matches
+  // a fixed display height of 80px so the logo renders at 80px high (crisp on retina displays).
   const imgMeta: any = src;
   const intrinsicWidth = imgMeta?.width ?? undefined;
   const intrinsicHeight = imgMeta?.height ?? undefined;
+  const widthFor80 = (intrinsicWidth && intrinsicHeight) ? Math.round((intrinsicWidth / intrinsicHeight) * 80) : undefined;
 
   return (
     <footer className="mt-8 py-6">
@@ -23,10 +24,10 @@ export default function Footer() {
           <Image
             src={src}
             alt="RetireWise"
-            width={intrinsicWidth}
-            height={intrinsicHeight}
+            width={widthFor80}
+            height={80}
             priority
-            className="w-auto h-auto object-contain"
+            className="w-auto h-[80px] min-h-[80px] object-contain"
           />
         </div>
       </div>

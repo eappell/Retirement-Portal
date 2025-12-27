@@ -88,7 +88,7 @@ export function Header({ showAppSwitcher = false }: HeaderProps) {
               alt="RetireWise"
               width={logoWidthFor80}
               height={80}
-              className="w-auto h-auto object-contain transform origin-left"
+              className="w-auto h-[80px] min-h-[80px] object-contain transform origin-left"
               priority
             />
           </Link>
