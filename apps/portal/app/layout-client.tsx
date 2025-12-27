@@ -11,8 +11,12 @@ export default function RootLayoutClient({children}: {children: React.ReactNode}
     <ThemeProvider>
       <AuthProvider>
         <ToastProvider>
-          {children}
-          <Footer />
+          <div className="flex flex-col min-h-screen">
+            <main className="flex-1">
+              {children}
+            </main>
+            <Footer />
+          </div>
         </ToastProvider>
       </AuthProvider>
     </ThemeProvider>
