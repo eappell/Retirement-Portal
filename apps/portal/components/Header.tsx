@@ -79,7 +79,7 @@ export function Header({ showAppSwitcher = false }: HeaderProps) {
   };
 
   return (
-    <header className={`${headerBgClass} sticky top-0 z-50 bg-opacity-100 backdrop-blur-none ${headerBorderClass}`}>
+    <header className={`${headerBgClass} mt-[10px] sticky top-0 z-50 bg-opacity-100 backdrop-blur-none ${headerBorderClass}`}>
       <div className="max-w-[1400px] mx-auto px-4 py-4 sm:px-6 lg:px-8">
         <div className="flex items-center">
           {/* Logo/Brand */}
