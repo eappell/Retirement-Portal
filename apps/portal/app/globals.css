@@ -153,16 +153,24 @@ body {
   mix-blend-mode: overlay;
 }
 
-/* Animated background particles (removed) */
-/* Per request: animations removed and particles hidden site-wide. */
-.background-particles,
-.background-particles .particle {
-  display: none !important;
-  animation: none !important;
+/* Static background particles (no animation) */
+/* Decorative blobs remain non-animated; colors are theme-aware below. */
+.background-particles {
+  position: absolute;
+  inset: 0;
   pointer-events: none;
-  opacity: 1 !important;
-  filter: none !important;
+  z-index: 0; /* below content but above decorative overlay */
+  overflow: hidden;
+  display: block;
 }
+.background-particles .particle {
+  position: absolute;
+  border-radius: 50%;
+  filter: blur(28px);
+  animation: none !important;
+  opacity: 1 !important;
+  mix-blend-mode: normal;
+} 
 
 
 /* Tools grid similar to sample: 2 columns on wide screens, 1 column on narrow screens */

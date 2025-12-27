@@ -266,6 +266,15 @@ export default function DashboardPage() {
     <div className="min-h-screen bg-background portal-dashboard dashboard-redesign">
       <Header />
 
+      {/* Background particles (static, no animation) */}
+      <div className="background-particles" aria-hidden="true">
+        <div className={"particle" + (theme === 'light' ? ' particle-light' : '')} />
+        <div className={"particle" + (theme === 'light' ? ' particle-light' : '')} />
+        <div className={"particle" + (theme === 'light' ? ' particle-light' : '')} />
+        <div className={"particle" + (theme === 'light' ? ' particle-light' : '')} />
+        <div className={"particle" + (theme === 'light' ? ' particle-light' : '')} />
+      </div>
+
 
 
 
