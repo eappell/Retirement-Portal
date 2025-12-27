@@ -41,6 +41,20 @@ function getEffectiveUrl(app: { id: string; url: string }, devSettings: DevSetti
   return app.url;
 }
 
+// Convert hex color to rgba string with given alpha
+function hexToRgba(hex: string, alpha = 0.06) {
+  try {
+    let h = hex.replace('#', '');
+    if (h.length === 3) h = h.split('').map(c => c + c).join('');
+    const r = parseInt(h.slice(0, 2), 16);
+    const g = parseInt(h.slice(2, 4), 16);
+    const b = parseInt(h.slice(4, 6), 16);
+    return `rgba(${r}, ${g}, ${b}, ${alpha})`;
+  } catch (e) {
+    return hex; // fallback to original value
+  }
+}
+
 interface App {
   id: string;
   name: string;
@@ -385,6 +399,19 @@ export default function DashboardPage() {
               };
               
               const appStyle = getAppStyle(app, key);
+              // Keep tile background subtle (use tileBg). If app.gradient exists, extract its first hex
+              // and apply a VERY light, transparent shade for the tile background so the tint is barely noticeable.
+              let tileBackgroundStyle: any = { backgroundColor: appStyle.tileBg };
+              if (app.gradient) {
+                const match = String(app.gradient).match(/#(?:[0-9a-fA-F]{3}){1,2}/g);
+                if (match && match.length > 0) {
+                  // Use the first color in the gradient for the subtle tint
+                  tileBackgroundStyle = { backgroundColor: hexToRgba(match[0], 0.04) };
+                } else {
+                  // Fallback: very low-opacity overlay of the full gradient (rare)
+                  tileBackgroundStyle = { backgroundImage: app.gradient, opacity: 0.98 };
+                }
+              }
               const effectiveUrl = getEffectiveUrl(app, devSettings);
               const isDevMode = devSettings[app.id]?.enabled;
               
@@ -395,7 +422,7 @@ export default function DashboardPage() {
                   onClick={() => handleAppClick(app)}
                   data-app-id={app.id}
                   className="app-tile app-tile-unified rounded-2xl shadow-lg hover:shadow-2xl transform transition-all duration-200 hover:scale-[1.035] block group"
-                  style={{ padding: '30px', backgroundColor: appStyle.tileBg, maxWidth: '668px', height: '180px', position: 'relative' }}
+                  style={{ padding: '30px', ...tileBackgroundStyle, maxWidth: '668px', height: '180px', position: 'relative' }}
                 >
                   {isDevMode && (
                     <div className="absolute top-2 right-2 bg-orange-500 text-white text-xs font-bold px-2 py-1 rounded">
@@ -406,7 +433,7 @@ export default function DashboardPage() {
                     <div className="flex items-start gap-4">
                       <div className="flex-shrink-0">
                         {/* Icon square with gradient background - always use Heroicons from Firestore */}
-                        <div className="app-tile-icon-bg" style={{ background: appStyle.iconGradient }}>
+                        <div className="app-tile-icon-bg" style={{ background: app.gradient ? app.gradient : appStyle.iconGradient }}>
                           <AppIcon icon={app.icon} className="app-tile-hero-icon" color="#ffffff" />
                         </div>
                       </div>

@@ -4,6 +4,7 @@ import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { useAuth } from "@/lib/auth";
 import { Header } from "@/components/Header";
+import { useTheme } from '@/lib/theme';
 import {
   updatePassword,
   EmailAuthProvider,
@@ -54,6 +55,7 @@ export default function ProfilePage() {
   const [retirementAgeError, setRetirementAgeError] = useState<string | null>(null);
   const [incomeError, setIncomeError] = useState<string | null>(null);
   const { trackEvent } = useAnalytics();
+  const { theme } = useTheme();
 
   useEffect(() => {
     setMounted(true);
@@ -175,14 +177,25 @@ export default function ProfilePage() {
     );
   }
 
+  const wrapperStyle = theme === 'light' ? { backgroundColor: '#ffffff', color: '#0f172a', fontWeight: 600 } : undefined;
+
   return (
-    <div className="min-h-screen bg-gray-50 dark:bg-slate-900">
+    <div className="min-h-screen profile-force-dark" style={wrapperStyle}>
+      <style>{`.profile-force-dark, .profile-force-dark * { color: #0f172a !important; font-weight: 600 !important; }
+        .dark .profile-force-dark, .dark .profile-force-dark * { color: #f8fafc !important; font-weight: 600 !important; }
+        /* Ensure the page H1 (profile-page-title) is visible and theme-aware */
+        .profile-force-dark .profile-page-title { color: #0f172a !important; }
+        .dark .profile-force-dark .profile-page-title { color: #f8fafc !important; }
+        .profile-force-dark input::placeholder { color: rgba(15,23,42,0.45) !important; }
+        .dark .profile-force-dark input::placeholder { color: rgba(248,250,252,0.6) !important; }
+        .profile-force-dark .opacity-50 { opacity: 0.7 !important; }
+        `}</style>
       <Header />
 
       <main className="max-w-2xl mx-auto px-4 py-12 sm:px-6 lg:px-8">
         <div className="mb-8">
-          <h1 className="text-3xl font-bold text-gray-900">My Profile</h1>
-          <p className="text-gray-600 mt-2">Manage your account settings and preferences</p>
+          <h1 className={`text-3xl font-bold profile-page-title ${theme === 'light' ? 'text-gray-900' : 'text-slate-100'}`}>My Profile</h1>
+          <p className="text-gray-800 mt-2">Manage your account settings and preferences</p>
         </div>
 
         {success && (
@@ -198,12 +211,12 @@ export default function ProfilePage() {
         )}
 
         {/* Account Information */}
-        <div className="bg-white dark:bg-slate-800 rounded-lg shadow-lg p-8 mb-8">
-          <h2 className="text-xl font-bold text-gray-900 dark:text-slate-100 mb-6">Account Information</h2>
+        <div className={`${theme === 'light' ? 'bg-white text-gray-900' : 'bg-slate-800 text-slate-100'} rounded-lg shadow-lg p-8 mb-8`}>
+          <h2 className={`text-xl font-bold ${theme === 'light' ? 'text-gray-900' : 'text-slate-100'} mb-6`}>Account Information</h2>
 
           <div className="space-y-6">
             <div>
-              <label className="block text-sm font-semibold text-gray-700 dark:text-slate-200 mb-2">
+              <label className="block text-sm font-semibold text-gray-900 dark:text-slate-200 mb-2">
                 Email Address
               </label>
               {editingProfile ? (
@@ -211,39 +224,39 @@ export default function ProfilePage() {
                   type="email"
                   value={editableEmail}
                   onChange={(e) => setEditableEmail(e.target.value)}
-                  className="w-full px-4 py-3 border border-gray-300 dark:border-slate-700 rounded-lg bg-white dark:bg-slate-700 text-gray-700 dark:text-slate-100"
+                  className="w-full px-4 py-3 border border-gray-300 dark:border-slate-700 rounded-lg bg-white dark:bg-slate-700 text-gray-900 dark:text-slate-100"
                 />
               ) : (
                 <input
                   type="email"
                   value={user.email || ""}
                   disabled
-                  className="w-full px-4 py-3 border border-gray-300 dark:border-slate-700 rounded-lg bg-gray-50 dark:bg-slate-700 text-gray-700 dark:text-slate-100"
+                  className="w-full px-4 py-3 border border-gray-300 dark:border-slate-700 rounded-lg bg-gray-50 dark:bg-slate-700 text-gray-900 dark:text-slate-100"
                 />
               )}
             </div>
 
             <div>
-              <label className="block text-sm font-semibold text-gray-700 dark:text-slate-200 mb-2">
+              <label className="block text-sm font-semibold text-gray-900 dark:text-slate-200 mb-2">
                 Account ID
               </label>
               <input
                 type="text"
                 value={user.uid}
                 disabled
-                className="w-full px-4 py-3 border border-gray-300 dark:border-slate-700 rounded-lg bg-gray-50 dark:bg-slate-700 text-gray-700 dark:text-slate-100 font-mono text-xs"
+                className="w-full px-4 py-3 border border-gray-300 dark:border-slate-700 rounded-lg bg-gray-50 dark:bg-slate-700 text-gray-900 dark:text-slate-100 font-mono text-xs"
               />
             </div>
 
             <div>
-              <label className="block text-sm font-semibold text-gray-700 dark:text-slate-200 mb-2">
+              <label className="block text-sm font-semibold text-gray-900 dark:text-slate-200 mb-2">
                 Account Created
               </label>
               <input
                 type="text"
                 value={new Date(user.metadata?.creationTime || "").toLocaleDateString()}
                 disabled
-                className="w-full px-4 py-3 border border-gray-300 dark:border-slate-700 rounded-lg bg-gray-50 dark:bg-slate-700 text-gray-700 dark:text-slate-100"
+                className="w-full px-4 py-3 border border-gray-300 dark:border-slate-700 rounded-lg bg-gray-50 dark:bg-slate-700 text-gray-900 dark:text-slate-100"
               />
             </div>
           </div>
@@ -256,13 +269,13 @@ export default function ProfilePage() {
             <p className="text-sm">Tell us your Date of Birth, Retirement Age and Current Annual Income so we can tailor recommendations for you.</p>
           </div>
         )}
-        <div className="bg-white dark:bg-slate-800 rounded-lg shadow-lg p-8 mb-8">
+        <div className={`${theme === 'light' ? 'bg-white text-gray-900' : 'bg-slate-800 text-slate-100'} rounded-lg shadow-lg p-8 mb-8`}>
           <div className="flex items-center justify-between mb-4">
-            <h2 className="text-xl font-bold text-gray-900 dark:text-slate-100">Profile</h2>
+            <h2 className={`text-xl font-bold ${theme === 'light' ? 'text-gray-900' : 'text-slate-100'}`}>Profile</h2>
             {!editingProfile ? (
               <button className="text-indigo-600" onClick={() => setEditingProfile(true)}>Edit</button>
             ) : (
-              <button className="text-gray-600" onClick={() => { setEditingProfile(false); setEditableName(user.displayName || ""); setEditableEmail(user.email || ""); setCurrentPasswordForEmail(""); }}>Cancel</button>
+              <button className="text-gray-800" onClick={() => { setEditingProfile(false); setEditableName(user.displayName || ""); setEditableEmail(user.email || ""); setCurrentPasswordForEmail(""); }}>Cancel</button>
             )}
           </div>
 
@@ -328,32 +341,32 @@ export default function ProfilePage() {
             }}>
               <div className="space-y-4">
                 <div>
-                  <label className="block text-sm font-semibold text-gray-700 dark:text-slate-200 mb-2">Name</label>
-                  <input value={editableName} onChange={(e) => setEditableName(e.target.value)} className="w-full px-4 py-3 border border-gray-300 rounded-lg bg-white dark:bg-slate-700 text-gray-700 dark:text-slate-100" />
+                  <label className="block text-sm font-semibold text-gray-900 dark:text-slate-200 mb-2">Name</label>
+                  <input value={editableName} onChange={(e) => setEditableName(e.target.value)} className="w-full px-4 py-3 border border-gray-300 rounded-lg bg-white dark:bg-slate-700 text-gray-900 dark:text-slate-100" />
                 </div>
                 <div>
-                  <label className="block text-sm font-semibold text-gray-700 dark:text-slate-200 mb-2">Date of Birth</label>
-                  <input type="date" value={editableDob || ''} onChange={(e) => setEditableDob(e.target.value || null)} className="w-full px-4 py-3 border border-gray-300 rounded-lg bg-white dark:bg-slate-700 text-gray-700 dark:text-slate-100" />
+                  <label className="block text-sm font-semibold text-gray-900 dark:text-slate-200 mb-2">Date of Birth</label>
+                  <input type="date" value={editableDob || ''} onChange={(e) => setEditableDob(e.target.value || null)} className="w-full px-4 py-3 border border-gray-300 rounded-lg bg-white dark:bg-slate-700 text-gray-900 dark:text-slate-100" />
                   {dobError && <p className="text-xs text-red-600 mt-1">{dobError}</p>}
                 </div>
                 <div>
-                  <label className="block text-sm font-semibold text-gray-700 dark:text-slate-200 mb-2">Retirement Age</label>
-                  <input type="number" min={40} max={100} value={editableRetirementAge ?? ''} onChange={(e) => setEditableRetirementAge(e.target.value ? Number(e.target.value) : null)} className="w-full px-4 py-3 border border-gray-300 rounded-lg bg-white dark:bg-slate-700 text-gray-700 dark:text-slate-100" />
+                  <label className="block text-sm font-semibold text-gray-900 dark:text-slate-200 mb-2">Retirement Age</label>
+                  <input type="number" min={40} max={100} value={editableRetirementAge ?? ''} onChange={(e) => setEditableRetirementAge(e.target.value ? Number(e.target.value) : null)} className="w-full px-4 py-3 border border-gray-300 rounded-lg bg-white dark:bg-slate-700 text-gray-900 dark:text-slate-100" />
                   {retirementAgeError && <p className="text-xs text-red-600 mt-1">{retirementAgeError}</p>}
                 </div>
                 <div>
-                  <label className="block text-sm font-semibold text-gray-700 dark:text-slate-200 mb-2">Current Annual Income</label>
-                  <input type="number" step="0.01" value={editableCurrentAnnualIncome ?? ''} onChange={(e) => setEditableCurrentAnnualIncome(e.target.value ? Number(e.target.value) : null)} className="w-full px-4 py-3 border border-gray-300 rounded-lg bg-white dark:bg-slate-700 text-gray-700 dark:text-slate-100" />
+                  <label className="block text-sm font-semibold text-gray-900 dark:text-slate-200 mb-2">Current Annual Income</label>
+                  <input type="number" step="0.01" value={editableCurrentAnnualIncome ?? ''} onChange={(e) => setEditableCurrentAnnualIncome(e.target.value ? Number(e.target.value) : null)} className="w-full px-4 py-3 border border-gray-300 rounded-lg bg-white dark:bg-slate-700 text-gray-900 dark:text-slate-100" />
                   {incomeError && <p className="text-xs text-red-600 mt-1">{incomeError}</p>}
                 </div>
                 <div>
-                  <label className="block text-sm font-semibold text-gray-700 dark:text-slate-200 mb-2">Email</label>
-                  <input value={editableEmail} onChange={(e) => setEditableEmail(e.target.value)} className="w-full px-4 py-3 border border-gray-300 rounded-lg bg-white dark:bg-slate-700 text-gray-700 dark:text-slate-100" />
+                  <label className="block text-sm font-semibold text-gray-900 dark:text-slate-200 mb-2">Email</label>
+                  <input value={editableEmail} onChange={(e) => setEditableEmail(e.target.value)} className="w-full px-4 py-3 border border-gray-300 rounded-lg bg-white dark:bg-slate-700 text-gray-900 dark:text-slate-100" />
                 </div>
                 {editableEmail !== user.email && (
                   <div>
-                    <label className="block text-sm font-semibold text-gray-700 dark:text-slate-200 mb-2">Current Password (required to change email)</label>
-                    <input type="password" value={currentPasswordForEmail} onChange={(e) => setCurrentPasswordForEmail(e.target.value)} className="w-full px-4 py-3 border border-gray-300 rounded-lg bg-white dark:bg-slate-700 text-gray-700 dark:text-slate-100" />
+                    <label className="block text-sm font-semibold text-gray-900 dark:text-slate-200 mb-2">Current Password (required to change email)</label>
+                    <input type="password" value={currentPasswordForEmail} onChange={(e) => setCurrentPasswordForEmail(e.target.value)} className="w-full px-4 py-3 border border-gray-300 rounded-lg bg-white dark:bg-slate-700 text-gray-900 dark:text-slate-100" />
                   </div>
                 )}
 
@@ -365,17 +378,17 @@ export default function ProfilePage() {
             </form>
           ) : (
             <div>
-              <p className="text-sm text-gray-700 dark:text-slate-200">Name: {user.displayName || '(no name)'}</p>
-              <p className="text-sm text-gray-700 dark:text-slate-200">Email: {user.email}</p>
+              <p className="text-sm text-gray-900 dark:text-slate-200">Name: {user.displayName || '(no name)'}</p>
+              <p className="text-sm text-gray-900 dark:text-slate-200">Email: {user.email}</p>
             </div>
           )}
         </div>
 
         {/* Password Management */}
         {!user.isAnonymous && (
-          <div className="bg-white rounded-lg shadow-lg p-8 mb-8">
+          <div className={`${theme === 'light' ? 'bg-white text-gray-900' : 'bg-slate-800 text-slate-100'} rounded-lg shadow-lg p-8 mb-8`}>
               <div className="flex justify-between items-center mb-6">
-                <h2 className="text-xl font-bold text-gray-900 dark:text-slate-100">Security</h2>
+                <h2 className={`text-xl font-bold ${theme === 'light' ? 'text-gray-900' : 'text-slate-100'}`}>Security</h2>
               {!showPasswordForm && (
                 <button
                   onClick={() => setShowPasswordForm(true)}
@@ -389,7 +402,7 @@ export default function ProfilePage() {
             {showPasswordForm ? (
               <form onSubmit={handlePasswordChange} className="space-y-4">
                 <div>
-                  <label className="block text-sm font-semibold text-gray-700 mb-2">
+                  <label className="block text-sm font-semibold text-gray-900 mb-2">
                     Current Password
                   </label>
                   <input
@@ -402,7 +415,7 @@ export default function ProfilePage() {
                 </div>
 
                 <div>
-                  <label className="block text-sm font-semibold text-gray-700 mb-2">
+                  <label className="block text-sm font-semibold text-gray-900 mb-2">
                     New Password
                   </label>
                   <input
@@ -415,7 +428,7 @@ export default function ProfilePage() {
                 </div>
 
                 <div>
-                  <label className="block text-sm font-semibold text-gray-700 mb-2">
+                  <label className="block text-sm font-semibold text-gray-900 mb-2">
                     Confirm New Password
                   </label>
                   <input
@@ -450,7 +463,7 @@ export default function ProfilePage() {
                 </div>
               </form>
             ) : (
-                <div className="text-gray-600 dark:text-slate-300">
+                <div className="text-gray-800 dark:text-slate-300">
                 <p className="mb-4">Secure your account with a strong password.</p>
                 <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
                   <p className="text-sm text-blue-900">
@@ -465,14 +478,14 @@ export default function ProfilePage() {
         )}
 
         {/* Preferences */}
-        <div className="bg-white dark:bg-slate-800 rounded-lg shadow-lg p-8">
-          <h2 className="text-xl font-bold text-gray-900 dark:text-slate-100 mb-6">Preferences</h2>
+        <div className={`${theme === 'light' ? 'bg-white text-gray-900' : 'bg-slate-800 text-slate-100'} rounded-lg shadow-lg p-8`}>
+          <h2 className={`text-xl font-bold ${theme === 'light' ? 'text-gray-900' : 'text-slate-100'} mb-6`}>Preferences</h2>
 
           <div className="space-y-4">
             <div className="flex items-center justify-between p-4 border border-gray-200 dark:border-slate-700 rounded-lg hover:bg-gray-50 dark:hover:bg-slate-700">
               <div>
                 <p className="font-semibold text-gray-900 dark:text-slate-100">Email Notifications</p>
-                <p className="text-sm text-gray-600 dark:text-slate-300">Receive notifications about your account</p>
+                <p className="text-sm text-gray-800 dark:text-slate-300">Receive notifications about your account</p>
               </div>
               <button
                 onClick={() => handlePreferencesChange("emailNotifications")}
@@ -492,7 +505,7 @@ export default function ProfilePage() {
             <div className="flex items-center justify-between p-4 border border-gray-200 dark:border-slate-700 rounded-lg hover:bg-gray-50 dark:hover:bg-slate-700">
               <div>
                 <p className="font-semibold text-gray-900 dark:text-slate-100">Marketing Emails</p>
-                <p className="text-sm text-gray-600 dark:text-slate-300">Hear about new features and updates</p>
+                <p className="text-sm text-gray-800 dark:text-slate-300">Hear about new features and updates</p>
               </div>
               <button
                 onClick={() => handlePreferencesChange("marketingEmails")}
@@ -512,7 +525,7 @@ export default function ProfilePage() {
             <div className="flex items-center justify-between p-4 border border-gray-200 dark:border-slate-700 rounded-lg hover:bg-gray-50 dark:hover:bg-slate-700 opacity-50">
               <div>
                 <p className="font-semibold text-gray-900 dark:text-slate-100">Two-Factor Authentication</p>
-                <p className="text-sm text-gray-600 dark:text-slate-300">Coming soon</p>
+                <p className="text-sm text-gray-800 dark:text-slate-300">Coming soon</p>
               </div>
               <div className="relative inline-flex h-6 w-11 items-center rounded-full bg-gray-300">
                 <span className="inline-block h-4 w-4 transform rounded-full bg-white translate-x-1" />
