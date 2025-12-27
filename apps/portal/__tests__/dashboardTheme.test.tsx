@@ -27,12 +27,12 @@ describe('Dashboard theme styles', () => {
     expect(container.querySelector('.dashboard-redesign')).toBeTruthy();
   });
 
-  test('renders decorative background particles (3 blurred blobs)', async () => {
+  test('does not render decorative background particles', async () => {
     const { container } = render(<DashboardPage />);
 
-    await waitFor(() => expect(container.querySelector('.background-particles')).toBeTruthy());
+    // The particles/animations have been removed — ensure the DOM no longer contains them
+    await waitFor(() => expect(container.querySelector('.dashboard-redesign')).toBeTruthy());
 
-    const particles = container.querySelectorAll('.background-particles .particle');
-    expect(particles.length).toBeGreaterThanOrEqual(5);
+    expect(container.querySelector('.background-particles')).toBeNull();
   });
 });

@@ -153,14 +153,17 @@ body {
   mix-blend-mode: overlay;
 }
 
-/* Animated background particles (copied from docs/sampledash.html) */
-.background-particles {
-  position: absolute;
-  inset: 0;
+/* Animated background particles (removed) */
+/* Per request: animations removed and particles hidden site-wide. */
+.background-particles,
+.background-particles .particle {
+  display: none !important;
+  animation: none !important;
   pointer-events: none;
-  z-index: 0; /* below content but above decorative overlay */
-  overflow: hidden;
-} 
+  opacity: 1 !important;
+  filter: none !important;
+}
+
 
 /* Tools grid similar to sample: 2 columns on wide screens, 1 column on narrow screens */
 .tools-grid-custom {
@@ -251,6 +254,27 @@ html.light .dashboard-redesign .background-particles .particle-light:nth-child(5
 html.light .dashboard-redesign .background-particles .particle-light,
 :root.light .dashboard-redesign .background-particles .particle-light {
   background-image: radial-gradient(circle, rgba(99,102,241,0.72) 0%, rgba(96,165,250,0.28) 40%, transparent 80%) !important;
+}
+
+/* Accessibility and compatibility: respect user's motion preference and provide an explicit "no particles" utility */
+@media (prefers-reduced-motion: reduce) {
+  /* Some browsers or assistive setups request reduced motion — fully disable decorative animation */
+  .background-particles,
+  .background-particles .particle {
+    display: none !important;
+    animation: none !important;
+    opacity: 1 !important;
+    filter: none !important;
+  }
+}
+
+/* Runtime toggle: add a class to the <html> or page container to explicitly disable background animations */
+.no-particles .background-particles,
+.background-particles.no-anim {
+  display: none !important;
+  animation: none !important;
+  opacity: 1 !important;
+  filter: none !important;
 }
 
 /* Dark mode particles: stronger blue glow + pulsation and livelier float */

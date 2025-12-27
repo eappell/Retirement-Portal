@@ -124,6 +124,8 @@ export default function DashboardPage() {
   const [apps, setApps] = useState<App[]>(DEFAULT_APPS);
   const [loadingApps, setLoadingApps] = useState(true);
   const [devSettings, setDevSettings] = useState<DevSettings>({});
+
+
  
 
   useEffect(() => {
@@ -264,14 +266,7 @@ export default function DashboardPage() {
     <div className="min-h-screen bg-background portal-dashboard dashboard-redesign">
       <Header />
 
-      {/* Background particles */}
-      <div className="background-particles" aria-hidden="true">
-        <div className={"particle" + (theme === 'light' ? ' particle-light' : '')} />
-        <div className={"particle" + (theme === 'light' ? ' particle-light' : '')} />
-        <div className={"particle" + (theme === 'light' ? ' particle-light' : '')} />
-        <div className={"particle" + (theme === 'light' ? ' particle-light' : '')} />
-        <div className={"particle" + (theme === 'light' ? ' particle-light' : '')} />
-      </div>
+
 
 
 
