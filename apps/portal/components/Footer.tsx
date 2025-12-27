@@ -18,7 +18,7 @@ export default function Footer() {
   const widthFor80 = (intrinsicWidth && intrinsicHeight) ? Math.round((intrinsicWidth / intrinsicHeight) * 80) : undefined;
 
   return (
-    <footer className="mt-8 pt-[50px] pb-6">
+    <footer className="mt-8 pt-[20px] pb-6">
       <div className="max-w-[1400px] mx-auto px-4">
         <div className="flex justify-center">
           <Image
