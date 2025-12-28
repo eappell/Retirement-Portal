@@ -476,7 +476,7 @@ html.light .dashboard-redesign .background-particles .particle-light,
 }
 .light .app-tile-unified p,
 .light .app-tile-unified .tool-description {
-  font-family: -apple-system, 'system-ui', 'Segoe UI', system-ui, sans-serif !important;
+  font-family: 'Segoe UI', -apple-system, 'system-ui', system-ui, sans-serif !important;
   font-size: 15.2px !important;
   font-weight: 400 !important;
   font-style: normal !important;
@@ -498,7 +498,7 @@ html.light .dashboard-redesign .background-particles .particle-light,
 }
 .app-tile-unified p,
 .app-tile-unified .tool-description {
-  font-family: -apple-system, 'system-ui', 'Segoe UI', system-ui, sans-serif !important;
+  font-family: 'Segoe UI', -apple-system, 'system-ui', system-ui, sans-serif !important;
   font-size: 15.2px !important;
   font-weight: 400 !important;
   font-style: normal !important;
@@ -509,7 +509,7 @@ html.light .dashboard-redesign .background-particles .particle-light,
   color: #000000 !important;
 }
 .light .app-tile-unified p {
-  font-family: -apple-system, 'system-ui', 'Segoe UI', system-ui, sans-serif !important;
+  font-family: 'Segoe UI', -apple-system, 'system-ui', system-ui, sans-serif !important;
   font-size: 15.2px !important;
   font-weight: 400 !important;
   font-style: normal !important;
@@ -555,7 +555,7 @@ button {
 .app-tile-unified .portal-app-desc,
 .app-tile-unified p,
 .app-tile-unified .tool-description {
-  font-family: -apple-system, 'system-ui', 'Segoe UI', system-ui, sans-serif !important;
+  font-family: 'Segoe UI', -apple-system, 'system-ui', system-ui, sans-serif !important;
   font-size: 15.2px !important;
   font-weight: 400 !important;
   font-style: normal !important;
@@ -746,7 +746,7 @@ h1{ font-size:3rem; font-weight:800; margin-bottom:16px; background:var(--title-
 .app-tile-unified .app-description,
 .app-tile .app-description,
 p.app-description {
-  font-family: -apple-system, "system-ui", "Segoe UI", system-ui, sans-serif !important;
+  font-family: 'Segoe UI', -apple-system, 'system-ui', system-ui, sans-serif !important;
   font-size: 16px !important;
   font-weight: 600 !important;
   font-style: normal !important;

@@ -287,7 +287,7 @@ export default function DashboardPage() {
           <h2 
             className="mb-2 text-center dashboard-title"
             style={{ 
-              fontFamily: "-apple-system, 'system-ui', 'Segoe UI', system-ui, sans-serif", 
+              fontFamily: "'Segoe UI', -apple-system, 'system-ui', system-ui, sans-serif", 
               fontSize: '48px', 
               fontWeight: 800, 
               fontStyle: 'normal',
