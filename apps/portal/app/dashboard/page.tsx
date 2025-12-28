@@ -464,7 +464,7 @@ export default function DashboardPage() {
         {/* Stats Section */}
         <div className="stats-section mt-12">
           <div className="stat-card">
-            <div className="stat-value">6</div>
+            <div className="stat-value">{apps.length}</div>
             <div className="stat-label">Planning Tools</div>
           </div>
           <div className="stat-card">
