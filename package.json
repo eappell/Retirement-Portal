@@ -1,7 +1,9 @@
 {
   "scripts": {
     "build": "npm install --prefix apps/portal && npm --prefix apps/portal run build",
-    "test:rules": "node ./scripts/test-firestore-rules.js"
+    "test:rules": "node ./scripts/test-firestore-rules.js",
+    "deploy-ui": "bash scripts/deploy-ui.sh",
+    "deploy-api": "bash scripts/deploy-api.sh"
   },
   "dependencies": {
     "firebase": "^12.6.0",
