@@ -52,7 +52,8 @@ export function Header({ showAppSwitcher = false }: HeaderProps) {
   // Use the small no-tag logo variants for the header, and change display height when scrolled
   const logoSrc = theme === "light" ? logoSmBlack : logoSmWhite;
   const logoMeta: any = logoSrc;
-  const LOGO_DISPLAY_HEIGHT = isScrolled ? 40 : 80;
+  // Start at 65px and shrink to 40px when scrolled
+  const LOGO_DISPLAY_HEIGHT = isScrolled ? 40 : 65;
   const logoWidthFor65 = (logoMeta?.width && logoMeta?.height) ? Math.round((logoMeta.width / logoMeta.height) * LOGO_DISPLAY_HEIGHT) : undefined;
 
   const handleLogout = async () => {
@@ -91,9 +92,9 @@ export function Header({ showAppSwitcher = false }: HeaderProps) {
   };
 
   return (
-    <header className={`${headerBgClass} mt-[10px] sticky top-0 z-50 bg-opacity-100 backdrop-blur-none ${headerBorderClass} transition-all duration-300`} style={{ height: isScrolled ? 60 : 100 }}>
-      <div className={`max-w-[1400px] mx-auto px-4 sm:px-6 lg:px-8 transition-all duration-300`} style={{ paddingTop: isScrolled ? 8 : 18, paddingBottom: isScrolled ? 8 : 18 }}>
-        <div className="flex items-center" style={{ minHeight: isScrolled ? 60 : 100 }}>
+    <header className={`${headerBgClass} sticky top-0 z-50 bg-opacity-100 backdrop-blur-none ${headerBorderClass} transition-all duration-300`}>
+      <div className={`max-w-[1400px] mx-auto px-4 sm:px-6 lg:px-8 transition-all duration-300 ${isScrolled ? 'py-2' : 'py-4'}`}>
+        <div className="flex items-center">
           {/* Logo/Brand */}
           <Link href="/dashboard" className="flex items-center gap-2 -ml-5">
             <Image
@@ -101,7 +102,7 @@ export function Header({ showAppSwitcher = false }: HeaderProps) {
               alt="RetireWise"
               width={logoWidthFor65}
               height={LOGO_DISPLAY_HEIGHT}
-              className={`w-auto object-contain transform origin-left transition-all duration-300 ${isScrolled ? 'h-[40px] min-h-[40px]' : 'h-[80px] min-h-[80px]'}`}
+              className={`w-auto object-contain transform origin-left transition-all duration-300 ${isScrolled ? 'h-[40px] min-h-[40px]' : 'h-[65px] min-h-[65px]'}`}
               priority
             />
           </Link>
