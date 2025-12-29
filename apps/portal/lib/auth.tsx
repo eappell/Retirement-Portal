@@ -22,6 +22,8 @@ export interface User extends FirebaseUser {
   lifeExpectancy?: number | null;
   currentState?: string | null;
   retirementState?: string | null;
+  // Friendly name sourced from Auth displayName or Firestore `name` field
+  name?: string | null;
 }
 
 interface AuthContextType {
@@ -74,10 +76,12 @@ export const AuthProvider = ({children}: {children: ReactNode}) => {
               const lifeExpectancy = (userData?.lifeExpectancy as number) || null;
               const currentState = (userData?.currentState as string) || null;
               const retirementState = (userData?.retirementState as string) || null;
+              const name = (userData?.name as string) || firebaseUser.displayName || null;
 
               const newUser = {
                 ...firebaseUser,
                 tier,
+                name,
                 dob,
                 retirementAge,
                 currentAnnualIncome,
@@ -120,6 +124,7 @@ export const AuthProvider = ({children}: {children: ReactNode}) => {
               const newUser2 = {
                 ...firebaseUser,
                 tier: "free",
+                name: firebaseUser.displayName || null,
                 dob: null,
                 retirementAge: null,
                 currentAnnualIncome: null,
