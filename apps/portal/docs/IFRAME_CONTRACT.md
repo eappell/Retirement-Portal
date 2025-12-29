@@ -14,7 +14,11 @@ Messages sent from Portal -> Iframe
     - dob: string | null (ISO date string)
     - retirementAge: number | null
     - currentAnnualIncome: number | null
+    - currentState: string | null (two-letter state code, e.g. "CA")
+    - retirementState: string | null (two-letter state code the user intends to retire in)
   - Sent when the iframe loads with current auth token and role.
+
+  Note: Child apps should prefer `retirementState` when present; otherwise fall back to `currentState`. This allows the portal to capture both the user's current residence and their planned retirement location and let embedded apps choose which to use as a pre-filled default.
 
 - USER_ROLE_UPDATE
   - type: "USER_ROLE_UPDATE"
@@ -64,9 +68,10 @@ window.addEventListener('message', (ev) => {
       break;
     case 'USER_ROLE_UPDATE':
         handleRoleChange(data.role);
-        // apply other profile fields if present
-        if (data.dob || data.retirementAge || data.currentAnnualIncome) {
-          applyProfile({ dob: data.dob, retirementAge: data.retirementAge, currentAnnualIncome: data.currentAnnualIncome });
+        // apply other profile fields if present (prefer retirementState over currentState)
+        if (data.dob || data.retirementAge || data.currentAnnualIncome || data.currentState || data.retirementState) {
+          const effectiveState = data.retirementState || data.currentState || null
+          applyProfile({ dob: data.dob, retirementAge: data.retirementAge, currentAnnualIncome: data.currentAnnualIncome, state: effectiveState });
         }
       break;
     case 'THEME_CHANGE':
@@ -76,8 +81,9 @@ window.addEventListener('message', (ev) => {
       // handle cross-app data
       break;
     case 'USER_PROFILE_UPDATE':
-      if (data.dob || data.retirementAge || data.currentAnnualIncome) {
-        applyProfile({ dob: data.dob, retirementAge: data.retirementAge, currentAnnualIncome: data.currentAnnualIncome });
+      if (data.dob || data.retirementAge || data.currentAnnualIncome || data.currentState || data.retirementState) {
+        const effectiveState = data.retirementState || data.currentState || null
+        applyProfile({ dob: data.dob, retirementAge: data.retirementAge, currentAnnualIncome: data.currentAnnualIncome, state: effectiveState });
       }
       break;
     // other message types...
