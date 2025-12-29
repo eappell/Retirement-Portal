@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useAuth } from "@/lib/auth";
@@ -36,11 +36,23 @@ export function Header({ showAppSwitcher = false }: HeaderProps) {
   const borderColor = theme === "light" ? "border-gray-200" : "border-slate-700";
   const dropdownBg = theme === "light" ? "bg-[#F9F8F6]" : "bg-slate-800";
 
-  // Use the small no-tag logo variants for the header, but render them at a fixed display height of 65px
-  // so they appear at the correct size while retaining crispness on Retina displays.
+  // Shrinking header behavior: full height 100px -> compact 60px
+  const [isScrolled, setIsScrolled] = useState(false);
+
+  // On scroll, set a compact header state once past a small threshold
+  useEffect(() => {
+    const onScroll = () => {
+      if (window.scrollY > 20) setIsScrolled(true);
+      else setIsScrolled(false);
+    };
+    window.addEventListener('scroll', onScroll, { passive: true });
+    return () => window.removeEventListener('scroll', onScroll);
+  }, []);
+
+  // Use the small no-tag logo variants for the header, and change display height when scrolled
   const logoSrc = theme === "light" ? logoSmBlack : logoSmWhite;
   const logoMeta: any = logoSrc;
-  const LOGO_DISPLAY_HEIGHT = 65;
+  const LOGO_DISPLAY_HEIGHT = isScrolled ? 40 : 80;
   const logoWidthFor65 = (logoMeta?.width && logoMeta?.height) ? Math.round((logoMeta.width / logoMeta.height) * LOGO_DISPLAY_HEIGHT) : undefined;
 
   const handleLogout = async () => {
@@ -79,9 +91,9 @@ export function Header({ showAppSwitcher = false }: HeaderProps) {
   };
 
   return (
-    <header className={`${headerBgClass} mt-[10px] sticky top-0 z-50 bg-opacity-100 backdrop-blur-none ${headerBorderClass}`}>
-      <div className="max-w-[1400px] mx-auto px-4 py-4 sm:px-6 lg:px-8">
-        <div className="flex items-center">
+    <header className={`${headerBgClass} mt-[10px] sticky top-0 z-50 bg-opacity-100 backdrop-blur-none ${headerBorderClass} transition-all duration-300`} style={{ height: isScrolled ? 60 : 100 }}>
+      <div className={`max-w-[1400px] mx-auto px-4 sm:px-6 lg:px-8 transition-all duration-300`} style={{ paddingTop: isScrolled ? 8 : 18, paddingBottom: isScrolled ? 8 : 18 }}>
+        <div className="flex items-center" style={{ minHeight: isScrolled ? 60 : 100 }}>
           {/* Logo/Brand */}
           <Link href="/dashboard" className="flex items-center gap-2 -ml-5">
             <Image
@@ -89,7 +101,7 @@ export function Header({ showAppSwitcher = false }: HeaderProps) {
               alt="RetireWise"
               width={logoWidthFor65}
               height={LOGO_DISPLAY_HEIGHT}
-              className="w-auto h-[65px] min-h-[65px] object-contain transform origin-left"
+              className={`w-auto object-contain transform origin-left transition-all duration-300 ${isScrolled ? 'h-[40px] min-h-[40px]' : 'h-[80px] min-h-[80px]'}`}
               priority
             />
           </Link>
