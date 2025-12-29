@@ -305,6 +305,8 @@ export default function ProfilePage() {
             )}
           </div>
 
+          <p className={`text-sm mb-4 ${theme === 'light' ? 'text-gray-600' : 'text-slate-400'}`}>We only collect these profile details to pre-fill your information across our apps so you don’t need to re-enter them — used only to personalize recommendations and calculations.</p>
+
           {editingProfile ? (
             <form onSubmit={async (e) => {
               e.preventDefault();
