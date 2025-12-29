@@ -1,0 +1,15 @@
+version: '3.8'
+services:
+  portal:
+    build:
+      context: .
+      dockerfile: apps/portal/Dockerfile
+    image: retire-portal:latest
+    container_name: retire-portal
+    ports:
+      - "8020:8020"
+    restart: unless-stopped
+    environment:
+      - NODE_ENV=production
+      - PORT=8020
+    volumes: []
