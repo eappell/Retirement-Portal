@@ -97,9 +97,12 @@ export const AuthProvider = ({children}: {children: ReactNode}) => {
                     userId: firebaseUser.uid,
                     email: firebaseUser.email,
                     tier,
+                    name: firebaseUser.displayName || null,
                     dob,
                     retirementAge,
                     currentAnnualIncome,
+                    currentState,
+                    retirementState,
                   })
                 );
               } catch (err) {
@@ -129,9 +132,12 @@ export const AuthProvider = ({children}: {children: ReactNode}) => {
                     userId: firebaseUser.uid,
                     email: firebaseUser.email,
                     tier: 'free',
+                    name: firebaseUser.displayName || null,
                     dob: null,
                     retirementAge: null,
                     currentAnnualIncome: null,
+                    currentState: null,
+                    retirementState: null,
                   })
                 );
               } catch (err) {
@@ -290,6 +296,7 @@ export const AuthProvider = ({children}: {children: ReactNode}) => {
             userId: next?.uid,
             email: next?.email,
             tier: next?.tier,
+            name: next?.displayName || next?.name || null,
             dob: next?.dob || null,
             retirementAge: next?.retirementAge || null,
             currentAnnualIncome: next?.currentAnnualIncome || null,

@@ -48,6 +48,7 @@ export function IFrameWrapper({
                   token,
                   userId: user.uid,
                   email: user.email,
+                  name: user.displayName || null,
                   tier: tier || user.tier || "free",
                   dob: user.dob || null,
                   retirementAge: user.retirementAge || null,
@@ -89,6 +90,7 @@ export function IFrameWrapper({
         {
           type: "USER_ROLE_UPDATE",
           role,
+          name: user?.displayName || null,
           dob: user?.dob || null,
           retirementAge: user?.retirementAge || null,
           currentAnnualIncome: user?.currentAnnualIncome || null,
@@ -160,8 +162,7 @@ export function IFrameWrapper({
           if (iframeRef.current) {
             iframeRef.current.contentWindow?.postMessage(
               {
-                type: 'USER_PROFILE_UPDATE',
-                dob: parsed?.dob || null,
+                type: 'USER_PROFILE_UPDATE',                name: parsed?.name || parsed?.displayName || null,                dob: parsed?.dob || null,
                 retirementAge: parsed?.retirementAge || null,
                 currentAnnualIncome: parsed?.currentAnnualIncome || null,
                 filingStatus: parsed?.filingStatus || null,
