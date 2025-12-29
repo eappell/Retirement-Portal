@@ -63,4 +63,28 @@ fi
 echo "Building portal Docker image on NAS and bringing up container on port 8020"
 "${SSH_PREFIX[@]}" "cd '$NAS_PATH' && docker build -f apps/portal/Dockerfile -t retire-portal:latest . && docker compose -f docker-compose.portal.yml up -d --no-deps --build portal"
 
-echo "Portal deployed. Verify at http://<NAS_IP>:8020"
+echo "Portal deployed. Verifying with healthcheck..."
+
+# Health check: poll local port 8020 on the NAS until service responds or timeout
+HEALTH_URL="http://localhost:8020/"
+MAX_ATTEMPTS=12
+SLEEP_SECONDS=5
+ATTEMPT=1
+SUCCESS=0
+while [[ $ATTEMPT -le $MAX_ATTEMPTS ]]; do
+  echo "Healthcheck attempt $ATTEMPT/$MAX_ATTEMPTS..."
+  if "${SSH_PREFIX[@]}" "curl -sS -o /dev/null -w '%{http_code}' $HEALTH_URL | grep -q '^2'"; then
+    echo "Healthcheck succeeded. Portal is up at http://<NAS_IP>:8020"
+    SUCCESS=1
+    break
+  fi
+  sleep $SLEEP_SECONDS
+  ATTEMPT=$((ATTEMPT+1))
+done
+
+if [[ $SUCCESS -ne 1 ]]; then
+  echo "Healthcheck failed after $((MAX_ATTEMPTS*SLEEP_SECONDS)) seconds. Gathering logs..."
+  "${SSH_PREFIX[@]}" "cd '$NAS_PATH' && docker compose -f docker-compose.portal.yml logs --no-color --tail 200 portal"
+  echo "Check the logs above. If you want me to, I can fetch these logs or retry the deploy."
+  exit 1
+fi
