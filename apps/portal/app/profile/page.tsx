@@ -208,25 +208,14 @@ export default function ProfilePage() {
     );
   }
 
-  const wrapperStyle = theme === 'light' ? { backgroundColor: '#ffffff', color: '#0f172a', fontWeight: 600 } : undefined;
-
   return (
-    <div className="min-h-screen profile-force-dark" style={wrapperStyle}>
-      <style>{`.profile-force-dark, .profile-force-dark * { color: #0f172a !important; font-weight: 600 !important; }
-        .dark .profile-force-dark, .dark .profile-force-dark * { color: #f8fafc !important; font-weight: 600 !important; }
-        /* Ensure the page H1 (profile-page-title) is visible and theme-aware */
-        .profile-force-dark .profile-page-title { color: #0f172a !important; }
-        .dark .profile-force-dark .profile-page-title { color: #f8fafc !important; }
-        .profile-force-dark input::placeholder { color: rgba(15,23,42,0.45) !important; }
-        .dark .profile-force-dark input::placeholder { color: rgba(248,250,252,0.6) !important; }
-        .profile-force-dark .opacity-50 { opacity: 0.7 !important; }
-        `}</style>
+    <div className="min-h-screen" style={{ backgroundColor: theme === 'light' ? '#f3f4f6' : '#0f172a' }}>
       <Header />
 
       <main className="max-w-2xl mx-auto px-4 py-12 sm:px-6 lg:px-8">
         <div className="mb-8">
-          <h1 className="text-3xl font-bold" style={{ color: theme === 'light' ? '#1f2937' : '#f1f5f9' }}>My Profile</h1>
-          <p style={{ color: theme === 'light' ? '#374151' : '#cbd5e1' }} className="mt-2">Manage your account settings and preferences</p>
+          <h1 className="text-3xl font-bold" style={{ color: theme === 'light' ? '#111827' : '#f8fafc' }}>My Profile</h1>
+          <p className="mt-2" style={{ color: theme === 'light' ? '#4b5563' : '#94a3b8' }}>Manage your account settings and preferences</p>
         </div>
 
         {success && (
@@ -539,10 +528,10 @@ export default function ProfilePage() {
                 </div>
               </form>
             ) : (
-                <div className="text-gray-800 dark:text-slate-300">
+                <div style={{ color: theme === 'light' ? '#1f2937' : '#cbd5e1' }}>
                 <p className="mb-4">Secure your account with a strong password.</p>
-                <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
-                  <p className="text-sm text-blue-900">
+                <div style={{ backgroundColor: theme === 'light' ? '#eff6ff' : '#1e3a5f', borderColor: theme === 'light' ? '#bfdbfe' : '#3b82f6' }} className="border rounded-lg p-4">
+                  <p className="text-sm" style={{ color: theme === 'light' ? '#1e3a8a' : '#93c5fd' }}>
                     ✓ Use a unique password<br />
                     ✓ Include uppercase and lowercase letters<br />
                     ✓ Include numbers and special characters
