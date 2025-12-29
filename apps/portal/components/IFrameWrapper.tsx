@@ -52,6 +52,12 @@ export function IFrameWrapper({
                   dob: user.dob || null,
                   retirementAge: user.retirementAge || null,
                   currentAnnualIncome: user.currentAnnualIncome || null,
+                  filingStatus: user.filingStatus || null,
+                  spouseDob: user.spouseDob || null,
+                  spouseName: user.spouseName || null,
+                  lifeExpectancy: user.lifeExpectancy || null,
+                  currentState: user.currentState || null,
+                  retirementState: user.retirementState || null,
                 },
                 "*"
               );
@@ -86,6 +92,12 @@ export function IFrameWrapper({
           dob: user?.dob || null,
           retirementAge: user?.retirementAge || null,
           currentAnnualIncome: user?.currentAnnualIncome || null,
+          filingStatus: user?.filingStatus || null,
+          spouseDob: user?.spouseDob || null,
+          spouseName: user?.spouseName || null,
+          lifeExpectancy: user?.lifeExpectancy || null,
+          currentState: user?.currentState || null,
+          retirementState: user?.retirementState || null,
         },
         "*"
       );
@@ -98,17 +110,29 @@ export function IFrameWrapper({
       const dob = user?.dob || null;
       const retirementAge = user?.retirementAge || null;
       const currentAnnualIncome = user?.currentAnnualIncome || null;
+      const filingStatus = user?.filingStatus || null;
+      const spouseDob = user?.spouseDob || null;
+      const spouseName = user?.spouseName || null;
+      const lifeExpectancy = user?.lifeExpectancy || null;
+      const currentState = user?.currentState || null;
+      const retirementState = user?.retirementState || null;
       iframeRef.current.contentWindow?.postMessage(
         {
           type: 'USER_PROFILE_UPDATE',
           dob,
           retirementAge,
           currentAnnualIncome,
+          filingStatus,
+          spouseDob,
+          spouseName,
+          lifeExpectancy,
+          currentState,
+          retirementState,
         },
         '*'
       );
     }
-  }, [user?.dob, user?.retirementAge, user?.currentAnnualIncome, loading]);
+  }, [user?.dob, user?.retirementAge, user?.currentAnnualIncome, user?.filingStatus, user?.spouseDob, user?.spouseName, user?.lifeExpectancy, user?.currentState, user?.retirementState, loading]);
 
   // Listen for storage events (other windows) and forward role changes
   useEffect(() => {
@@ -140,6 +164,12 @@ export function IFrameWrapper({
                 dob: parsed?.dob || null,
                 retirementAge: parsed?.retirementAge || null,
                 currentAnnualIncome: parsed?.currentAnnualIncome || null,
+                filingStatus: parsed?.filingStatus || null,
+                spouseDob: parsed?.spouseDob || null,
+                spouseName: parsed?.spouseName || null,
+                lifeExpectancy: parsed?.lifeExpectancy || null,
+                currentState: parsed?.currentState || null,
+                retirementState: parsed?.retirementState || null,
               },
               '*'
             );

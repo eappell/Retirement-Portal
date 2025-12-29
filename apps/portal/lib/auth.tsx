@@ -16,6 +16,12 @@ export interface User extends FirebaseUser {
   dob?: string | null;
   retirementAge?: number | null;
   currentAnnualIncome?: number | null;
+  filingStatus?: 'single' | 'married' | null;
+  spouseDob?: string | null;
+  spouseName?: string | null;
+  lifeExpectancy?: number | null;
+  currentState?: string | null;
+  retirementState?: string | null;
 }
 
 interface AuthContextType {
@@ -26,7 +32,7 @@ interface AuthContextType {
   signup: (email: string, password: string) => Promise<void>;
   loginAnonymously: () => Promise<void>;
   logout: () => Promise<void>;
-  updateUserProfile: (profile: { dob?: string | null; retirementAge?: number | null; currentAnnualIncome?: number | null; }) => Promise<void>;
+  updateUserProfile: (profile: { dob?: string | null; retirementAge?: number | null; currentAnnualIncome?: number | null; filingStatus?: 'single' | 'married' | null; spouseDob?: string | null; spouseName?: string | null; lifeExpectancy?: number | null; currentState?: string | null; retirementState?: string | null; }) => Promise<void>;
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
@@ -62,6 +68,12 @@ export const AuthProvider = ({children}: {children: ReactNode}) => {
               const dob = (userData?.dob as string) || null;
               const retirementAge = (userData?.retirementAge as number) || null;
               const currentAnnualIncome = (userData?.currentAnnualIncome as number) || null;
+              const filingStatus = (userData?.filingStatus as 'single' | 'married') || null;
+              const spouseDob = (userData?.spouseDob as string) || null;
+              const spouseName = (userData?.spouseName as string) || null;
+              const lifeExpectancy = (userData?.lifeExpectancy as number) || null;
+              const currentState = (userData?.currentState as string) || null;
+              const retirementState = (userData?.retirementState as string) || null;
 
               const newUser = {
                 ...firebaseUser,
@@ -69,6 +81,12 @@ export const AuthProvider = ({children}: {children: ReactNode}) => {
                 dob,
                 retirementAge,
                 currentAnnualIncome,
+                filingStatus,
+                spouseDob,
+                spouseName,
+                lifeExpectancy,
+                currentState,
+                retirementState,
               } as User;
               setUser(newUser);
               // Persist a compact portal user object for same-origin read
@@ -257,7 +275,7 @@ export const AuthProvider = ({children}: {children: ReactNode}) => {
     }
   }, []);
 
-  const updateUserProfile = useCallback(async (profile: { dob?: string | null; retirementAge?: number | null; currentAnnualIncome?: number | null; }) => {
+  const updateUserProfile = useCallback(async (profile: { dob?: string | null; retirementAge?: number | null; currentAnnualIncome?: number | null; filingStatus?: 'single' | 'married' | null; spouseDob?: string | null; spouseName?: string | null; lifeExpectancy?: number | null; currentState?: string | null; retirementState?: string | null; }) => {
     setError(null);
     try {
       if (!auth.currentUser) throw new Error('Not authenticated');
@@ -275,6 +293,12 @@ export const AuthProvider = ({children}: {children: ReactNode}) => {
             dob: next?.dob || null,
             retirementAge: next?.retirementAge || null,
             currentAnnualIncome: next?.currentAnnualIncome || null,
+            filingStatus: next?.filingStatus || null,
+            spouseDob: next?.spouseDob || null,
+            spouseName: next?.spouseName || null,
+            lifeExpectancy: next?.lifeExpectancy || null,
+            currentState: next?.currentState || null,
+            retirementState: next?.retirementState || null,
           };
           localStorage.setItem('portalUser', JSON.stringify(portalUser));
         } catch (err) {

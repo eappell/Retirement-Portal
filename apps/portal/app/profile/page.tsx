@@ -17,7 +17,22 @@ import { auth, db } from "@/lib/firebase";
 import { doc, updateDoc } from "firebase/firestore";
 import { useToast } from "@/components/ToastProvider";
 import { useAnalytics } from "@/lib/useAnalytics";
-import { validateDob, validateRetirementAge, validateCurrentAnnualIncome } from '@/lib/profileValidation';
+import { validateDob, validateRetirementAge, validateCurrentAnnualIncome, validateSpouseDob, validateLifeExpectancy } from '@/lib/profileValidation';
+
+// US States for dropdown selection
+const US_STATES: Record<string, string> = {
+  AL: 'Alabama', AK: 'Alaska', AZ: 'Arizona', AR: 'Arkansas', CA: 'California',
+  CO: 'Colorado', CT: 'Connecticut', DE: 'Delaware', FL: 'Florida', GA: 'Georgia',
+  HI: 'Hawaii', ID: 'Idaho', IL: 'Illinois', IN: 'Indiana', IA: 'Iowa',
+  KS: 'Kansas', KY: 'Kentucky', LA: 'Louisiana', ME: 'Maine', MD: 'Maryland',
+  MA: 'Massachusetts', MI: 'Michigan', MN: 'Minnesota', MS: 'Mississippi', MO: 'Missouri',
+  MT: 'Montana', NE: 'Nebraska', NV: 'Nevada', NH: 'New Hampshire', NJ: 'New Jersey',
+  NM: 'New Mexico', NY: 'New York', NC: 'North Carolina', ND: 'North Dakota', OH: 'Ohio',
+  OK: 'Oklahoma', OR: 'Oregon', PA: 'Pennsylvania', RI: 'Rhode Island', SC: 'South Carolina',
+  SD: 'South Dakota', TN: 'Tennessee', TX: 'Texas', UT: 'Utah', VT: 'Vermont',
+  VA: 'Virginia', WA: 'Washington', WV: 'West Virginia', WI: 'Wisconsin', WY: 'Wyoming',
+  DC: 'District of Columbia',
+};
 
 export default function ProfilePage() {
   const router = useRouter();
@@ -50,10 +65,18 @@ export default function ProfilePage() {
   const [editableDob, setEditableDob] = useState<string | null>(user?.dob || null);
   const [editableRetirementAge, setEditableRetirementAge] = useState<number | null>(user?.retirementAge || null);
   const [editableCurrentAnnualIncome, setEditableCurrentAnnualIncome] = useState<number | null>(user?.currentAnnualIncome || null);
+  const [editableFilingStatus, setEditableFilingStatus] = useState<'single' | 'married' | null>(user?.filingStatus || null);
+  const [editableSpouseDob, setEditableSpouseDob] = useState<string | null>(user?.spouseDob || null);
+  const [editableSpouseName, setEditableSpouseName] = useState<string | null>(user?.spouseName || null);
+  const [editableLifeExpectancy, setEditableLifeExpectancy] = useState<number | null>(user?.lifeExpectancy || null);
+  const [editableCurrentState, setEditableCurrentState] = useState<string | null>(user?.currentState || null);
+  const [editableRetirementState, setEditableRetirementState] = useState<string | null>(user?.retirementState || null);
   // Validation errors
   const [dobError, setDobError] = useState<string | null>(null);
   const [retirementAgeError, setRetirementAgeError] = useState<string | null>(null);
   const [incomeError, setIncomeError] = useState<string | null>(null);
+  const [spouseDobError, setSpouseDobError] = useState<string | null>(null);
+  const [lifeExpectancyError, setLifeExpectancyError] = useState<string | null>(null);
   const { trackEvent } = useAnalytics();
   const { theme } = useTheme();
 
@@ -72,6 +95,12 @@ export default function ProfilePage() {
     setEditableDob(user?.dob || null);
     setEditableRetirementAge(user?.retirementAge || null);
     setEditableCurrentAnnualIncome(user?.currentAnnualIncome || null);
+    setEditableFilingStatus(user?.filingStatus || null);
+    setEditableSpouseDob(user?.spouseDob || null);
+    setEditableSpouseName(user?.spouseName || null);
+    setEditableLifeExpectancy(user?.lifeExpectancy || null);
+    setEditableCurrentState(user?.currentState || null);
+    setEditableRetirementState(user?.retirementState || null);
   }, [user]);
 
   // Validate fields when edited
@@ -79,7 +108,9 @@ export default function ProfilePage() {
     setDobError(validateDob(editableDob));
     setRetirementAgeError(validateRetirementAge(editableRetirementAge, editableDob));
     setIncomeError(validateCurrentAnnualIncome(editableCurrentAnnualIncome));
-  }, [editableDob, editableRetirementAge, editableCurrentAnnualIncome]);
+    setSpouseDobError(validateSpouseDob(editableSpouseDob, editableFilingStatus));
+    setLifeExpectancyError(validateLifeExpectancy(editableLifeExpectancy, editableDob));
+  }, [editableDob, editableRetirementAge, editableCurrentAnnualIncome, editableFilingStatus, editableSpouseDob, editableLifeExpectancy]);
 
   useEffect(() => {
     if (mounted && !user) {
@@ -194,8 +225,8 @@ export default function ProfilePage() {
 
       <main className="max-w-2xl mx-auto px-4 py-12 sm:px-6 lg:px-8">
         <div className="mb-8">
-          <h1 className={`text-3xl font-bold profile-page-title ${theme === 'light' ? 'text-gray-900' : 'text-slate-100'}`}>My Profile</h1>
-          <p className="text-gray-800 mt-2">Manage your account settings and preferences</p>
+          <h1 className="text-3xl font-bold" style={{ color: theme === 'light' ? '#1f2937' : '#f1f5f9' }}>My Profile</h1>
+          <p style={{ color: theme === 'light' ? '#374151' : '#cbd5e1' }} className="mt-2">Manage your account settings and preferences</p>
         </div>
 
         {success && (
@@ -308,10 +339,10 @@ export default function ProfilePage() {
                 }
 
                 // Update Firestore user doc
-                await updateDoc(doc(db, 'users', user.uid), { name: editableName, email: editableEmail, dob: editableDob, retirementAge: editableRetirementAge, currentAnnualIncome: editableCurrentAnnualIncome });
+                await updateDoc(doc(db, 'users', user.uid), { name: editableName, email: editableEmail, dob: editableDob, retirementAge: editableRetirementAge, currentAnnualIncome: editableCurrentAnnualIncome, filingStatus: editableFilingStatus, spouseDob: editableSpouseDob, spouseName: editableSpouseName, lifeExpectancy: editableLifeExpectancy, currentState: editableCurrentState, retirementState: editableRetirementState });
                 // Update AuthProvider managed profile too
                 try {
-                  await updateUserProfile({ dob: editableDob, retirementAge: editableRetirementAge, currentAnnualIncome: editableCurrentAnnualIncome });
+                  await updateUserProfile({ dob: editableDob, retirementAge: editableRetirementAge, currentAnnualIncome: editableCurrentAnnualIncome, filingStatus: editableFilingStatus, spouseDob: editableSpouseDob, spouseName: editableSpouseName, lifeExpectancy: editableLifeExpectancy, currentState: editableCurrentState, retirementState: editableRetirementState });
                 } catch (e) {
                   console.warn('Failed to update user profile in context', e);
                 }
@@ -360,6 +391,51 @@ export default function ProfilePage() {
                   {incomeError && <p className="text-xs text-red-600 mt-1">{incomeError}</p>}
                 </div>
                 <div>
+                  <label className="block text-sm font-semibold text-gray-900 dark:text-slate-200 mb-2">Life Expectancy</label>
+                  <input type="number" min={50} max={120} value={editableLifeExpectancy ?? ''} onChange={(e) => setEditableLifeExpectancy(e.target.value ? Number(e.target.value) : null)} placeholder="Default: 90" className="w-full px-4 py-3 border border-gray-300 rounded-lg bg-white dark:bg-slate-700 text-gray-900 dark:text-slate-100" />
+                  {lifeExpectancyError && <p className="text-xs text-red-600 mt-1">{lifeExpectancyError}</p>}
+                </div>
+                <div>
+                  <label className="block text-sm font-semibold text-gray-900 dark:text-slate-200 mb-2">Current State of Residence</label>
+                  <select value={editableCurrentState || ''} onChange={(e) => setEditableCurrentState(e.target.value || null)} className="w-full px-4 py-3 border border-gray-300 rounded-lg bg-white dark:bg-slate-700 text-gray-900 dark:text-slate-100">
+                    <option value="">Select...</option>
+                    {Object.entries(US_STATES).map(([code, name]) => (
+                      <option key={code} value={code}>{name}</option>
+                    ))}
+                  </select>
+                </div>
+                <div>
+                  <label className="block text-sm font-semibold text-gray-900 dark:text-slate-200 mb-2">Planned Retirement State</label>
+                  <select value={editableRetirementState || ''} onChange={(e) => setEditableRetirementState(e.target.value || null)} className="w-full px-4 py-3 border border-gray-300 rounded-lg bg-white dark:bg-slate-700 text-gray-900 dark:text-slate-100">
+                    <option value="">Select...</option>
+                    {Object.entries(US_STATES).map(([code, name]) => (
+                      <option key={code} value={code}>{name}</option>
+                    ))}
+                  </select>
+                  <p className="text-xs text-gray-500 dark:text-slate-400 mt-1">Leave blank if same as current state</p>
+                </div>
+                <div>
+                  <label className="block text-sm font-semibold text-gray-900 dark:text-slate-200 mb-2">Filing Status</label>
+                  <select value={editableFilingStatus || ''} onChange={(e) => setEditableFilingStatus(e.target.value as 'single' | 'married' || null)} className="w-full px-4 py-3 border border-gray-300 rounded-lg bg-white dark:bg-slate-700 text-gray-900 dark:text-slate-100">
+                    <option value="">Select...</option>
+                    <option value="single">Single</option>
+                    <option value="married">Married Filing Jointly</option>
+                  </select>
+                </div>
+                {editableFilingStatus === 'married' && (
+                  <>
+                    <div>
+                      <label className="block text-sm font-semibold text-gray-900 dark:text-slate-200 mb-2">Spouse Name</label>
+                      <input type="text" value={editableSpouseName || ''} onChange={(e) => setEditableSpouseName(e.target.value || null)} className="w-full px-4 py-3 border border-gray-300 rounded-lg bg-white dark:bg-slate-700 text-gray-900 dark:text-slate-100" />
+                    </div>
+                    <div>
+                      <label className="block text-sm font-semibold text-gray-900 dark:text-slate-200 mb-2">Spouse Date of Birth</label>
+                      <input type="date" value={editableSpouseDob || ''} onChange={(e) => setEditableSpouseDob(e.target.value || null)} className="w-full px-4 py-3 border border-gray-300 rounded-lg bg-white dark:bg-slate-700 text-gray-900 dark:text-slate-100" />
+                      {spouseDobError && <p className="text-xs text-red-600 mt-1">{spouseDobError}</p>}
+                    </div>
+                  </>
+                )}
+                <div>
                   <label className="block text-sm font-semibold text-gray-900 dark:text-slate-200 mb-2">Email</label>
                   <input value={editableEmail} onChange={(e) => setEditableEmail(e.target.value)} className="w-full px-4 py-3 border border-gray-300 rounded-lg bg-white dark:bg-slate-700 text-gray-900 dark:text-slate-100" />
                 </div>
@@ -371,7 +447,7 @@ export default function ProfilePage() {
                 )}
 
                 <div className="flex gap-3">
-                  <button type="submit" disabled={loading || !!dobError || !!retirementAgeError || !!incomeError} className="bg-indigo-600 hover:bg-indigo-700 disabled:bg-gray-400 text-white font-semibold py-2 px-6 rounded-lg">Save</button>
+                  <button type="submit" disabled={loading || !!dobError || !!retirementAgeError || !!incomeError || !!spouseDobError || !!lifeExpectancyError} className="bg-indigo-600 hover:bg-indigo-700 disabled:bg-gray-400 text-white font-semibold py-2 px-6 rounded-lg">Save</button>
                   <button type="button" onClick={() => { setEditingProfile(false); setEditableName(user.displayName || ''); setEditableEmail(user.email || ''); setCurrentPasswordForEmail(''); }} className="bg-gray-300 hover:bg-gray-400 text-gray-900 font-semibold py-2 px-6 rounded-lg">Cancel</button>
                 </div>
               </div>
