@@ -214,7 +214,13 @@ export default function ProfilePage() {
 
       <main className="max-w-2xl mx-auto px-4 py-12 sm:px-6 lg:px-8">
         <div className="mb-8">
-          <h1 className="text-3xl font-bold" style={{ color: theme === 'light' ? '#111827' : '#f8fafc' }}>My Profile</h1>
+          <h1 className="text-3xl font-bold" style={{ 
+            color: theme === 'light' ? '#111827' : '#f8fafc',
+            background: 'none',
+            WebkitBackgroundClip: 'unset',
+            WebkitTextFillColor: theme === 'light' ? '#111827' : '#f8fafc',
+            backgroundClip: 'unset'
+          }}>My Profile</h1>
           <p className="mt-2" style={{ color: theme === 'light' ? '#4b5563' : '#94a3b8' }}>Manage your account settings and preferences</p>
         </div>
 
