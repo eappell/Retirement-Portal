@@ -24,7 +24,7 @@ export default function Footer() {
   const resolvedSrc: string = (typeof importedSrc === 'string' && importedSrc) || imgMeta?.src || publicPath;
 
   return (
-    <footer className="relative mt-[10px] pt-[20px] pb-6" style={{ position: 'static' }}>
+    <footer className="relative z-20 mt-[10px] pt-[20px] pb-6" style={{ position: 'static' }}>
       <div className="max-w-[1400px] mx-auto px-4">
         <div className="flex justify-center">
           <Image
@@ -33,7 +33,9 @@ export default function Footer() {
             width={widthFor80}
             height={80}
             priority
-            className="w-auto h-[80px] min-h-[80px] object-contain"
+            // Ensure logo uses normal blend mode so it isn't blended into overlays behind it
+            className="w-auto h-[80px] min-h-[80px] object-contain mix-blend-normal"
+            style={{ display: 'block' }}
           />
         </div>
       </div>
