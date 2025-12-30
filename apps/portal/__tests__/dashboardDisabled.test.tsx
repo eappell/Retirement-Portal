@@ -7,6 +7,11 @@ vi.mock('@/lib/auth', () => ({ useAuth: () => ({ user: { uid: 'uid1', email: 'a@
 vi.mock('@/lib/useUserTier', () => ({ useUserTier: () => ({ tier: 'paid', loading: false }) }));
 vi.mock('@/lib/theme', () => ({ useTheme: () => ({ theme: 'light', toggleTheme: () => {} }) }));
 
+// Mock Next's Image since tests don't need layout precision here
+vi.mock('next/image', () => ({
+  default: ({ alt }) => <img alt={alt} />,
+}));
+
 // Mock firebase getDocs/collection to supply an app that is disabled and one that is enabled
 const disabledApp = { id: 'disabled-app', name: 'Disabled App', url: 'http://localhost/', disabled: true };
 const enabledApp = { id: 'enabled-app', name: 'Enabled App', url: 'http://localhost:1000/', disabled: false };

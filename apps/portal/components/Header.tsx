@@ -36,8 +36,12 @@ export function Header({ showAppSwitcher = false }: HeaderProps) {
   const borderColor = theme === "light" ? "border-gray-200" : "border-slate-700";
   const dropdownBg = theme === "light" ? "bg-[#F9F8F6]" : "bg-slate-800";
 
-  // Shrinking header behavior: full height 100px -> compact 60px
+  // Shrinking header behavior: full height -> compact
   const [isScrolled, setIsScrolled] = useState(false);
+
+  // Heights in px used for layout / CSS variable
+  const EXPANDED_HEIGHT = 100; // approx full header height
+  const COMPACT_HEIGHT = 60; // compact header height when scrolled
 
   // On scroll, set a compact header state once past a small threshold
   useEffect(() => {
@@ -46,8 +50,35 @@ export function Header({ showAppSwitcher = false }: HeaderProps) {
       else setIsScrolled(false);
     };
     window.addEventListener('scroll', onScroll, { passive: true });
-    return () => window.removeEventListener('scroll', onScroll);
+
+    // Also listen for scroll messages from embedded iframes
+    const handleMessage = (e: MessageEvent) => {
+      try {
+        if (e?.data?.type === 'IFRAME_SCROLL') {
+          const sc = !!e.data.scrolled;
+          setIsScrolled(sc);
+        }
+      } catch (err) {
+        // ignore malformed messages
+      }
+    };
+    window.addEventListener('message', handleMessage);
+
+    return () => {
+      window.removeEventListener('scroll', onScroll);
+      window.removeEventListener('message', handleMessage);
+    };
   }, []);
+
+  // Update CSS variable so page content can reserve space for the fixed header
+  useEffect(() => {
+    const height = isScrolled ? COMPACT_HEIGHT : EXPANDED_HEIGHT;
+    try {
+      document.documentElement.style.setProperty('--portal-header-height', `${height}px`);
+    } catch (e) {
+      // ignore
+    }
+  }, [isScrolled]);
 
   // Use the small no-tag logo variants for the header, and change display height when scrolled
   const logoSrc = theme === "light" ? logoSmBlack : logoSmWhite;
@@ -92,7 +123,7 @@ export function Header({ showAppSwitcher = false }: HeaderProps) {
   };
 
   return (
-    <header className={`${headerBgClass} sticky top-0 z-50 bg-opacity-100 backdrop-blur-none ${headerBorderClass} transition-all duration-300`}>
+    <header className={`${headerBgClass} fixed top-0 left-0 right-0 z-50 bg-opacity-100 backdrop-blur-none ${headerBorderClass} transition-all duration-300`} style={{ height: isScrolled ? COMPACT_HEIGHT : EXPANDED_HEIGHT }}>
       <div className={`max-w-[1400px] mx-auto px-4 sm:px-6 lg:px-8 transition-all duration-300 ${isScrolled ? 'py-2' : 'py-4'}`}>
         <div className="flex items-center">
           {/* Logo/Brand */}

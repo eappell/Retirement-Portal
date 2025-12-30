@@ -264,7 +264,7 @@ export default function AppPage() {
       </div>
 
       {/* iFrame Container */}
-      <div className="flex-1 overflow-hidden">
+      <div className="flex-1 overflow-visible">
         <IFrameWrapper
           appId={appId}
           appName={finalAppName}

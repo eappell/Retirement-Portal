@@ -70,4 +70,29 @@ describe('IFrameWrapper messaging', () => {
       throw new Error('Neither USER_ROLE_UPDATE nor AUTH_TOKEN was posted to iframe');
     }
   });
+
+  test('resizes iframe on IFRAME_HEIGHT message', async () => {
+    const { container } = render(
+      <IFrameWrapper appId="test" appName="Test App" appUrl="http://example.com" />
+    );
+
+    const iframe = await screen.findByTitle('Test App') as HTMLIFrameElement;
+    expect(iframe).toBeTruthy();
+
+    // initial height should be unset
+    expect(iframe.style.height).toBe('');
+
+    // Ensure window is tall enough so the portal won't clamp the height in tests
+    (window as any).innerHeight = 2000;
+
+    // post a height message
+    window.postMessage({ type: 'IFRAME_HEIGHT', height: 1200 }, '*');
+
+    await waitFor(() => {
+      const applied = parseInt(iframe.style.height?.replace('px','') || '0', 10);
+      expect(applied).toBeGreaterThanOrEqual(1200);
+    });
+  });
+
+
 });
