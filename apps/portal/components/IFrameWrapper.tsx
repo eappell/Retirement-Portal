@@ -820,10 +820,10 @@ export function IFrameWrapper({
               iframeRef.current!.style.setProperty('height', `${final}px`, 'important');
               iframeRef.current!.style.minHeight = `${final}px`;
               iframeRef.current!.contentWindow?.postMessage({ type: 'IFRAME_HEIGHT_APPLIED', height: final }, '*');
-              stabilizer.active = true;
-              stabilizer.attempts = 0;
-              stabilizer.applied = final;
-              scheduleRequestContent(STABILIZE_BASE_DELAY);
+              // Schedule a sanity re-check of content height after the forced fit
+              setTimeout(() => {
+                try { iframeRef.current?.contentWindow?.postMessage({ type: 'REQUEST_CONTENT_HEIGHT' }, '*'); } catch (e) {}
+              }, 200);
               console.log('[IFrameWrapper] Forced fit applied -> bottom:', bottom, 'final:', final, 'buffer:', buffer, 'extraPadding:', extraPaddingRef.current);
             } catch (e) {}
             setIsForcingFit(false);
