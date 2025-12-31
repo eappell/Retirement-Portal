@@ -78,6 +78,50 @@ export function IFrameWrapper({
     }
   };
 
+  // Reset height tracking refs when appId changes (e.g., switching apps via dropdown)
+  useEffect(() => {
+    // Reset all height-related refs so the new app can report its own height
+    baseAppliedRef.current = 0;
+    currentAppliedRef.current = 0;
+    lastAppliedRefGlobal.current = 0;
+    updateCountRefGlobal.current = 0;
+    lastUpdateTsRefGlobal.current = 0;
+    heightRateRef.current = { count: 0, ts: 0, mutedUntil: 0 };
+    globalMsgRef.current = { count: 0, ts: Date.now(), mutedUntil: 0 };
+    originCountsRef.current.clear();
+    
+    // Reset iframe height style to allow new app to set its own height
+    if (iframeRef.current) {
+      iframeRef.current.style.removeProperty('height');
+      iframeRef.current.style.removeProperty('min-height');
+    }
+    
+    console.log('[IFrameWrapper] Reset height tracking for new app:', appId);
+  }, [appId]);
+
+  // Request height from iframe on mount and after delays (handles direct URL and dropdown navigation)
+  useEffect(() => {
+    const requestHeight = () => {
+      if (iframeRef.current?.contentWindow) {
+        console.log('[IFrameWrapper] Requesting content height from iframe');
+        iframeRef.current.contentWindow.postMessage({ type: 'REQUEST_CONTENT_HEIGHT' }, '*');
+      }
+    };
+
+    // Request at various intervals to catch the app when it's ready
+    const t1 = setTimeout(requestHeight, 500);
+    const t2 = setTimeout(requestHeight, 1000);
+    const t3 = setTimeout(requestHeight, 2000);
+    const t4 = setTimeout(requestHeight, 3000);
+
+    return () => {
+      clearTimeout(t1);
+      clearTimeout(t2);
+      clearTimeout(t3);
+      clearTimeout(t4);
+    };
+  }, [appId]);
+
   // Load persisted value for this app
   useEffect(() => {
     try {
@@ -156,6 +200,14 @@ export function IFrameWrapper({
                 },
                 "*"
               );
+              // Request content height from the iframe after it loads
+              setTimeout(() => {
+                iframeRef.current?.contentWindow?.postMessage({ type: 'REQUEST_CONTENT_HEIGHT' }, '*');
+              }, 500);
+              // Request again after a longer delay for slower-loading apps
+              setTimeout(() => {
+                iframeRef.current?.contentWindow?.postMessage({ type: 'REQUEST_CONTENT_HEIGHT' }, '*');
+              }, 1500);
             };
           }
         }
@@ -1167,54 +1219,28 @@ export function IFrameWrapper({
   }
 
   return (
-    <div className="flex flex-col relative overflow-visible">
-      {/* Small overlay control for per-app extra padding */}
-      <div className="absolute right-2 top-2 z-50">
-        <button
-          title="Toggle extra padding controls"
-          onClick={() => setShowPaddingControls((s) => !s)}
-          className="bg-white/90 dark:bg-gray-800/90 text-sm px-2 py-1 rounded shadow border"
-        >
-          Padding: {extraPadding}px
-        </button>
-        {showPaddingControls && (
-          <div className="mt-2 p-2 bg-white/95 dark:bg-gray-800/95 rounded shadow border text-sm w-40">
-            <div className="flex items-center justify-between mb-2">
-              <label className="text-xs text-gray-600">Extra padding (px)</label>
-              <div className="space-x-1">
-                <button onClick={() => setExtraPadding((v) => Math.max(0, v - 5))} className="px-1">-5</button>
-                <button onClick={() => setExtraPadding((v) => v + 5)} className="px-1">+5</button>
-              </div>
-            </div>
-            <input
-              type="number"
-              value={extraPadding}
-              onChange={(e) => setExtraPadding(Math.max(0, Number(e.target.value || 0)))}
-              className="w-full border rounded px-2 py-1 text-sm"
-            />
-            <div className="flex items-center justify-between mt-2">
-              <div className="flex items-center space-x-2">
-                <button onClick={() => { setExtraPadding(0); setShowPaddingControls(false); }} className="text-xs text-red-600">Reset</button>
-                <button onClick={() => setShowPaddingControls(false)} className="text-xs">Done</button>
-              </div>
-              <div className="flex items-center space-x-2">
-                <button onClick={forceFit} className="text-xs bg-indigo-600 text-white px-2 py-0.5 rounded">
-                  {isForcingFit ? 'Fitting…' : 'Force fit'}
-                </button>
-                <button onClick={() => {
-                  try { iframeRef.current?.contentWindow?.postMessage({ type: 'HIGHLIGHT_BOTTOM_ELEMENT' }, '*'); } catch (e) {}
-                }} className="text-xs bg-yellow-400 text-black px-2 py-0.5 rounded">Highlight</button>
-              </div>
-            </div>
-          </div>
-        )}
-      </div>
-
+    <div className="relative">
       <iframe
+        key={appUrl}
         ref={iframeRef}
         src={appUrl}
         title={appName}
-        className="w-full border-0 flex-none"
+        className="w-full border-0 block"
+        style={{ height: 'calc(100vh - 200px)', minHeight: '600px' }}
+        scrolling="no"
+        onLoad={() => {
+          console.log('[IFrameWrapper] iframe onLoad fired for:', appUrl);
+          // Request height immediately on load
+          setTimeout(() => {
+            iframeRef.current?.contentWindow?.postMessage({ type: 'REQUEST_CONTENT_HEIGHT' }, '*');
+          }, 100);
+          setTimeout(() => {
+            iframeRef.current?.contentWindow?.postMessage({ type: 'REQUEST_CONTENT_HEIGHT' }, '*');
+          }, 500);
+          setTimeout(() => {
+            iframeRef.current?.contentWindow?.postMessage({ type: 'REQUEST_CONTENT_HEIGHT' }, '*');
+          }, 1500);
+        }}
         allow="camera;microphone;geolocation"
         sandbox="allow-same-origin allow-scripts allow-popups allow-forms allow-modals allow-top-navigation allow-downloads"
       />

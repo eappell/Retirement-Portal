@@ -98,6 +98,14 @@ export default function AppPage() {
     setMounted(true);
   }, []);
 
+  // Reset state when appId changes (e.g., when switching apps via dropdown)
+  useEffect(() => {
+    setAppConfig(null);
+    setAppTitle("");
+    setAppDescription("");
+    setLoadingApp(true);
+  }, [appId]);
+
   // Listen for app metadata from iframe
   useEffect(() => {
     const handleMessage = (event: MessageEvent) => {
@@ -234,7 +242,7 @@ export default function AppPage() {
   const finalAppName = appName || appConfig.name;
 
   return (
-    <div className="flex flex-col h-screen bg-gray-50">
+    <div className="bg-gray-50">
       <Header showAppSwitcher />
 
       {/* App Info Bar */}
@@ -264,14 +272,13 @@ export default function AppPage() {
       </div>
 
       {/* iFrame Container */}
-      <div className="flex-1 overflow-visible">
-        <IFrameWrapper
-          appId={appId}
-          appName={finalAppName}
-          appUrl={finalAppUrl}
-          description={appConfig.description}
-        />
-      </div>
+      <IFrameWrapper
+        key={appId}
+        appId={appId}
+        appName={finalAppName}
+        appUrl={finalAppUrl}
+        description={appConfig.description}
+      />
     </div>
   );
 }

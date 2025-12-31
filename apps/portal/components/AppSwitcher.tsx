@@ -13,6 +13,35 @@ interface App {
   name: string;
   icon: string;
   url: string;
+  baseUrl: string; // The actual app URL (localhost or production)
+}
+
+// Dev settings interface (matches dashboard)
+interface DevSettings {
+  [appId: string]: {
+    enabled: boolean;
+    port: string;
+  };
+}
+
+const DEV_SETTINGS_KEY = 'portal-dev-settings';
+
+function getDevSettings(): DevSettings {
+  if (typeof window === 'undefined') return {};
+  try {
+    const stored = localStorage.getItem(DEV_SETTINGS_KEY);
+    return stored ? JSON.parse(stored) : {};
+  } catch {
+    return {};
+  }
+}
+
+function getEffectiveUrl(appId: string, baseUrl: string, devSettings: DevSettings): string {
+  const setting = devSettings[appId];
+  if (setting?.enabled && setting.port) {
+    return `http://localhost:${setting.port}`;
+  }
+  return baseUrl;
 }
 
 // `getIconComponent` is provided by the curated `icon-map` module.
@@ -25,6 +54,12 @@ export function AppSwitcher() {
   const [apps, setApps] = useState<App[]>([]);
   const [loading, setLoading] = useState(true);
   const dropdownRef = useRef<HTMLDivElement>(null);
+  const [devSettings, setDevSettings] = useState<DevSettings>({});
+
+  // Load dev settings
+  useEffect(() => {
+    setDevSettings(getDevSettings());
+  }, []);
 
   // Load apps from Firestore
   useEffect(() => {
@@ -41,6 +76,7 @@ export function AppSwitcher() {
             name: data.name,
             icon: data.icon || "Cube",
             url: `/apps/${data.id}`,
+            baseUrl: data.url || '',
           });
         });
 
@@ -90,7 +126,10 @@ export function AppSwitcher() {
   }, []);
 
   const handleAppSelect = (app: App) => {
-    router.push(app.url);
+    // Get effective URL (respects dev mode settings)
+    const effectiveUrl = getEffectiveUrl(app.id, app.baseUrl, devSettings);
+    // Navigate with URL as query parameter (same as dashboard)
+    router.push(`/apps/${app.id}?name=${encodeURIComponent(app.name)}&url=${encodeURIComponent(effectiveUrl)}`);
     setIsOpen(false);
   };
 
