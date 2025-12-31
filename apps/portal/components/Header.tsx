@@ -96,7 +96,7 @@ export function Header({ showAppSwitcher = false }: HeaderProps) {
       <div className={`max-w-[1400px] mx-auto px-4 sm:px-6 lg:px-8 transition-all duration-300 ${isScrolled ? 'py-2' : 'py-4'}`}>
         <div className="flex items-center">
           {/* Logo/Brand */}
-          <Link href="/dashboard" className="flex items-center gap-2 -ml-5">
+          <Link href="/dashboard" className="flex items-center gap-2 -ml-5 cursor-pointer">
             <Image
               src={logoSrc}
               alt="RetireWise"

@@ -525,9 +525,13 @@ html.light .dashboard-redesign .background-particles .particle-light,
 }
 
 
-/* Ensure pointer cursor for all <button> elements across the portal */
-button {
-  cursor: pointer;
+/* Ensure pointer cursor for common interactive elements across the portal */
+a, a *, button, button *, [role="button"], [role="button"] *, [role="tab"], [role="tab"] *, label, label *, .btn, .btn *, .tool-card, .tool-card * {
+  cursor: pointer !important;
+}
+
+button:disabled, button[disabled], input[disabled], [disabled], .disabled, .disabled * {
+  cursor: not-allowed !important;
 }
 
 /* Portal app name/description overrides to ensure correct contrast */
