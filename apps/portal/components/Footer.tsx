@@ -45,8 +45,8 @@ export default function Footer() {
   }, [theme]);
 
   return (
-    <footer className="relative z-20 mt-[10px] pt-[20px] pb-6" style={{ position: 'static', isolation: 'isolate' }}>
-      <div className="max-w-[1400px] mx-auto px-4">
+    <footer className="relative z-20 h-[130px]" style={{ position: 'static', isolation: 'isolate' }}>
+      <div className="max-w-[1400px] mx-auto px-4 py-4">
         <div ref={imgWrapperRef} className="flex justify-center">
           <Image
             key={imgKey}

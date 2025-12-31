@@ -25,11 +25,141 @@ export function IFrameWrapper({
   const { tier } = useUserTier();
   const { theme } = useTheme();
   const iframeRef = useRef<HTMLIFrameElement>(null);
+  const messageLogRef = useRef<{ last: string | null; count: number; ts: number; suppressed?: boolean }>({ last: null, count: 0, ts: 0 });
+  const lastAppliedRefGlobal = useRef<number>(0);
+  const updateCountRefGlobal = useRef<number>(0);
+  const lastUpdateTsRefGlobal = useRef<number>(0);
+  // Rate limit / mute gate for frequent height messages to stop flooding
+  const heightRateRef = useRef<{ count: number; ts: number; mutedUntil: number }>({ count: 0, ts: 0, mutedUntil: 0 });
+  // Global message flood protector
+  const globalMsgRef = useRef<{ count: number; ts: number; mutedUntil: number }>({ count: 0, ts: Date.now(), mutedUntil: 0 });
+  // Track message counts by sender/origin to help identify flood sources
+  const originCountsRef = useRef<Map<string, number>>(new Map());
+
+  // Track base applied height (without extra padding) and current applied (with padding) so the UI control can reapply instantly
+  const baseAppliedRef = useRef<number>(0);
+  const currentAppliedRef = useRef<number>(0);
+  const extraPaddingRef = useRef<number>(0);
+
+  // Diagnostic toggles: set these on window for debugging
+  (window as any).__portal_unmute_resize = (window as any).__portal_unmute_resize || false;
+  (window as any).__portal_force_unmute = (window as any).__portal_force_unmute || false;
+
+  // Whitelist valid portal <-> iframe contract message types to avoid processing extension/devtools noise
+  const ALLOWED_MESSAGE_TYPES = new Set([
+    'IFRAME_HEIGHT', 'CONTENT_HEIGHT', 'IFRAME_HEIGHT_APPLIED', 'REQUEST_CONTENT_HEIGHT',
+    'REQUEST_THEME', 'THEME_CHANGE', 'AUTH_TOKEN', 'USER_ROLE_UPDATE', 'USER_PROFILE_UPDATE', 'REQUEST_AUTH', 'REQUEST_ROLE',
+    'REQUEST_APP_STATE', 'APP_STATE_UPDATE', 'APP_STATE_RESTORE', 'TOOLBAR_BUTTONS', 'TOOLBAR_BUTTON_ACTION', 'TOOLBAR_BUTTON_STATE', 'NAVIGATE',
+    'REQUEST_INSIGHTS', 'REQUEST_INSIGHTS_RESPONSE', 'GET_SCENARIOS', 'GET_SCENARIOS_RESPONSE', 'INSIGHTS_RESPONSE', 'APP_DATA_TRANSFER',
+    'REQUEST_HEALTHCARE_DATA', 'HEALTHCARE_DATA_RESPONSE'
+  ] as const);
+
   const router = useRouter();
   const [authToken, setAuthToken] = useState<string>("");
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string>("");
   const [toolbarButtons, setToolbarButtons] = useState<ToolbarButton[]>([]);
+
+  // Per-iframe extra padding (px). Allows manual tuning when an app's footer or sticky controls are clipped.
+  const [extraPadding, setExtraPadding] = useState<number>(0);
+  const [showPaddingControls, setShowPaddingControls] = useState<boolean>(false);
+  const [isForcingFit, setIsForcingFit] = useState<boolean>(false);
+
+  const forceFit = () => {
+    try {
+      if (!iframeRef.current) return;
+      setIsForcingFit(true);
+      // Ask the child for the bottom-most element position
+      iframeRef.current.contentWindow?.postMessage({ type: 'REQUEST_BOTTOM_ELEMENT' }, '*');
+      // safety timeout in case the child doesn't respond
+      setTimeout(() => setIsForcingFit(false), 5000);
+    } catch (e) {
+      setIsForcingFit(false);
+    }
+  };
+
+  // Reset height tracking refs when appId changes (e.g., switching apps via dropdown)
+  useEffect(() => {
+    // Reset all height-related refs so the new app can report its own height
+    baseAppliedRef.current = 0;
+    currentAppliedRef.current = 0;
+    lastAppliedRefGlobal.current = 0;
+    updateCountRefGlobal.current = 0;
+    lastUpdateTsRefGlobal.current = 0;
+    heightRateRef.current = { count: 0, ts: 0, mutedUntil: 0 };
+    globalMsgRef.current = { count: 0, ts: Date.now(), mutedUntil: 0 };
+    originCountsRef.current.clear();
+    
+    // Reset iframe height style to allow new app to set its own height
+    if (iframeRef.current) {
+      iframeRef.current.style.removeProperty('height');
+      iframeRef.current.style.removeProperty('min-height');
+    }
+    
+    console.log('[IFrameWrapper] Reset height tracking for new app:', appId);
+  }, [appId]);
+
+  // Request height from iframe on mount and after delays (handles direct URL and dropdown navigation)
+  useEffect(() => {
+    const requestHeight = () => {
+      if (iframeRef.current?.contentWindow) {
+        console.log('[IFrameWrapper] Requesting content height from iframe');
+        iframeRef.current.contentWindow.postMessage({ type: 'REQUEST_CONTENT_HEIGHT' }, '*');
+      }
+    };
+
+    // Request at various intervals to catch the app when it's ready
+    const t1 = setTimeout(requestHeight, 500);
+    const t2 = setTimeout(requestHeight, 1000);
+    const t3 = setTimeout(requestHeight, 2000);
+    const t4 = setTimeout(requestHeight, 3000);
+
+    return () => {
+      clearTimeout(t1);
+      clearTimeout(t2);
+      clearTimeout(t3);
+      clearTimeout(t4);
+    };
+  }, [appId]);
+
+  // Load persisted value for this app
+  useEffect(() => {
+    try {
+      const key = `iframeExtraPadding:${appId}`;
+      const raw = localStorage.getItem(key);
+      if (raw !== null) {
+        const n = Number(raw);
+        if (!isNaN(n)) {
+          setExtraPadding(n);
+          extraPaddingRef.current = n;
+        }
+      }
+    } catch (e) {}
+  }, [appId]);
+
+  // Persist when changed and update ref
+  useEffect(() => {
+    try {
+      const key = `iframeExtraPadding:${appId}`;
+      localStorage.setItem(key, String(extraPadding));
+      extraPaddingRef.current = extraPadding;
+    } catch (e) {}
+  }, [appId, extraPadding]);
+
+  // When extraPadding changes, immediately reapply height if we've previously applied one
+  useEffect(() => {
+    try {
+      const base = baseAppliedRef.current;
+      if (!base || !iframeRef.current) return;
+      const newFinal = Math.max(0, Math.ceil(base + (Number(extraPaddingRef.current) || 0)));
+      iframeRef.current.style.setProperty('height', `${newFinal}px`, 'important');
+      iframeRef.current.style.minHeight = `${newFinal}px`;
+      currentAppliedRef.current = newFinal;
+      // Inform child about the applied height so it can decide whether to request more
+      iframeRef.current.contentWindow?.postMessage({ type: 'IFRAME_HEIGHT_APPLIED', height: newFinal }, '*');
+      console.log('[IFrameWrapper] Reapplied height due to extraPadding change:', newFinal, 'extraPadding:', extraPaddingRef.current);
+    } catch (e) {}
+  }, [extraPadding]);
 
   useEffect(() => {
     const getAuthToken = async () => {
@@ -70,6 +200,14 @@ export function IFrameWrapper({
                 },
                 "*"
               );
+              // Request content height from the iframe after it loads
+              setTimeout(() => {
+                iframeRef.current?.contentWindow?.postMessage({ type: 'REQUEST_CONTENT_HEIGHT' }, '*');
+              }, 500);
+              // Request again after a longer delay for slower-loading apps
+              setTimeout(() => {
+                iframeRef.current?.contentWindow?.postMessage({ type: 'REQUEST_CONTENT_HEIGHT' }, '*');
+              }, 1500);
             };
           }
         }
@@ -199,14 +337,385 @@ export function IFrameWrapper({
     }
   }, [theme, loading]);
 
+  // Listen for IFRAME_HEIGHT messages from iframe and resize the iframe element accordingly
+  useEffect(() => {
+    const STABILIZE_MAX_ATTEMPTS = 4;
+    const STABILIZE_BASE_DELAY = 200; // ms
+    const MIN_DELTA = 16; // px tolerance
+
+    const stabilizer = {
+      active: false,
+      attempts: 0,
+      applied: 0,
+      timerId: null as any,
+      stopped: false,
+      lastMeasured: 0,
+    };
+
+    const scheduleRequestContent = (delay = STABILIZE_BASE_DELAY) => {
+      if (stabilizer.timerId) clearTimeout(stabilizer.timerId);
+      stabilizer.timerId = setTimeout(() => {
+        try {
+          iframeRef.current?.contentWindow?.postMessage({ type: 'REQUEST_CONTENT_HEIGHT' }, '*');
+        } catch (e) {}
+      }, delay);
+    };
+
+    // Helper: relax ancestors that are clipping the iframe if their rect height is smaller than the target height.
+    const relaxAncestorsIfClipping = (targetHeight: number) => {
+      try {
+        let el: HTMLElement | null = iframeRef.current as HTMLElement | null;
+        const changedAncestors: Array<{ tag: string; oldOverflow?: string; oldMinHeight?: string; rectHeight?: number }> = [];
+        while (el && el.parentElement) {
+          const parent = el.parentElement as HTMLElement | null;
+          if (!parent) break;
+          try {
+            const cs = getComputedStyle(parent);
+            const rect = parent.getBoundingClientRect();
+            const rectH = Math.round(rect.height || 0);
+            if ((cs.overflow === 'hidden' || cs.overflow === 'clip') && rectH < targetHeight) {
+              changedAncestors.push({ tag: parent.tagName, oldOverflow: cs.overflow, oldMinHeight: parent.style.minHeight, rectHeight: rectH });
+              parent.style.setProperty('overflow', 'visible', 'important');
+              parent.style.setProperty('min-height', `${targetHeight}px`, 'important');
+              console.debug('[IFrameWrapper] Relaxed ancestor overflow for iframe visibility:', parent.tagName, 'wasOverflow:', cs.overflow, 'wasHeight:', rectH);
+            }
+          } catch (e) {}
+          el = parent;
+        }
+        if (changedAncestors.length) console.log('[IFrameWrapper] Updated ancestors to prevent clipping:', changedAncestors);
+        return changedAncestors.length > 0;
+      } catch (e) { return false; }
+    };
+
+    const clearStabilizer = () => {
+      stabilizer.active = false;
+      stabilizer.attempts = 0;
+      stabilizer.applied = 0;
+      if (stabilizer.timerId) {
+        clearTimeout(stabilizer.timerId);
+        stabilizer.timerId = null;
+      }
+    };
+
+    const handleIframeHeightMessage = (event: MessageEvent) => {
+      try {
+        // Global flood protection
+        const now = Date.now();
+        if (!(window as any).__portal_force_unmute) {
+          if (now - globalMsgRef.current.ts > 10000) {
+            globalMsgRef.current.count = 1;
+            globalMsgRef.current.ts = now;
+          } else {
+            globalMsgRef.current.count = (globalMsgRef.current.count || 0) + 1;
+            // track counts by origin/source for diagnostics
+            try {
+              const origin = event.origin || event.data?.source || 'unknown';
+              originCountsRef.current.set(origin, (originCountsRef.current.get(origin) || 0) + 1);
+            } catch (e) {}
+            if (globalMsgRef.current.count > 400) {
+              globalMsgRef.current.mutedUntil = now + 20000;
+              console.warn('[IFrameWrapper] Global message flood detected — muting non-critical message processing for 20s');
+              try {
+                // Pause resize handling immediately and ask iframe to pause too
+                (window as any).__portal_pause_resizing = true;
+                iframeRef.current?.contentWindow?.postMessage({ type: 'STABILIZE_STOP', duration: 20000 }, '*');
+                // log top offenders
+                const arr = Array.from(originCountsRef.current.entries()).sort((a,b) => b[1]-a[1]).slice(0,5);
+                console.warn('[IFrameWrapper] Top message senders:', arr);
+                console.warn('[IFrameWrapper] Paused resize handling. To resume manually run: window.__portal_pause_resizing = false');
+              } catch (e) {}
+            }
+          }
+          if (globalMsgRef.current.mutedUntil && now < globalMsgRef.current.mutedUntil) {
+            // while globally muted, ignore height/content messages only
+            const msgType = event.data?.type;
+            if (msgType === 'IFRAME_HEIGHT' || msgType === 'CONTENT_HEIGHT') return;
+          }
+        }
+
+        // Throttle / mute gate for height messages specifically
+        const msgType = event.data?.type;
+        if (msgType === 'IFRAME_HEIGHT' || msgType === 'CONTENT_HEIGHT') {
+          if (!(window as any).__portal_unmute_resize) {
+            if (heightRateRef.current.mutedUntil && now < heightRateRef.current.mutedUntil) {
+              // currently muted
+              return;
+            }
+            if (now - heightRateRef.current.ts > 5000) {
+              heightRateRef.current.count = 1;
+              heightRateRef.current.ts = now;
+            } else {
+              heightRateRef.current.count = (heightRateRef.current.count || 0) + 1;
+              // if more than 30 messages in 5s, mute for 10s
+              if (heightRateRef.current.count > 30) {
+                heightRateRef.current.mutedUntil = now + 10000;
+                console.warn('[IFrameWrapper] Muting frequent height messages for 10s');
+                // Ask the iframe to pause sending height updates for a short interval as well
+                try { iframeRef.current?.contentWindow?.postMessage({ type: 'STABILIZE_STOP', duration: 10000 }, '*'); } catch (e) {}
+                return;
+              }
+            }
+          }
+        }
+
+        if (event.data?.type === 'IFRAME_HEIGHT') {
+          const h = Number(event.data.height || 0);
+          if (!isFinite(h) || h <= 0) return;
+          const min = 300;
+          const max = 10000;
+          const clamped = Math.max(min, Math.min(max, Math.round(h)));
+
+          // If stabilizer has been stopped (giving up), ignore further requests
+          if (stabilizer.stopped) return;
+
+          // If currently stabilizing and the incoming request isn't larger than what we've already applied, ignore it
+          if (stabilizer.active && clamped + 24 <= stabilizer.applied) {
+            return;
+          }
+
+          // If the incoming measurement is very close to the already applied height,
+          // it's likely the iframe echoed back the portal-applied height — ignore to avoid incremental growth
+          // Slightly larger buffer to ensure footers and small sticky elements are not clipped
+          const buffer = 36;
+          if (stabilizer.active && Math.abs(clamped - stabilizer.applied) <= buffer) {
+            console.debug('[IFrameWrapper] Ignoring echoed height close to applied:', clamped, 'applied:', stabilizer.applied);
+            return;
+          }
+
+          const applied = clamped + buffer;
+          // store base/applied refs so padding control can reapply later
+          baseAppliedRef.current = applied;
+          const finalApplied = applied + (Number(extraPaddingRef.current) || 0);
+
+          // Diagnostics once per apply
+          try {
+            const diagnostics: any[] = [];
+            let el: HTMLElement | null = iframeRef.current as HTMLElement | null;
+            while (el) {
+              const cs = getComputedStyle(el);
+              diagnostics.push({ tag: el.tagName, id: el.id || null, class: el.className || null, computedHeight: cs.height, overflow: cs.overflow, maxHeight: cs.maxHeight, display: cs.display });
+              el = el.parentElement;
+            }
+            console.log('[IFrameWrapper] Ancestor diagnostics:', diagnostics);
+          } catch (e) {}
+
+          // Apply with priority
+          try {
+            iframeRef.current!.style.setProperty('height', `${finalApplied}px`, 'important');
+            iframeRef.current!.style.minHeight = `${finalApplied}px`;
+            iframeRef.current!.style.overflow = 'hidden';
+            iframeRef.current!.style.display = 'block';
+            iframeRef.current!.classList.remove('flex-1');
+            iframeRef.current!.classList.add('flex-none');
+            try { iframeRef.current!.setAttribute('scrolling', 'no'); } catch (e) {}
+
+            // Defensive: ensure no ancestor is clipping the iframe; use helper to relax if needed
+            try {
+              relaxAncestorsIfClipping(finalApplied);
+            } catch (e) {}
+
+          } catch (e) {}
+
+          stabilizer.active = true;
+          stabilizer.attempts = 0;
+          stabilizer.applied = finalApplied;
+          currentAppliedRef.current = finalApplied;
+          baseAppliedRef.current = applied;
+
+          // Inform iframe of the final applied height
+          iframeRef.current?.contentWindow?.postMessage({ type: 'IFRAME_HEIGHT_APPLIED', height: finalApplied }, '*');
+          scheduleRequestContent(STABILIZE_BASE_DELAY);
+
+          console.log('[IFrameWrapper] Applied height to iframe (important):', finalApplied, 'buffer:', buffer, 'extraPadding:', extraPaddingRef.current);
+        }
+
+        if (event.data?.type === 'CONTENT_HEIGHT') {
+          const measured = Number(event.data.height || 0);
+          if (!isFinite(measured) || measured <= 0) return;
+          const DEFAULT_BUFFER = 36;
+          let buffer = DEFAULT_BUFFER;
+          if (typeof event.data?.suggestedBuffer === 'number' || !isNaN(Number(event.data?.suggestedBuffer))) {
+            const sb = Number(event.data.suggestedBuffer || 0);
+            // Offer suggestion to the user by pre-filling padding if it's larger than current
+            if ((Number(extraPaddingRef.current) || 0) < sb) {
+              setExtraPadding(sb);
+              console.debug('[IFrameWrapper] Prefilled extraPadding from child suggestedBuffer:', sb);
+            }
+
+            // Use either default buffer or suggested + safety margin, whichever is larger
+            buffer = Math.max(DEFAULT_BUFFER, Math.ceil(sb + 12));
+            console.debug('[IFrameWrapper] Using suggestedBuffer from child:', sb, 'buffer used:', buffer);
+          }
+          const desired = Math.round(measured + buffer);
+
+          // Determine the currently applied height (could have been applied earlier or via other UI action)
+          const currentApplied = currentAppliedRef.current || (iframeRef.current ? Math.round(parseFloat(getComputedStyle(iframeRef.current).height) || 0) : 0);
+
+          // If not currently stabilizing, allow CONTENT_HEIGHT to increase the iframe if needed
+          if (!stabilizer.active) {
+            if (desired > currentApplied + MIN_DELTA) {
+              try {
+                const finalDesired = desired + (Number(extraPaddingRef.current) || 0);
+                baseAppliedRef.current = desired;
+                currentAppliedRef.current = finalDesired;
+                iframeRef.current!.style.setProperty('height', `${finalDesired}px`, 'important');
+                iframeRef.current!.style.minHeight = `${finalDesired}px`;
+                iframeRef.current!.contentWindow?.postMessage({ type: 'IFRAME_HEIGHT_APPLIED', height: finalDesired }, '*');
+                stabilizer.active = true;
+                stabilizer.attempts = 0;
+                stabilizer.applied = finalDesired;
+                scheduleRequestContent(STABILIZE_BASE_DELAY);
+                console.log('[IFrameWrapper] Applied CONTENT_HEIGHT (unsolicited) -> final:', finalDesired, 'buffer:', buffer, 'extraPadding:', extraPaddingRef.current);
+              } catch (e) {}
+            } else {
+              console.debug('[IFrameWrapper] CONTENT_HEIGHT received but not larger than current applied; ignoring', desired, currentApplied);
+            }
+            return;
+          }
+
+          // Track last measured
+          stabilizer.lastMeasured = measured;
+
+          // If content has grown meaningfully beyond current applied height, try once more
+          if (desired > stabilizer.applied + MIN_DELTA && stabilizer.attempts < STABILIZE_MAX_ATTEMPTS) {
+            // Oscillation detection: if we've already tried and the child's measured height hasn't changed,
+            // request bottom-element diagnostics and attempt ancestor relaxation instead of blindly increasing.
+            if (stabilizer.attempts > 0 && Math.abs(measured - stabilizer.lastMeasured) <= 1) {
+              console.warn('[IFrameWrapper] Measurement stagnant despite increases — requesting bottom-element diagnostics and trying to relax clipping ancestors');
+              try { iframeRef.current?.contentWindow?.postMessage({ type: 'REQUEST_BOTTOM_ELEMENT' }, '*'); } catch (e) {}
+              const finalDesired = desired + (Number(extraPaddingRef.current) || 0);
+              const relaxed = relaxAncestorsIfClipping(finalDesired);
+              if (relaxed) {
+                try {
+                  baseAppliedRef.current = desired;
+                  currentAppliedRef.current = finalDesired;
+                  iframeRef.current!.style.setProperty('height', `${finalDesired}px`, 'important');
+                  iframeRef.current!.style.minHeight = `${finalDesired}px`;
+                  iframeRef.current!.contentWindow?.postMessage({ type: 'IFRAME_HEIGHT_APPLIED', height: finalDesired }, '*');
+                  stabilizer.applied = finalDesired;
+                  stabilizer.attempts++;
+                  const delay = STABILIZE_BASE_DELAY * Math.pow(2, stabilizer.attempts);
+                  scheduleRequestContent(delay);
+                  console.log('[IFrameWrapper] Applied after relaxing ancestors -> final:', finalDesired, 'attempt:', stabilizer.attempts, 'extraPadding:', extraPaddingRef.current);
+                } catch (e) {
+                  clearStabilizer();
+                }
+                return;
+              } else {
+                // Nothing to relax; stop stabilizer to avoid runaway growth and request manual inspection
+                try { iframeRef.current?.contentWindow?.postMessage({ type: 'STABILIZE_STOP', duration: 15000 }, '*'); } catch (e) {}
+                stabilizer.stopped = true;
+                clearStabilizer();
+                console.warn('[IFrameWrapper] Measurement stagnant and no clipping ancestors found — stopping stabilizer and requesting manual inspection');
+                return;
+              }
+            }
+            stabilizer.attempts++;
+            // increase and re-request after exponential backoff
+            try {
+              // include any extra padding when applying the desired height
+              const finalDesired = desired + (Number(extraPaddingRef.current) || 0);
+              baseAppliedRef.current = desired;
+              currentAppliedRef.current = finalDesired;
+
+              iframeRef.current!.style.setProperty('height', `${finalDesired}px`, 'important');
+              iframeRef.current!.style.minHeight = `${finalDesired}px`;
+              iframeRef.current!.contentWindow?.postMessage({ type: 'IFRAME_HEIGHT_APPLIED', height: finalDesired }, '*');
+              stabilizer.applied = finalDesired;
+              const delay = STABILIZE_BASE_DELAY * Math.pow(2, stabilizer.attempts);
+              scheduleRequestContent(delay);
+              console.log('[IFrameWrapper] Increased iframe to measured desired height:', desired, 'final:', finalDesired, 'attempt:', stabilizer.attempts, 'extraPadding:', extraPaddingRef.current);
+            } catch (e) {
+              clearStabilizer();
+            }
+          } else if (desired > stabilizer.applied + MIN_DELTA && stabilizer.attempts >= STABILIZE_MAX_ATTEMPTS) {
+            // Exceeded attempts and content still grows — cap to a safe maximum and stop
+            const FINAL_MAX = 8000;
+            const final = Math.min(desired, FINAL_MAX);
+            try {
+              iframeRef.current!.style.setProperty('height', `${final}px`, 'important');
+              iframeRef.current!.style.minHeight = `${final}px`;
+              iframeRef.current!.contentWindow?.postMessage({ type: 'IFRAME_HEIGHT_APPLIED', height: final }, '*');
+              console.warn('[IFrameWrapper] Stabilizer gave up after repeated increases; capping to', final);
+              // Ask the child to pause sending for a short interval to avoid continuous growth
+              try { iframeRef.current?.contentWindow?.postMessage({ type: 'STABILIZE_STOP', duration: 15000 }, '*'); } catch (e) {}
+            } catch (e) {}
+            stabilizer.stopped = true;
+            clearStabilizer();
+          } else {
+            // measurement within tolerance or we've exhausted attempts
+            console.log('[IFrameWrapper] Stabilized; final height:', stabilizer.applied, 'measured:', measured);
+            clearStabilizer();
+          }
+        }
+      } catch (e) {
+        // ignore
+      }
+    };
+
+    window.addEventListener('message', handleIframeHeightMessage);
+    return () => {
+      window.removeEventListener('message', handleIframeHeightMessage);
+      clearStabilizer();
+    };
+  }, []);
+
   // Listen for toolbar button messages and app-to-app messages from iframe
   useEffect(() => {
     const handleMessage = (event: MessageEvent) => {
-      console.log("IFrameWrapper received message:", event.data);
+      const d = event?.data;
+      // Quietly ignore empty / non-object / devtools messages
+      if (!d) return;
+      if (typeof d === 'string') {
+        if (d.includes('react-devtools') || d.includes('__REACT_DEVTOOLS_GLOBAL_HOOK__')) return;
+      }
+      if (typeof d === 'object') {
+        // nested devtools payloads
+        if (typeof (d as any).source === 'string' && (d as any).source.startsWith('react-devtools')) return;
+        if (typeof (d as any).payload === 'object' && typeof (d as any).payload?.source === 'string' && (d as any).payload.source.startsWith('react-devtools')) return;
+      }
+      // Only handle messages that conform to our contract (must have a 'type')
+      if (!d.type) return;
+      // Only accept known, whitelisted message types to avoid noisy extension/devtools messages
+      if (typeof d.type === 'string' && !ALLOWED_MESSAGE_TYPES.has(d.type)) return;
+
+      // Simple spam suppression so the console doesn't get flooded by repeated messages
+      try {
+        const sig = `${d.type}::${d.source || d.payload?.source || ''}::${String(d.action || '')}`;
+        const now = Date.now();
+        const ref = messageLogRef.current;
+        if (ref.last === sig) {
+          ref.count = (ref.count || 0) + 1;
+          if (now - ref.ts > 10000) {
+            // reset window
+            ref.count = 1;
+            ref.ts = now;
+            ref.suppressed = false;
+          } else {
+            // if repeated too often, suppress further logs
+            if (ref.count > 25) {
+              if (!ref.suppressed) {
+                console.warn('[IFrameWrapper] Suppressing repeated messages of type', d.type);
+                ref.suppressed = true;
+              }
+              return;
+            }
+          }
+        } else {
+          ref.last = sig;
+          ref.count = 1;
+          ref.ts = now;
+          ref.suppressed = false;
+        }
+      } catch (e) {
+        // ignore suppression errors
+      }
+
+      console.log("IFrameWrapper received message:", d);
       // In production, verify the origin
       
       // If iframe requests current theme, reply with the portal theme
-      if (event.data?.type === "REQUEST_THEME") {
+      if (d?.type === "REQUEST_THEME") {
         if (iframeRef.current) {
           iframeRef.current.contentWindow?.postMessage(
             {
@@ -281,6 +790,105 @@ export function IFrameWrapper({
           console.warn('[IFrameWrapper] Failed to respond to REQUEST_APP_STATE', e);
         }
         return;
+      }
+
+      // Child reports measured content height when explicitly requested
+      if (event.data?.type === 'CONTENT_HEIGHT') {
+        try {
+          const measured = Number(event.data.height || 0);
+          if (!isFinite(measured) || measured <= 0) return;
+          const buffer = 24;
+          const desired = Math.round(measured + buffer);
+
+          if (iframeRef.current) {
+            const current = Number((iframeRef.current.style.height || '').replace('px','')) || 0;
+            const MIN_DELTA = 16; // require meaningful delta to avoid ping-pong
+            const now = Date.now();
+
+            if (desired > current + MIN_DELTA) {
+              if (now - lastUpdateTsRefGlobal.current < 500) {
+                updateCountRefGlobal.current = (updateCountRefGlobal.current || 0) + 1;
+              } else {
+                updateCountRefGlobal.current = 1;
+              }
+              lastUpdateTsRefGlobal.current = now;
+              if (updateCountRefGlobal.current > 6) {
+                console.warn('[IFrameWrapper] Stopping auto-resize after repeated attempts');
+                return;
+              }
+
+              iframeRef.current.style.setProperty('height', `${desired}px`, 'important');
+              iframeRef.current.style.minHeight = `${desired}px`;
+              iframeRef.current.contentWindow?.postMessage({ type: 'IFRAME_HEIGHT_APPLIED', height: desired }, '*');
+              lastAppliedRefGlobal.current = desired;
+              console.log('[IFrameWrapper] Updated iframe to measured height:', desired, 'measured:', measured, 'current:', current);
+            } else {
+              if (Math.abs(desired - current) > 0) {
+                console.log('[IFrameWrapper] Measured content height within tolerance; no update:', measured, 'current:', current);
+              }
+            }
+          }
+        } catch (e) {
+          // ignore
+        }
+        return;
+      }
+
+      // Handle bottom element diagnostics & force-fit replies
+      if (event.data?.type === 'BOTTOM_ELEMENT_POSITION') {
+        try {
+          const bottom = Number(event.data.bottom || 0);
+          if (!isFinite(bottom) || bottom <= 0) return;
+          const sb = Number(event.data.suggestedBuffer || 0);
+
+          // Log element info and child metrics when provided
+          if (event.data.elementInfo) console.log('[IFrameWrapper] Bottom element info:', event.data.elementInfo);
+          if (event.data.childMetrics) console.log('[IFrameWrapper] Child metrics:', event.data.childMetrics);
+
+          // Diagnostics: log iframe bounding rect and ancestors' bounding rects
+          try {
+            const iframeRect = iframeRef.current?.getBoundingClientRect();
+            console.log('[IFrameWrapper] Iframe bounding rect:', iframeRect);
+            let el: HTMLElement | null = iframeRef.current as HTMLElement | null;
+            const ancRects: any[] = [];
+            while (el) {
+              try {
+                const cs = getComputedStyle(el);
+                ancRects.push({ tag: el.tagName, rect: el.getBoundingClientRect(), computedHeight: cs.height, overflow: cs.overflow });
+              } catch (e) {}
+              el = el.parentElement;
+            }
+            console.log('[IFrameWrapper] Ancestor bounding rects:', ancRects);
+          } catch (e) {}
+
+          // If user requested force-fit we have state flag set; otherwise just log
+          if (isForcingFit) {
+            const DEFAULT_BUFFER = 36;
+            const buffer = Math.max(DEFAULT_BUFFER, Math.ceil(sb + 12));
+            const final = Math.ceil(bottom + buffer + (Number(extraPaddingRef.current) || 0));
+            try {
+              baseAppliedRef.current = bottom;
+              currentAppliedRef.current = final;
+              iframeRef.current!.style.setProperty('height', `${final}px`, 'important');
+              iframeRef.current!.style.minHeight = `${final}px`;
+              iframeRef.current!.contentWindow?.postMessage({ type: 'IFRAME_HEIGHT_APPLIED', height: final }, '*');
+              // Schedule a sanity re-check of content height after the forced fit
+              setTimeout(() => {
+                try { iframeRef.current?.contentWindow?.postMessage({ type: 'REQUEST_CONTENT_HEIGHT' }, '*'); } catch (e) {}
+              }, 200);
+              console.log('[IFrameWrapper] Forced fit applied -> bottom:', bottom, 'final:', final, 'buffer:', buffer, 'extraPadding:', extraPaddingRef.current);
+            } catch (e) {}
+            setIsForcingFit(false);
+          }
+        } catch (e) {}
+      }
+
+      if (event.data?.type === 'HIGHLIGHT_DONE') {
+        try {
+          if (event.data.elementInfo) console.log('[IFrameWrapper] Child highlighted element:', event.data.elementInfo);
+          if (event.data.childMetrics) console.log('[IFrameWrapper] Child metrics (highlight):', event.data.childMetrics);
+          console.log('[IFrameWrapper] Highlight completed on child element:', event.data.elementInfo);
+        } catch (e) {}
       }
 
       // Persist app state updates coming from embedded apps
@@ -611,12 +1219,28 @@ export function IFrameWrapper({
   }
 
   return (
-    <div className="flex flex-col h-full">
+    <div className="relative">
       <iframe
+        key={appUrl}
         ref={iframeRef}
         src={appUrl}
         title={appName}
-        className="flex-1 w-full border-0"
+        className="w-full border-0 block"
+        style={{ height: 'calc(100vh - 200px)', minHeight: '600px' }}
+        scrolling="no"
+        onLoad={() => {
+          console.log('[IFrameWrapper] iframe onLoad fired for:', appUrl);
+          // Request height immediately on load
+          setTimeout(() => {
+            iframeRef.current?.contentWindow?.postMessage({ type: 'REQUEST_CONTENT_HEIGHT' }, '*');
+          }, 100);
+          setTimeout(() => {
+            iframeRef.current?.contentWindow?.postMessage({ type: 'REQUEST_CONTENT_HEIGHT' }, '*');
+          }, 500);
+          setTimeout(() => {
+            iframeRef.current?.contentWindow?.postMessage({ type: 'REQUEST_CONTENT_HEIGHT' }, '*');
+          }, 1500);
+        }}
         allow="camera;microphone;geolocation"
         sandbox="allow-same-origin allow-scripts allow-popups allow-forms allow-modals allow-top-navigation allow-downloads"
       />

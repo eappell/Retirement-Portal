@@ -14,6 +14,13 @@ vi.mock('firebase/firestore', () => ({
   getDocs: async () => ({ forEach: (cb: (d: any) => void) => {} }),
 }));
 
+// Mock Next.js Image to avoid width/height requirement in tests
+vi.mock('next/image', () => ({
+  default: ({ alt }) => {
+    return <img alt={alt} />
+  }
+}));
+
 import DashboardPage from '@/app/dashboard/page';
 
 describe('Dashboard theme styles', () => {

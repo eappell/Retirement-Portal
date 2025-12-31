@@ -153,7 +153,7 @@ export default function AppPageContent() {
       </div>
 
       {/* iFrame Container */}
-      <div className="flex-1 overflow-hidden flex justify-center">
+      <div className="flex-1 overflow-visible flex justify-center">
         <div className="w-full max-w-7xl">
           <IFrameWrapper
             appId={appId}
