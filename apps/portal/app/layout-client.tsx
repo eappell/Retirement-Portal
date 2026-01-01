@@ -5,6 +5,7 @@ import {ThemeProvider} from "@/lib/theme";
 import ToastProvider from "@/components/ToastProvider";
 
 import Footer from "@/components/Footer";
+import { ScrollToTopButton } from "@/components/ScrollToTopButton";
 
 export default function RootLayoutClient({children}: {children: React.ReactNode}) {
   return (
@@ -16,6 +17,7 @@ export default function RootLayoutClient({children}: {children: React.ReactNode}
               {children}
             </main>
             <Footer />
+            <ScrollToTopButton />
           </div>
         </ToastProvider>
       </AuthProvider>
