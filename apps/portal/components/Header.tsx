@@ -12,15 +12,10 @@ import logoSmBlack from "../public/images/RetireWise-Logo-sm-black-notag.png";
 import logoSmWhite from "../public/images/RetireWise-Logo-sm-white-notag.png";
 import logo80Black from "../public/images/RetireWise-Logo-80h-black-tag.png";
 import logo80White from "../public/images/RetireWise-Logo-80h-white-tag.png";
-import { AppSwitcher } from "./AppSwitcher";
 import { AppLauncher } from "./AppLauncher";
 import { SunIcon, MoonIcon } from "@heroicons/react/24/outline";
 
-interface HeaderProps {
-  showAppSwitcher?: boolean;
-}
-
-export function Header({ showAppSwitcher = false }: HeaderProps) {
+export function Header() {
   const router = useRouter();
   const { user, logout } = useAuth();
   const { tier, loading: tierLoading } = useUserTier();
@@ -144,10 +139,8 @@ export function Header({ showAppSwitcher = false }: HeaderProps) {
             />
           </Link>
 
-          {/* Centered App Switcher - only shown when an app is loaded */}
-          <div className="flex-1 flex justify-center">
-            {showAppSwitcher && <AppSwitcher />}
-          </div>
+          {/* Spacer */}
+          <div className="flex-1" />
 
           {/* Right Side Navigation */}
           <nav className="hidden md:flex items-center gap-4">

@@ -115,7 +115,7 @@ export default function AppPageContent() {
   if (!appId || !APP_REGISTRY[appId]) {
     return (
       <div className="min-h-screen bg-gray-50">
-        <Header showAppSwitcher />
+        <Header />
         <div className="max-w-7xl mx-auto px-4 py-12 sm:px-6 lg:px-8">
           <div className="text-center">
             <p className="text-red-600 font-semibold mb-4">Application not found</p>
@@ -135,7 +135,7 @@ export default function AppPageContent() {
 
   return (
     <div className="flex flex-col h-screen bg-gray-50">
-      <Header showAppSwitcher />
+      <Header />
 
       {/* App Info Bar */}
       <div className="bg-white border-b border-gray-200">
