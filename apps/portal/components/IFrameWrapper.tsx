@@ -122,6 +122,29 @@ export function IFrameWrapper({
     };
   }, [appId]);
 
+  // Enforce max-height on iframe to enable internal scrolling and sticky navbars
+  // This runs periodically to counteract any dynamic height adjustments
+  useEffect(() => {
+    const enforceMaxHeight = () => {
+      if (!iframeRef.current) return;
+      const headerHeight = parseInt(getComputedStyle(document.documentElement).getPropertyValue('--portal-header-height') || '100', 10);
+      const viewportMaxHeight = window.innerHeight - headerHeight - 130;
+      iframeRef.current.style.setProperty('max-height', `${viewportMaxHeight}px`, 'important');
+    };
+
+    // Enforce immediately and on resize
+    enforceMaxHeight();
+    window.addEventListener('resize', enforceMaxHeight);
+
+    // Also enforce periodically to catch dynamic updates
+    const interval = setInterval(enforceMaxHeight, 500);
+
+    return () => {
+      window.removeEventListener('resize', enforceMaxHeight);
+      clearInterval(interval);
+    };
+  }, []);
+
   // Load persisted value for this app
   useEffect(() => {
     try {
@@ -507,34 +530,40 @@ export function IFrameWrapper({
             console.log('[IFrameWrapper] Ancestor diagnostics:', diagnostics);
           } catch (e) {}
 
-          // Apply with priority
+          // Apply with priority - but cap to viewport height to enable internal scrolling for sticky navbars
           try {
-            iframeRef.current!.style.setProperty('height', `${finalApplied}px`, 'important');
-            iframeRef.current!.style.minHeight = `${finalApplied}px`;
-            iframeRef.current!.style.overflow = 'hidden';
+            // Calculate max height based on viewport
+            const headerHeight = parseInt(getComputedStyle(document.documentElement).getPropertyValue('--portal-header-height') || '100', 10);
+            const viewportMaxHeight = window.innerHeight - headerHeight - 130;
+            
+            // Don't let iframe grow beyond viewport - this enables internal scrolling and sticky navbars
+            const cappedHeight = Math.min(finalApplied, viewportMaxHeight);
+            
+            iframeRef.current!.style.setProperty('height', `${cappedHeight}px`, 'important');
+            iframeRef.current!.style.minHeight = `${cappedHeight}px`;
+            iframeRef.current!.style.setProperty('max-height', `${viewportMaxHeight}px`, 'important');
             iframeRef.current!.style.display = 'block';
             iframeRef.current!.classList.remove('flex-1');
             iframeRef.current!.classList.add('flex-none');
-            try { iframeRef.current!.setAttribute('scrolling', 'no'); } catch (e) {}
 
             // Defensive: ensure no ancestor is clipping the iframe; use helper to relax if needed
             try {
-              relaxAncestorsIfClipping(finalApplied);
+              relaxAncestorsIfClipping(cappedHeight);
             } catch (e) {}
 
           } catch (e) {}
 
           stabilizer.active = true;
           stabilizer.attempts = 0;
-          stabilizer.applied = finalApplied;
-          currentAppliedRef.current = finalApplied;
-          baseAppliedRef.current = applied;
+          stabilizer.applied = cappedHeight;
+          currentAppliedRef.current = cappedHeight;
+          baseAppliedRef.current = cappedHeight;
 
-          // Inform iframe of the final applied height
-          iframeRef.current?.contentWindow?.postMessage({ type: 'IFRAME_HEIGHT_APPLIED', height: finalApplied }, '*');
+          // Inform iframe of the final applied height (send capped height so app knows scroll is enabled)
+          iframeRef.current?.contentWindow?.postMessage({ type: 'IFRAME_HEIGHT_APPLIED', height: cappedHeight }, '*');
           scheduleRequestContent(STABILIZE_BASE_DELAY);
 
-          console.log('[IFrameWrapper] Applied height to iframe (important):', finalApplied, 'buffer:', buffer, 'extraPadding:', extraPaddingRef.current);
+          console.log('[IFrameWrapper] Applied capped height to iframe:', cappedHeight, 'original:', finalApplied, 'viewportMax:', viewportMaxHeight);
         }
 
         if (event.data?.type === 'CONTENT_HEIGHT') {
@@ -1239,12 +1268,12 @@ export function IFrameWrapper({
         ref={iframeRef}
         src={appUrl}
         title={appName}
-        className="w-full border-0 block"
+        className="w-full border-0 block overflow-auto"
         style={{ 
-          height: 'calc(100vh - var(--portal-header-height, 100px) - 280px)', 
-          minHeight: 'calc(100vh - var(--portal-header-height, 100px) - 280px)' 
+          height: 'calc(100vh - var(--portal-header-height, 100px) - 130px)', 
+          minHeight: 'calc(100vh - var(--portal-header-height, 100px) - 130px)',
+          maxHeight: 'calc(100vh - var(--portal-header-height, 100px) - 130px)'
         }}
-        scrolling="no"
         onLoad={() => {
           console.log('[IFrameWrapper] iframe onLoad fired for:', appUrl);
           // Request height immediately on load
