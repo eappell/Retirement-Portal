@@ -531,14 +531,13 @@ export function IFrameWrapper({
           } catch (e) {}
 
           // Apply with priority - but cap to viewport height to enable internal scrolling for sticky navbars
+          // Calculate max height based on viewport (reuse headerHeight from above)
+          const viewportMaxHeight = window.innerHeight - headerHeight - 130;
+          
+          // Don't let iframe grow beyond viewport - this enables internal scrolling and sticky navbars
+          const cappedHeight = Math.min(finalApplied, viewportMaxHeight);
+          
           try {
-            // Calculate max height based on viewport
-            const headerHeight = parseInt(getComputedStyle(document.documentElement).getPropertyValue('--portal-header-height') || '100', 10);
-            const viewportMaxHeight = window.innerHeight - headerHeight - 130;
-            
-            // Don't let iframe grow beyond viewport - this enables internal scrolling and sticky navbars
-            const cappedHeight = Math.min(finalApplied, viewportMaxHeight);
-            
             iframeRef.current!.style.setProperty('height', `${cappedHeight}px`, 'important');
             iframeRef.current!.style.minHeight = `${cappedHeight}px`;
             iframeRef.current!.style.setProperty('max-height', `${viewportMaxHeight}px`, 'important');
