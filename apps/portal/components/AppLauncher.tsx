@@ -15,29 +15,26 @@ interface App {
   disabled?: boolean;
 }
 
-// Grid icon with 9 squares (3x3)
+// Grid icon with 9 colorful squares (3x3)
 function GridIcon({ className }: { className?: string }) {
   return (
     <svg 
       xmlns="http://www.w3.org/2000/svg" 
-      fill="none" 
       viewBox="0 0 24 24" 
-      strokeWidth={1.5} 
-      stroke="currentColor" 
       className={className}
     >
       {/* Row 1 */}
-      <rect x="3" y="3" width="4.5" height="4.5" rx="1" strokeLinecap="round" strokeLinejoin="round" />
-      <rect x="9.75" y="3" width="4.5" height="4.5" rx="1" strokeLinecap="round" strokeLinejoin="round" />
-      <rect x="16.5" y="3" width="4.5" height="4.5" rx="1" strokeLinecap="round" strokeLinejoin="round" />
+      <rect x="3" y="3" width="4.5" height="4.5" rx="1" fill="#EF4444" /> {/* Red */}
+      <rect x="9.75" y="3" width="4.5" height="4.5" rx="1" fill="#F59E0B" /> {/* Amber */}
+      <rect x="16.5" y="3" width="4.5" height="4.5" rx="1" fill="#10B981" /> {/* Emerald */}
       {/* Row 2 */}
-      <rect x="3" y="9.75" width="4.5" height="4.5" rx="1" strokeLinecap="round" strokeLinejoin="round" />
-      <rect x="9.75" y="9.75" width="4.5" height="4.5" rx="1" strokeLinecap="round" strokeLinejoin="round" />
-      <rect x="16.5" y="9.75" width="4.5" height="4.5" rx="1" strokeLinecap="round" strokeLinejoin="round" />
+      <rect x="3" y="9.75" width="4.5" height="4.5" rx="1" fill="#3B82F6" /> {/* Blue */}
+      <rect x="9.75" y="9.75" width="4.5" height="4.5" rx="1" fill="#8B5CF6" /> {/* Violet */}
+      <rect x="16.5" y="9.75" width="4.5" height="4.5" rx="1" fill="#EC4899" /> {/* Pink */}
       {/* Row 3 */}
-      <rect x="3" y="16.5" width="4.5" height="4.5" rx="1" strokeLinecap="round" strokeLinejoin="round" />
-      <rect x="9.75" y="16.5" width="4.5" height="4.5" rx="1" strokeLinecap="round" strokeLinejoin="round" />
-      <rect x="16.5" y="16.5" width="4.5" height="4.5" rx="1" strokeLinecap="round" strokeLinejoin="round" />
+      <rect x="3" y="16.5" width="4.5" height="4.5" rx="1" fill="#06B6D4" /> {/* Cyan */}
+      <rect x="9.75" y="16.5" width="4.5" height="4.5" rx="1" fill="#84CC16" /> {/* Lime */}
+      <rect x="16.5" y="16.5" width="4.5" height="4.5" rx="1" fill="#F97316" /> {/* Orange */}
     </svg>
   );
 }
@@ -167,22 +164,31 @@ export function AppLauncher() {
               </div>
             ) : (
               <div className="grid grid-cols-3 gap-2">
-                {apps.map((app) => (
-                  <button
-                    key={app.id}
-                    onClick={() => handleAppClick(app.id)}
-                    className={`flex flex-col items-center p-3 rounded-lg ${itemHover} transition-colors cursor-pointer`}
-                    role="menuitem"
-                    title={app.description || app.name}
-                  >
-                    <div className={`w-12 h-12 rounded-xl flex items-center justify-center mb-2 ${theme === 'light' ? 'bg-indigo-100' : 'bg-indigo-900/30'}`}>
-                      <AppIcon icon={app.icon} className={`h-6 w-6 ${theme === 'light' ? 'text-indigo-600' : 'text-indigo-400'}`} />
+                {apps.map((app, index) => {
+                  // First row (index < 3) shows tooltip below, rest show above
+                  const isTopRow = index < 3;
+                  return (
+                    <div key={app.id} className="relative group">
+                      <button
+                        onClick={() => handleAppClick(app.id)}
+                        className={`flex flex-col items-center p-3 rounded-lg ${itemHover} transition-colors cursor-pointer w-full`}
+                        role="menuitem"
+                      >
+                        <div className={`w-12 h-12 rounded-xl flex items-center justify-center mb-2 ${theme === 'light' ? 'bg-indigo-100' : 'bg-indigo-900/30'}`}>
+                          <AppIcon icon={app.icon} className={`h-6 w-6 ${theme === 'light' ? 'text-indigo-600' : 'text-indigo-400'}`} />
+                        </div>
+                        <span className={`text-xs text-center ${textPrimary} line-clamp-2 leading-tight`}>
+                          {app.name}
+                        </span>
+                      </button>
+                      {/* Tooltip - below for top row, above for others */}
+                      <div className={`absolute left-1/2 -translate-x-1/2 px-2 py-1 text-xs rounded shadow-lg opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none z-50 w-[90px] text-center ${isTopRow ? 'top-full mt-1' : 'bottom-full mb-1'} ${theme === 'light' ? 'bg-gray-900 text-white' : 'bg-white text-gray-900'}`}>
+                        {app.name}
+                        <div className={`absolute left-1/2 -translate-x-1/2 border-4 border-transparent ${isTopRow ? `bottom-full ${theme === 'light' ? 'border-b-gray-900' : 'border-b-white'}` : `top-full ${theme === 'light' ? 'border-t-gray-900' : 'border-t-white'}`}`}></div>
+                      </div>
                     </div>
-                    <span className={`text-xs text-center ${textPrimary} line-clamp-2 leading-tight`}>
-                      {app.name}
-                    </span>
-                  </button>
-                ))}
+                  );
+                })}
               </div>
             )}
           </div>
