@@ -245,9 +245,9 @@ export default function AppPage() {
     <div className="bg-gray-50">
       <Header />
 
-      {/* App Info Bar */}
+      {/* App Info Bar - sticky below header */}
       <div 
-        className="border-b"
+        className="border-b sticky top-16 z-10"
         style={{ 
           backgroundColor: theme === 'light' ? '#F9F8F6' : '#1e293b',
           borderColor: theme === 'light' ? '#e5e7eb' : '#334155'
