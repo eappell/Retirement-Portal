@@ -463,10 +463,11 @@ export function IFrameWrapper({
           if (!isFinite(h) || h <= 0) return;
           
           // Calculate minimum height to keep footer at viewport bottom
-          // Header is ~100px (var(--portal-header-height)), Footer is ~130px
+          // Header: ~100px, App Info Bar: ~50px, Footer: ~130px
           const headerHeight = parseInt(getComputedStyle(document.documentElement).getPropertyValue('--portal-header-height') || '100', 10);
+          const appInfoBarHeight = 50;
           const footerHeight = 130;
-          const viewportMin = Math.max(300, window.innerHeight - headerHeight - footerHeight);
+          const viewportMin = Math.max(300, window.innerHeight - headerHeight - appInfoBarHeight - footerHeight);
           
           const min = viewportMin;
           const max = 10000;
@@ -1239,7 +1240,10 @@ export function IFrameWrapper({
         src={appUrl}
         title={appName}
         className="w-full border-0 block"
-        style={{ height: 'calc(100vh - 200px)', minHeight: '600px' }}
+        style={{ 
+          height: 'calc(100vh - var(--portal-header-height, 100px) - 180px)', 
+          minHeight: 'calc(100vh - var(--portal-header-height, 100px) - 180px)' 
+        }}
         scrolling="no"
         onLoad={() => {
           console.log('[IFrameWrapper] iframe onLoad fired for:', appUrl);
