@@ -13,6 +13,7 @@ import logoSmWhite from "../public/images/RetireWise-Logo-sm-white-notag.png";
 import logo80Black from "../public/images/RetireWise-Logo-80h-black-tag.png";
 import logo80White from "../public/images/RetireWise-Logo-80h-white-tag.png";
 import { AppSwitcher } from "./AppSwitcher";
+import { AppLauncher } from "./AppLauncher";
 import { SunIcon, MoonIcon } from "@heroicons/react/24/outline";
 
 interface HeaderProps {
@@ -126,8 +127,13 @@ export function Header({ showAppSwitcher = false }: HeaderProps) {
     <header className={`${headerBgClass} fixed top-0 left-0 right-0 z-50 bg-opacity-100 backdrop-blur-none ${headerBorderClass} transition-all duration-300`} style={{ height: isScrolled ? COMPACT_HEIGHT : EXPANDED_HEIGHT }}>
       <div className={`max-w-[1400px] mx-auto px-4 sm:px-6 lg:px-8 transition-all duration-300 ${isScrolled ? 'py-2' : 'py-4'}`}>
         <div className="flex items-center">
+          {/* App Launcher Grid Icon */}
+          <div className="mr-2">
+            <AppLauncher />
+          </div>
+
           {/* Logo/Brand */}
-          <Link href="/dashboard" className="flex items-center gap-2 -ml-5 cursor-pointer">
+          <Link href="/dashboard" className="flex items-center gap-2 cursor-pointer">
             <Image
               src={logoSrc}
               alt="RetireWise"
