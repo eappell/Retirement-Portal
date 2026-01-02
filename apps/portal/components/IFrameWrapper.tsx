@@ -461,7 +461,14 @@ export function IFrameWrapper({
         if (event.data?.type === 'IFRAME_HEIGHT') {
           const h = Number(event.data.height || 0);
           if (!isFinite(h) || h <= 0) return;
-          const min = 300;
+          
+          // Calculate minimum height to keep footer at viewport bottom
+          // Header is ~100px (var(--portal-header-height)), Footer is ~130px
+          const headerHeight = parseInt(getComputedStyle(document.documentElement).getPropertyValue('--portal-header-height') || '100', 10);
+          const footerHeight = 130;
+          const viewportMin = Math.max(300, window.innerHeight - headerHeight - footerHeight);
+          
+          const min = viewportMin;
           const max = 10000;
           const clamped = Math.max(min, Math.min(max, Math.round(h)));
 

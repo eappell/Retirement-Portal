@@ -12,8 +12,8 @@ export default function RootLayoutClient({children}: {children: React.ReactNode}
     <ThemeProvider>
       <AuthProvider>
         <ToastProvider>
-          <div className="min-h-screen">
-            <main style={{ paddingTop: 'var(--portal-header-height, 100px)' }}>
+          <div className="min-h-screen flex flex-col">
+            <main className="flex-1" style={{ paddingTop: 'var(--portal-header-height, 100px)' }}>
               {children}
             </main>
             <Footer />
