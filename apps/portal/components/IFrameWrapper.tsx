@@ -1065,7 +1065,10 @@ export function IFrameWrapper({
       
       // Handle scroll-to-top request from embedded app
       if (event.data?.type === 'SCROLL_TO_TOP') {
+        // Use multiple methods to ensure scroll works
         window.scrollTo({ top: 0, behavior: 'smooth' });
+        document.documentElement.scrollTop = 0;
+        document.body.scrollTop = 0;
         return;
       }
 
