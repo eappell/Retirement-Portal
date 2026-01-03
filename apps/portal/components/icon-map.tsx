@@ -25,6 +25,7 @@ import {
   ChartBarSquareIcon,
   DocumentChartBarIcon,
   PresentationChartBarIcon,
+  HomeIcon,
 } from "@heroicons/react/24/outline";
 
 export const ICON_MAP: Record<string, React.ComponentType<{ className?: string }>> = {
@@ -33,6 +34,7 @@ export const ICON_MAP: Record<string, React.ComponentType<{ className?: string }
 
   CurrencyDollar: CurrencyDollarIcon,
   CurrencyDollarIcon: CurrencyDollarIcon,
+  "Currency Dollar": CurrencyDollarIcon,
 
   Globe: GlobeAltIcon,
   GlobeAltIcon: GlobeAltIcon,
@@ -50,10 +52,12 @@ export const ICON_MAP: Record<string, React.ComponentType<{ className?: string }
   Bell: BellIcon,
   BellIcon: BellIcon,
   "Chart Pie": ChartPieIcon,
+  ChartPie: ChartPieIcon,
   ChartPieIcon: ChartPieIcon,
   Chart: ChartBarIcon,
   ChartBar: ChartBarIcon,
   ChartBarIcon: ChartBarIcon,
+  "Chart Bar": ChartBarIcon,
   ChartBarSquare: ChartBarSquareIcon,
   ChartBarSquareIcon: ChartBarSquareIcon,
   DocumentChartBar: DocumentChartBarIcon,
@@ -67,11 +71,13 @@ export const ICON_MAP: Record<string, React.ComponentType<{ className?: string }
   RocketLaunchIcon: RocketLaunchIcon,
   CreditCard: CreditCardIcon,
   CreditCardIcon: CreditCardIcon,
+  "Credit Card": CreditCardIcon,
   Shopping: ShoppingCartIcon,
   ShoppingCart: ShoppingCartIcon,
   ShoppingCartIcon: ShoppingCartIcon,
   UserGroup: UserGroupIcon,
   UserGroupIcon: UserGroupIcon,
+  "User Group": UserGroupIcon,
   Document: DocumentTextIcon,
   DocumentTextIcon: DocumentTextIcon,
   Chat: ChatBubbleLeftIcon,
@@ -90,6 +96,8 @@ export const ICON_MAP: Record<string, React.ComponentType<{ className?: string }
   CodeBracketIcon: CodeBracketIcon,
   Cog: Cog6ToothIcon,
   Cog6ToothIcon: Cog6ToothIcon,
+  Home: HomeIcon,
+  HomeIcon: HomeIcon,
 };
 
 function toPascalCase(s: string) {
