@@ -70,11 +70,14 @@ export function ScrollToTopButton() {
   return (
     <button
       onClick={scrollToTop}
-      className="fixed bottom-6 right-6 z-[9999] p-3 bg-brand-primary text-white rounded-full shadow-lg hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-brand-primary transition-all duration-300 print:hidden"
+      className="fixed bottom-6 right-6 z-[9999] p-3 text-white rounded-full shadow-lg focus:outline-none focus:ring-2 focus:ring-offset-2 transition-all duration-300 print:hidden hover:scale-110"
       aria-label="Scroll to top"
       title="Return to top"
+      style={{ backgroundColor: '#4f46e5', boxShadow: '0 6px 18px rgba(79,70,229,0.18)' }}
     >
-      <ArrowUpIcon className="w-6 h-6" />
+      <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 15l7-7 7 7" />
+      </svg>
     </button>
   )
 }
