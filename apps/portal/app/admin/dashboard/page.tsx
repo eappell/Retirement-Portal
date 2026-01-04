@@ -478,24 +478,9 @@ export default function AdminDashboard() {
   };
 
   if (!mounted || tierLoading || loading) {
-    // Render spinner plus a small debug panel to diagnose stuck loading in dev
     return (
       <div className="flex min-h-screen items-center justify-center">
-        <div className="flex flex-col items-center gap-6">
-          <div className="animate-spin rounded-full h-12 w-12 border-b-2" style={{borderColor: '#0B5394'}}></div>
-          <div className="bg-white dark:bg-slate-800 rounded-md p-3 shadow text-sm text-gray-700 dark:text-gray-200">
-            <div><strong>Debug</strong></div>
-            <div>mounted: {String(mounted)}</div>
-            <div>user: {user ? (user.uid || user.email || 'present') : 'null'}</div>
-            <div>tier: {String(tier)}</div>
-            <div>tierLoading: {String(tierLoading)}</div>
-            <div>loading: {String(loading)}</div>
-            <div className="mt-2 flex gap-2">
-              <button onClick={() => { fetchAdminData(); }} className="px-3 py-1 bg-blue-600 text-white rounded">Retry Fetch</button>
-              <button onClick={() => { setLoading(false); }} className="px-3 py-1 bg-gray-200 rounded">Force Continue</button>
-            </div>
-          </div>
-        </div>
+        <div className="animate-spin rounded-full h-12 w-12 border-b-2" style={{borderColor: '#0B5394'}}></div>
       </div>
     );
   }
