@@ -83,18 +83,19 @@ export function AppLauncher() {
 
   // Close menu when clicking outside
   useEffect(() => {
-    const handleClickOutside = (event: MouseEvent) => {
+    const handlePointerDown = (event: PointerEvent) => {
       if (menuRef.current && !menuRef.current.contains(event.target as Node)) {
         setIsOpen(false);
       }
     };
 
     if (isOpen) {
-      document.addEventListener("mousedown", handleClickOutside);
+      // use capture so we catch the event before other handlers stopPropagation
+      document.addEventListener("pointerdown", handlePointerDown, true);
     }
 
     return () => {
-      document.removeEventListener("mousedown", handleClickOutside);
+      document.removeEventListener("pointerdown", handlePointerDown, true);
     };
   }, [isOpen]);
 
@@ -182,9 +183,23 @@ export function AppLauncher() {
                         </span>
                       </button>
                       {/* Tooltip - below for top row, above for others */}
-                      <div className={`absolute left-1/2 -translate-x-1/2 px-2 py-1 text-xs rounded shadow-lg opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none z-50 w-[90px] text-center ${isTopRow ? 'top-full mt-1' : 'bottom-full mb-1'} ${theme === 'light' ? 'bg-gray-900 text-white' : 'bg-white text-gray-900'}`}>
+                      <div
+                        className={`absolute left-1/2 -translate-x-1/2 px-2 py-1 text-xs rounded shadow-lg opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none z-50 w-[90px] text-center ${isTopRow ? 'top-full mt-1' : 'bottom-full mb-1'}`}
+                        style={
+                          theme === 'light'
+                            ? { backgroundColor: '#111827', color: '#ffffff' }
+                            : { backgroundColor: '#ffffff', color: '#0b1220' }
+                        }
+                      >
                         {app.name}
-                        <div className={`absolute left-1/2 -translate-x-1/2 border-4 border-transparent ${isTopRow ? `bottom-full ${theme === 'light' ? 'border-b-gray-900' : 'border-b-white'}` : `top-full ${theme === 'light' ? 'border-t-gray-900' : 'border-t-white'}`}`}></div>
+                        <div
+                          className={`absolute left-1/2 -translate-x-1/2 border-4 border-transparent`}
+                          style={
+                            isTopRow
+                              ? (theme === 'light' ? { borderBottomColor: '#111827' } : { borderBottomColor: '#ffffff' })
+                              : (theme === 'light' ? { borderTopColor: '#111827' } : { borderTopColor: '#ffffff' })
+                          }
+                        />
                       </div>
                     </div>
                   );
