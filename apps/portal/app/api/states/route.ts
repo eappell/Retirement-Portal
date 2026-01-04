@@ -26,8 +26,8 @@ export async function GET() {
     // In some production environments filesystem access to repo-root may not be available.
     // Fall back to importing the JSON so it can be bundled with the app at build time.
     try {
-      // dynamic import relative to this file (may be bundled)
-      const mod = await import('../../../../../../api/data/states.json')
+      // dynamic import of bundled copy inside the portal app
+      const mod = await import('../data/states.json')
       const data = (mod && (mod.default || mod)) || mod
       return NextResponse.json(data)
     } catch (impErr) {

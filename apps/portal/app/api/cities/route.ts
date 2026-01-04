@@ -23,7 +23,8 @@ export async function GET() {
   } catch (err) {
     console.error('portal cities route GET fs error', err, 'DATA_PATH:', DATA_PATH)
     try {
-      const mod = await import('../../../../../../api/data/cities.json')
+      // dynamic import of bundled copy inside the portal app
+      const mod = await import('../data/cities.json')
       const data = (mod && (mod.default || mod)) || mod
       return NextResponse.json(data)
     } catch (impErr) {
