@@ -1,0 +1,43 @@
+{
+  "Colorado": [
+    {"name":"Denver","costOfLiving":110,"propertyTax":0.65,"medianHomeValue":520000},
+    {"name":"Colorado Springs","costOfLiving":95,"propertyTax":0.6,"medianHomeValue":380000},
+    {"name":"Aurora","costOfLiving":98,"propertyTax":0.62,"medianHomeValue":410000}
+  ],
+  "Texas": [
+    {"name":"Austin","costOfLiving":115,"propertyTax":1.8,"medianHomeValue":600000},
+    {"name":"San Antonio","costOfLiving":92,"propertyTax":1.7,"medianHomeValue":310000},
+    {"name":"Dallas","costOfLiving":100,"propertyTax":1.9,"medianHomeValue":350000},
+    {"name":"Houston","costOfLiving":98,"propertyTax":2.0,"medianHomeValue":290000},
+    {"name":"Fort Worth","costOfLiving":96,"propertyTax":1.95,"medianHomeValue":320000}
+  ],
+  "Arizona": [
+    {"name":"Phoenix","costOfLiving":99,"propertyTax":0.6,"medianHomeValue":360000},
+    {"name":"Tucson","costOfLiving":90,"propertyTax":0.58,"medianHomeValue":240000},
+    {"name":"Mesa","costOfLiving":95,"propertyTax":0.57,"medianHomeValue":300000}
+  ],
+  "Nevada": [
+    {"name":"Las Vegas","costOfLiving":103,"propertyTax":0.65,"medianHomeValue":330000},
+    {"name":"Henderson","costOfLiving":105,"propertyTax":0.66,"medianHomeValue":370000},
+    {"name":"Reno","costOfLiving":102,"propertyTax":0.64,"medianHomeValue":350000}
+  ],
+  "Washington": [
+    {"name":"Seattle","costOfLiving":160,"propertyTax":0.95,"medianHomeValue":760000},
+    {"name":"Spokane","costOfLiving":95,"propertyTax":1.05,"medianHomeValue":300000},
+    {"name":"Tacoma","costOfLiving":110,"propertyTax":1.0,"medianHomeValue":420000}
+  ],
+  "Florida": [
+    {"name":"Miami","costOfLiving":140,"propertyTax":0.95,"medianHomeValue":450000},
+    {"name":"Tampa","costOfLiving":105,"propertyTax":0.86,"medianHomeValue":320000},
+    {"name":"Orlando","costOfLiving":100,"propertyTax":0.88,"medianHomeValue":310000}
+  ],
+  "North Carolina": [
+    {"name":"Charlotte","costOfLiving":105,"propertyTax":0.85,"medianHomeValue":350000},
+    {"name":"Raleigh","costOfLiving":104,"propertyTax":0.82,"medianHomeValue":340000},
+    {"name":"Durham","costOfLiving":102,"propertyTax":0.8,"medianHomeValue":330000}
+  ],
+  "New York": [
+    {"name":"New York City","costOfLiving":180,"propertyTax":0.88,"medianHomeValue":680000},
+    {"name":"Buffalo","costOfLiving":85,"propertyTax":1.5,"medianHomeValue":150000}
+  ]
+}
