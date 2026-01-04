@@ -38,17 +38,26 @@ export function ScrollToTopButton() {
   }, [])
 
   const scrollToTop = () => {
-    window.scrollTo({
-      top: 0,
-      behavior: "smooth",
-    });
-    // Also try to tell any embedded iframe to scroll its own content to top
+    // Smooth-scroll the portal window
+    try {
+      window.scrollTo({ top: 0, behavior: 'smooth' })
+    } catch (e) {
+      try { document.documentElement.scrollTop = 0 } catch (e) {}
+    }
+
+    // Also smooth-scroll the main content area if present (portal layout)
+    try {
+      const main = document.querySelector('main') as HTMLElement | null
+      if (main) main.scrollTo?.({ top: 0, behavior: 'smooth' } as any)
+    } catch (e) {}
+
+    // Tell the embedded iframe to scroll smoothly as well
     try {
       const iframe = document.querySelector('iframe') as HTMLIFrameElement | null
       console.log('[ScrollToTopButton] clicking portal button; iframe found:', !!iframe)
       if (iframe && iframe.contentWindow) {
         console.log('[ScrollToTopButton] posting SCROLL_TO_TOP to iframe contentWindow', iframe.src)
-        iframe.contentWindow.postMessage({ type: 'SCROLL_TO_TOP', from: 'portal' }, '*')
+        iframe.contentWindow.postMessage({ type: 'SCROLL_TO_TOP', from: 'portal', smooth: true }, '*')
       } else {
         console.warn('[ScrollToTopButton] No iframe contentWindow available to postMessage')
       }
@@ -57,18 +66,15 @@ export function ScrollToTopButton() {
     }
   };
 
-  if (!isVisible && !iframeScrolled) {
-    return null;
-  }
-
+  if (!isVisible && !iframeScrolled) return null;
   return (
     <button
       onClick={scrollToTop}
-      className="fixed bottom-6 right-6 z-50 p-3 bg-indigo-600 hover:bg-indigo-700 text-white rounded-full shadow-lg transition-all duration-300 hover:scale-110 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
+      className="fixed bottom-6 right-6 z-[9999] p-3 bg-brand-primary text-white rounded-full shadow-lg hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-brand-primary transition-all duration-300 print:hidden"
       aria-label="Scroll to top"
       title="Return to top"
     >
       <ArrowUpIcon className="w-6 h-6" />
     </button>
-  );
+  )
 }
