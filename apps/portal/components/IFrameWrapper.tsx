@@ -764,6 +764,13 @@ export function IFrameWrapper({
         return;
       }
 
+      // Debug: log when iframe notifies scroll state
+      if (d?.type === 'IFRAME_SCROLL') {
+        try {
+          console.log('[IFrameWrapper] IFRAME_SCROLL from child, scrolled:', !!d.scrolled, 'source:', event.origin || 'unknown');
+        } catch (e) {}
+      }
+
       // Allow iframe to explicitly request current auth/token/role after it has attached listeners
       if (event.data?.type === "REQUEST_AUTH") {
         if (iframeRef.current) {

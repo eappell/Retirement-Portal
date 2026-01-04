@@ -25,6 +25,7 @@ export function ScrollToTopButton() {
     const handleMessage = (e: MessageEvent) => {
       try {
         if (e?.data?.type === 'IFRAME_SCROLL') {
+          console.log('[ScrollToTopButton] received IFRAME_SCROLL, scrolled:', !!e.data.scrolled, 'from', e.origin || 'unknown')
           setIframeScrolled(!!e.data.scrolled)
         }
       } catch (err) {
