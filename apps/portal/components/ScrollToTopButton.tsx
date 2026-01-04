@@ -10,7 +10,12 @@ export function ScrollToTopButton() {
   useEffect(() => {
     const toggleVisibility = () => {
       // Show button when scrolled down more than one viewport height
-      setIsVisible(window.scrollY > window.innerHeight);
+      const visible = window.scrollY > window.innerHeight
+      setIsVisible(visible)
+      // If we're at the very top of the portal, clear iframe-scrolled state so button hides
+      if (window.scrollY <= 1) {
+        setIframeScrolled(false)
+      }
     };
 
     // Check initial position
@@ -68,6 +73,13 @@ export function ScrollToTopButton() {
     } catch (e) {
       console.error('[ScrollToTopButton] Error posting SCROLL_TO_TOP to iframe', e)
     }
+    // Hide the button after the smooth scroll completes (so UI updates to top)
+    try {
+      setTimeout(() => {
+        setIsVisible(false)
+        setIframeScrolled(false)
+      }, 700)
+    } catch (e) {}
   };
 
   if (!isVisible && !iframeScrolled) return null;
