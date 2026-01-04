@@ -121,6 +121,11 @@ function saveDevSettings(settings: DevSettings) {
 export default function AdminAppsPage() {
   const router = useRouter();
   const { user } = useAuth();
+
+  useEffect(() => {
+    // redirect to admin dashboard where Manage Applications is now a tab
+    router.replace('/admin/dashboard');
+  }, [router]);
   const { tier, loading: tierLoading } = useUserTier();
   const [mounted, setMounted] = useState(false);
   const [apps, setApps] = useState<App[]>([]);
@@ -520,7 +525,7 @@ export default function AdminAppsPage() {
               </div>
             </div>
 
-            <div className="mb-6">
+            <div className="mb-6 flex flex-col sm:flex-row items-center gap-6">
               <label className="flex items-center gap-2">
                 <input
                   type="checkbox"
@@ -530,9 +535,7 @@ export default function AdminAppsPage() {
                 />
                 <span className="text-sm font-medium text-gray-700">Allow free tier users</span>
               </label>
-            </div>
 
-            <div className="mb-6">
               <label className="flex items-center gap-2">
                 <input
                   type="checkbox"
@@ -698,7 +701,7 @@ export default function AdminAppsPage() {
                     </div>
                   </div>
 
-                  <div className="mb-6">
+                  <div className="mb-6 flex flex-col sm:flex-row items-center gap-6">
                     <label className="flex items-center gap-2">
                       <input
                         type="checkbox"
@@ -708,9 +711,7 @@ export default function AdminAppsPage() {
                       />
                       <span className="text-sm font-medium text-gray-700">Allow free tier users</span>
                     </label>
-                  </div>
 
-                  <div className="mb-6">
                     <label className="flex items-center gap-2">
                       <input
                         type="checkbox"
