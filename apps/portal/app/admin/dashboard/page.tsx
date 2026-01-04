@@ -114,6 +114,7 @@ export default function AdminDashboard() {
   const { user } = useAuth();
   const { tier, loading: tierLoading } = useUserTier();
   const { theme } = useTheme();
+  const forcedTextColor = theme === 'dark' ? '#F9F8F6' : '#2A354A';
   const [mounted, setMounted] = useState(false);
   const [loading, setLoading] = useState(true);
   const [exportLoading, setExportLoading] = useState(false);
@@ -477,9 +478,24 @@ export default function AdminDashboard() {
   };
 
   if (!mounted || tierLoading || loading) {
+    // Render spinner plus a small debug panel to diagnose stuck loading in dev
     return (
       <div className="flex min-h-screen items-center justify-center">
-        <div className="animate-spin rounded-full h-12 w-12 border-b-2" style={{borderColor: '#0B5394'}}></div>
+        <div className="flex flex-col items-center gap-6">
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2" style={{borderColor: '#0B5394'}}></div>
+          <div className="bg-white dark:bg-slate-800 rounded-md p-3 shadow text-sm text-gray-700 dark:text-gray-200">
+            <div><strong>Debug</strong></div>
+            <div>mounted: {String(mounted)}</div>
+            <div>user: {user ? (user.uid || user.email || 'present') : 'null'}</div>
+            <div>tier: {String(tier)}</div>
+            <div>tierLoading: {String(tierLoading)}</div>
+            <div>loading: {String(loading)}</div>
+            <div className="mt-2 flex gap-2">
+              <button onClick={() => { fetchAdminData(); }} className="px-3 py-1 bg-blue-600 text-white rounded">Retry Fetch</button>
+              <button onClick={() => { setLoading(false); }} className="px-3 py-1 bg-gray-200 rounded">Force Continue</button>
+            </div>
+          </div>
+        </div>
       </div>
     );
   }
@@ -489,13 +505,30 @@ export default function AdminDashboard() {
   }
 
   return (
-    <div className="min-h-screen bg-background">
+    <div className="min-h-screen bg-background admin-dashboard">
+      <style jsx>{`
+        .admin-dashboard :where(*) {
+          color: ${forcedTextColor} !important;
+        }
+        .admin-dashboard a {
+          color: #0B5394 !important;
+        }
+        .admin-dashboard .force-light-text {
+          color: #ffffff !important;
+        }
+        .admin-dashboard .force-light-text svg {
+          color: inherit !important;
+        }
+        .admin-dashboard .force-dark-text {
+          color: ${theme === 'dark' ? '#111827' : 'inherit'} !important;
+        }
+      `}</style>
       <Header />
 
-      <main className="max-w-7xl mx-auto px-4 py-12 sm:px-6 lg:px-8">
+      <main className={`max-w-7xl mx-auto px-4 py-12 sm:px-6 lg:px-8 ${theme === 'dark' ? 'text-gray-100' : 'text-gray-900'}`}>
         <div className="mb-8">
-          <h1 className="text-3xl font-bold admin-heading">Admin Dashboard</h1>
-          <p className="mt-2 admin-subheading">System analytics and user management</p>
+          <h1 className={`text-3xl font-bold ${theme === 'dark' ? 'text-gray-100' : 'text-gray-900'}`}>Admin Dashboard</h1>
+          <p className={`mt-2 ${theme === 'dark' ? 'text-gray-300' : 'text-gray-600'}`}>System analytics and user management</p>
         </div>
 
         {/* Users Modal */}
@@ -680,7 +713,7 @@ export default function AdminDashboard() {
           <button
             onClick={() => { if (!exportLoading) handleExportUsers(); }}
             disabled={exportLoading}
-            className={`inline-flex items-center justify-center gap-2 text-white font-semibold py-3 px-6 rounded-lg transition-colors cursor-pointer ${exportLoading ? 'opacity-70 cursor-not-allowed' : ''}`}
+            className={`inline-flex items-center justify-center gap-2 force-light-text text-white font-semibold py-3 px-6 rounded-lg transition-colors cursor-pointer ${exportLoading ? 'opacity-70 cursor-not-allowed' : ''}`}
             style={{ backgroundColor: '#0B5394' }}
             onMouseEnter={(e) => { if (!exportLoading) e.currentTarget.style.backgroundColor = '#094170'; }}
             onMouseLeave={(e) => { if (!exportLoading) e.currentTarget.style.backgroundColor = '#0B5394'; }}
@@ -690,7 +723,7 @@ export default function AdminDashboard() {
           </button>
 
           <button
-            className="inline-flex items-center justify-center gap-2 text-white font-semibold py-3 px-6 rounded-lg transition-colors cursor-pointer"
+            className="inline-flex items-center justify-center gap-2 force-light-text text-white font-semibold py-3 px-6 rounded-lg transition-colors cursor-pointer"
             style={{ backgroundColor: '#0B5394' }}
             onMouseEnter={(e) => e.currentTarget.style.backgroundColor = '#094170'}
             onMouseLeave={(e) => e.currentTarget.style.backgroundColor = '#0B5394'}
@@ -742,7 +775,7 @@ export default function AdminDashboard() {
           <>
             {/* Key Metrics */}
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
-              <div className="bg-white dark:bg-slate-800 rounded-lg shadow-lg p-6">
+              <div className={`${theme === 'dark' ? 'bg-slate-800 text-gray-100' : 'bg-white text-gray-900'} rounded-lg shadow-lg p-6`}>
                 <h3 className="text-gray-600 dark:text-gray-300 text-sm font-semibold uppercase">Total Users</h3>
                 <p className="text-3xl font-bold mt-2" style={{color: '#0B5394'}}>{stats.totalUsers}</p>
                 <p className="text-xs text-gray-500 dark:text-gray-400 mt-2">
@@ -750,7 +783,7 @@ export default function AdminDashboard() {
                 </p>
               </div>
 
-              <div className="bg-white dark:bg-slate-800 rounded-lg shadow-lg p-6">
+              <div className={`${theme === 'dark' ? 'bg-slate-800 text-gray-100' : 'bg-white text-gray-900'} rounded-lg shadow-lg p-6`}>
                 <h3 className="text-gray-600 dark:text-gray-300 text-sm font-semibold uppercase">Active Users</h3>
                 <p className="text-3xl font-bold mt-2" style={{color: '#0B5394'}}>{analytics.monthlyActiveUsers}</p>
                 <p className="text-xs text-gray-500 dark:text-gray-400 mt-2">
@@ -758,7 +791,7 @@ export default function AdminDashboard() {
                 </p>
               </div>
 
-              <div className="bg-white dark:bg-slate-800 rounded-lg shadow-lg p-6">
+              <div className={`${theme === 'dark' ? 'bg-slate-800 text-gray-100' : 'bg-white text-gray-900'} rounded-lg shadow-lg p-6`}>
                 <h3 className="text-gray-600 dark:text-gray-300 text-sm font-semibold uppercase">Total Queries</h3>
                 <p className="text-3xl font-bold mt-2" style={{color: '#0B5394'}}>{stats.totalQueries}</p>
                 <p className="text-xs text-gray-500 dark:text-gray-400 mt-2">
@@ -766,7 +799,7 @@ export default function AdminDashboard() {
                 </p>
               </div>
 
-              <div className="bg-white dark:bg-slate-800 rounded-lg shadow-lg p-6">
+              <div className={`${theme === 'dark' ? 'bg-slate-800 text-gray-100' : 'bg-white text-gray-900'} rounded-lg shadow-lg p-6`}>
                 <h3 className="text-gray-600 dark:text-gray-300 text-sm font-semibold uppercase">Total Events</h3>
                 <p className="text-3xl font-bold text-orange-600 mt-2">{stats.totalEvents}</p>
                 <p className="text-xs text-gray-500 dark:text-gray-400 mt-2">Tracked analytics events</p>
@@ -776,8 +809,8 @@ export default function AdminDashboard() {
             {/* Charts Section */}
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 mb-8">
               {/* User Tier Distribution */}
-              <div className="bg-white dark:bg-slate-800 rounded-lg shadow-lg p-8">
-                <h2 className="text-xl font-bold text-gray-900 dark:text-gray-100 mb-6">User Distribution by Tier</h2>
+              <div className={`${theme === 'dark' ? 'bg-slate-800 text-gray-100' : 'bg-white text-gray-900'} rounded-lg shadow-lg p-8`}>
+                <h2 className={`text-xl font-bold mb-6 ${theme === 'dark' ? 'text-gray-100' : 'text-gray-900'}`}>User Distribution by Tier</h2>
                 <div className="space-y-4">
                   <div>
                     <div className="flex justify-between mb-2">
@@ -835,8 +868,8 @@ export default function AdminDashboard() {
               </div>
 
               {/* Top Applications */}
-              <div className="bg-white dark:bg-slate-800 rounded-lg shadow-lg p-8">
-                <h2 className="text-xl font-bold text-gray-900 dark:text-gray-100 mb-6">Most Used Applications</h2>
+              <div className={`${theme === 'dark' ? 'bg-slate-800 text-gray-100' : 'bg-white text-gray-900'} rounded-lg shadow-lg p-8`}>
+                <h2 className={`text-xl font-bold mb-6 ${theme === 'dark' ? 'text-gray-100' : 'text-gray-900'}`}>Most Used Applications</h2>
                 <div className="space-y-3">
                   {analytics.topApps.length > 0 ? (
                     analytics.topApps.map((app, index) => (
@@ -857,8 +890,8 @@ export default function AdminDashboard() {
             </div>
 
             {/* Activity Summary */}
-            <div className={`rounded-lg shadow-lg p-8 mb-8 ${theme === 'dark' ? 'bg-slate-800' : 'bg-white'}`}>
-              <h2 className={`text-xl font-bold mb-6 ${theme === 'dark' ? 'text-gray-100' : 'text-gray-900'}`}>Event Activity</h2>
+            <div className={`${theme === 'dark' ? 'bg-slate-800 text-gray-100' : 'bg-white text-gray-900'} rounded-lg shadow-lg p-8 mb-8`}>
+              <h2 className="text-xl font-bold mb-6">Event Activity</h2>
               <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
                 {analytics.recentEvents.map((event, index) => (
                   <div
@@ -877,15 +910,15 @@ export default function AdminDashboard() {
 
         {/* Users Tab Content */}
         {currentTab === 'users' && (
-          <div className="bg-white dark:bg-slate-800 rounded-lg shadow-lg p-6 mb-8">
+          <div className={`${theme === 'dark' ? 'bg-slate-800 text-gray-100' : 'bg-white text-gray-900'} rounded-lg shadow-lg p-6 mb-8`}>
             <div className="flex items-center justify-between mb-4">
               <div>
-                <h2 className="text-xl font-bold text-gray-900 dark:text-gray-100">Manage Users</h2>
-                <p className="text-sm text-gray-500 dark:text-gray-400">Create, edit, and set tiers for users</p>
+                <h2 className={`text-xl font-bold ${theme === 'dark' ? 'text-gray-100' : 'text-gray-900'}`}>Manage Users</h2>
+                <p className={`text-sm ${theme === 'dark' ? 'text-gray-300' : 'text-gray-600'}`}>Create, edit, and set tiers for users</p>
               </div>
               <div className="flex items-center gap-2">
-                <button onClick={() => setShowCreateModal(true)} className="px-4 py-2 bg-blue-600 text-white rounded">Create User</button>
-                <button onClick={() => loadUsers()} className="px-4 py-2 bg-gray-200 dark:bg-slate-700 dark:text-white rounded">Refresh</button>
+                <button onClick={() => setShowCreateModal(true)} className="px-4 py-2 bg-blue-600 text-white force-light-text rounded">Create User</button>
+                <button onClick={() => loadUsers()} className={`px-4 py-2 rounded ${theme === 'dark' ? 'bg-slate-700 text-white' : 'bg-gray-200 text-gray-800'}`}>Refresh</button>
               </div>
             </div>
 
@@ -936,7 +969,7 @@ export default function AdminDashboard() {
                             <div className="flex items-center gap-2">
                               <button
                                 onClick={() => setSelectedUser(u)}
-                                className="px-3 py-1 bg-gray-100 dark:bg-slate-700 rounded"
+                                className="px-3 py-1 bg-gray-100 dark:bg-slate-700 force-light-text rounded"
                               >
                                 Details
                               </button>
@@ -953,7 +986,7 @@ export default function AdminDashboard() {
                                     toast.showToast('Failed to delete user. See console.', 'error');
                                   }
                                 }}
-                                className="px-3 py-1 bg-red-100 text-red-700 rounded"
+                                className="px-3 py-1 bg-red-100 text-red-700 force-dark-text rounded"
                               >
                                 Delete
                               </button>
@@ -971,14 +1004,14 @@ export default function AdminDashboard() {
 
         {/* Apps Tab Content */}
         {currentTab === 'apps' && (
-          <div className="bg-white dark:bg-slate-800 rounded-lg shadow-lg p-6 mb-8">
+          <div className={`${theme === 'dark' ? 'bg-slate-800 text-gray-100' : 'bg-white text-gray-900'} rounded-lg shadow-lg p-6 mb-8`}>
             <div className="flex items-center justify-between mb-4">
               <div>
-                <h2 className="text-xl font-bold text-gray-900 dark:text-gray-100">Manage Applications</h2>
-                <p className="text-sm text-gray-500 dark:text-gray-400">Create and manage applications</p>
+                <h2 className={`text-xl font-bold ${theme === 'dark' ? 'text-gray-100' : 'text-gray-900'}`}>Manage Applications</h2>
+                <p className={`text-sm ${theme === 'dark' ? 'text-gray-300' : 'text-gray-600'}`}>Create and manage applications</p>
               </div>
               <div className="flex items-center gap-2">
-                <button onClick={() => loadApps()} className="px-4 py-2 bg-gray-200 dark:bg-slate-700 dark:text-white rounded">Refresh</button>
+                <button onClick={() => loadApps()} className={`px-4 py-2 rounded ${theme === 'dark' ? 'bg-slate-700 text-white' : 'bg-gray-200 text-gray-800'}`}>Refresh</button>
               </div>
             </div>
 
@@ -986,7 +1019,7 @@ export default function AdminDashboard() {
               <div className="flex items-center justify-between mb-2">
                 <h3 className="text-lg font-semibold">Applications ({appsList.length})</h3>
                 <div>
-                  <button onClick={() => setShowNewAppForm(prev => !prev)} className="px-3 py-1 bg-blue-600 text-white rounded">{showNewAppForm ? 'Cancel' : 'Create New App'}</button>
+                  <button onClick={() => setShowNewAppForm(prev => !prev)} className="px-3 py-1 bg-blue-600 text-white force-light-text rounded">{showNewAppForm ? 'Cancel' : 'Create New App'}</button>
                 </div>
               </div>
 
@@ -1122,22 +1155,20 @@ export default function AdminDashboard() {
                                 </h3>
                                 <p className="text-sm text-gray-600 dark:text-gray-300 mt-1">{app.description || 'No description'}</p>
                                 <p className="text-xs text-gray-500 mt-2">URL: <a href={app.url} target="_blank" rel="noreferrer" className="underline">{app.url}</a></p>
-                                {app.badge && <p className="text-xs inline-block mt-2 px-2 py-1 bg-slate-100 text-sm rounded" style={{color: '#6b5e62'}}>{app.badge}</p>}
+                                {app.badge && <p className="text-xs inline-block mt-2 px-2 py-1 bg-slate-100 text-sm rounded force-dark-text" style={{color: '#6b5e62'}}>{app.badge}</p>}
                               </div>
 
                               <div className="flex items-center gap-2">
                                 <div className="flex flex-col items-end">
                                   <div className="flex items-center gap-2">
-                                    <button onClick={() => { setEditingAppFirestoreId(app.firestoreId || null); setEditingForm({ ...app }); }} className="px-3 py-1 bg-indigo-600 text-white rounded">Edit</button>
-                                    <button onClick={() => handleToggleAppDisabled(app)} className={`px-3 py-1 rounded ${app.disabled ? 'bg-red-600 text-white' : 'bg-green-600 text-white'}`}>
+                                    <button onClick={() => { setEditingAppFirestoreId(app.firestoreId || null); setEditingForm({ ...app }); }} className="px-3 py-1 bg-indigo-600 text-white force-light-text rounded">Edit</button>
+                                    <button onClick={() => handleToggleAppDisabled(app)} className={`px-3 py-1 rounded force-light-text ${app.disabled ? 'bg-red-600 text-white' : 'bg-green-600 text-white'}`}>
                                       {app.disabled ? 'Offline' : 'Online'}
                                     </button>
-                                    <button onClick={() => handleDeleteApp(app)} className="px-3 py-1 bg-red-100 text-red-700 rounded">Delete</button>
                                   </div>
-
                                   {app.freeAllowed && (
                                     <div className="mt-2">
-                                      <span className="inline-block px-2 py-1 bg-emerald-100 text-emerald-800 rounded text-sm font-medium">Free Allowed</span>
+                                      <span className="inline-block px-2 py-1 bg-emerald-100 text-emerald-800 force-dark-text rounded text-sm font-medium">Free Allowed</span>
                                     </div>
                                   )}
                                 </div>
