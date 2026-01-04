@@ -26,7 +26,11 @@ export function ScrollToTopButton() {
       try {
         if (e?.data?.type === 'IFRAME_SCROLL') {
           console.log('[ScrollToTopButton] received IFRAME_SCROLL, scrolled:', !!e.data.scrolled, 'from', e.origin || 'unknown')
-          setIframeScrolled(!!e.data.scrolled)
+          const userScrolled = !!e.data.userScrolled
+          const scrollable = !!e.data.scrolled
+          console.log('[ScrollToTopButton] received IFRAME_SCROLL, scrollable:', scrollable, 'userScrolled:', userScrolled, 'from', e.origin || 'unknown')
+          // Only consider the iframe as "scrolled" when the user has scrolled inside it
+          setIframeScrolled(userScrolled || scrollable)
         }
       } catch (err) {
         // ignore
