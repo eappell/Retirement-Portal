@@ -45,11 +45,15 @@ export function ScrollToTopButton() {
     // Also try to tell any embedded iframe to scroll its own content to top
     try {
       const iframe = document.querySelector('iframe') as HTMLIFrameElement | null
+      console.log('[ScrollToTopButton] clicking portal button; iframe found:', !!iframe)
       if (iframe && iframe.contentWindow) {
-        iframe.contentWindow.postMessage({ type: 'SCROLL_TO_TOP' }, '*')
+        console.log('[ScrollToTopButton] posting SCROLL_TO_TOP to iframe contentWindow', iframe.src)
+        iframe.contentWindow.postMessage({ type: 'SCROLL_TO_TOP', from: 'portal' }, '*')
+      } else {
+        console.warn('[ScrollToTopButton] No iframe contentWindow available to postMessage')
       }
     } catch (e) {
-      // ignore
+      console.error('[ScrollToTopButton] Error posting SCROLL_TO_TOP to iframe', e)
     }
   };
 
