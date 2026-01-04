@@ -21,8 +21,15 @@ export async function GET() {
     const raw = fs.readFileSync(DATA_PATH, 'utf8')
     return new NextResponse(raw, { status: 200, headers: { 'Content-Type': 'application/json' } })
   } catch (err) {
-    console.error('portal cities route GET error', err, 'DATA_PATH:', DATA_PATH)
-    return NextResponse.json({ error: 'Internal error' }, { status: 500 })
+    console.error('portal cities route GET fs error', err, 'DATA_PATH:', DATA_PATH)
+    try {
+      const mod = await import('../../../../../../api/data/cities.json')
+      const data = (mod && (mod.default || mod)) || mod
+      return NextResponse.json(data)
+    } catch (impErr) {
+      console.error('portal cities route GET import fallback failed', impErr)
+      return NextResponse.json({ error: 'Internal error' }, { status: 500 })
+    }
   }
 }
 
@@ -34,11 +41,16 @@ export async function POST(req: Request) {
 
   try {
     const body = await req.json()
-    fs.writeFileSync(DATA_PATH, JSON.stringify(body, null, 2), 'utf8')
-    return NextResponse.json({ ok: true })
+    try {
+      fs.writeFileSync(DATA_PATH, JSON.stringify(body, null, 2), 'utf8')
+      return NextResponse.json({ ok: true })
+    } catch (writeErr) {
+      console.error('portal cities route POST write failed', writeErr, 'DATA_PATH:', DATA_PATH)
+      return NextResponse.json({ error: 'Write not supported in this environment' }, { status: 501 })
+    }
   } catch (err) {
-    console.error('portal cities route POST error', err, 'DATA_PATH:', DATA_PATH)
-    return NextResponse.json({ error: 'Write failed' }, { status: 500 })
+    console.error('portal cities route POST parse error', err)
+    return NextResponse.json({ error: 'Bad request' }, { status: 400 })
   }
 }
 
