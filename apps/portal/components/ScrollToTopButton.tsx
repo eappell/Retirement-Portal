@@ -5,6 +5,7 @@ import { ArrowUpIcon } from "@heroicons/react/24/solid";
 
 export function ScrollToTopButton() {
   const [isVisible, setIsVisible] = useState(false);
+  const [iframeScrolled, setIframeScrolled] = useState(false);
 
   useEffect(() => {
     const toggleVisibility = () => {
@@ -19,14 +20,39 @@ export function ScrollToTopButton() {
     return () => window.removeEventListener("scroll", toggleVisibility);
   }, []);
 
+  // Listen for embedded iframe scroll messages so the portal button can appear
+  useEffect(() => {
+    const handleMessage = (e: MessageEvent) => {
+      try {
+        if (e?.data?.type === 'IFRAME_SCROLL') {
+          setIframeScrolled(!!e.data.scrolled)
+        }
+      } catch (err) {
+        // ignore
+      }
+    }
+
+    window.addEventListener('message', handleMessage)
+    return () => window.removeEventListener('message', handleMessage)
+  }, [])
+
   const scrollToTop = () => {
     window.scrollTo({
       top: 0,
       behavior: "smooth",
     });
+    // Also try to tell any embedded iframe to scroll its own content to top
+    try {
+      const iframe = document.querySelector('iframe') as HTMLIFrameElement | null
+      if (iframe && iframe.contentWindow) {
+        iframe.contentWindow.postMessage({ type: 'SCROLL_TO_TOP' }, '*')
+      }
+    } catch (e) {
+      // ignore
+    }
   };
 
-  if (!isVisible) {
+  if (!isVisible && !iframeScrolled) {
     return null;
   }
 
