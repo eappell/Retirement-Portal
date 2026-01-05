@@ -319,17 +319,30 @@ html.light .dashboard-redesign .background-particles .particle-light,
   66% { transform: translate(-30px, 30px) scale(0.9); opacity: 0.4; }
 }
 
+/* Admin dashboard specific overrides to ensure headings and header text are always visible
+   This counteracts global gradient text clipping and other rules that may make text transparent. */
+.admin-dashboard .admin-heading,
+.admin-dashboard h1,
+.admin-dashboard .dashboard-title,
+.admin-dashboard header,
+.admin-dashboard header * {
+  -webkit-text-fill-color: inherit !important;
+  -webkit-background-clip: initial !important;
+  background-clip: initial !important;
+  color: inherit !important;
+  opacity: 1 !important;
+  visibility: visible !important;
+}
+
 /* Dashboard title gradient - darker for light mode, lighter for dark mode */
 .dashboard-title {
   background: linear-gradient(135deg, #2563eb 0%, #1d4ed8 50%, #1e40af 100%);
   -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
   background-clip: text;
 }
 .dark .dashboard-title {
   background: linear-gradient(135deg, #c4dfff 0%, #a9cffa 50%, #9ccaff 100%);
   -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
   background-clip: text;
 }
 
@@ -659,7 +672,7 @@ button:disabled, button[disabled], input[disabled], [disabled], .disabled, .disa
 /* Reuse dashboard-float keyframes (defined earlier in the file) */
 .container{ max-width:1400px; margin:0 auto; padding:0 20px; position:relative; z-index:1; padding-top:40px; }
 .hero-section { margin-bottom:48px; text-align:center; }
-h1{ font-size:3rem; font-weight:800; margin-bottom:16px; background:var(--title-gradient); -webkit-background-clip:text; -webkit-text-fill-color:transparent; background-clip:text; letter-spacing:-0.02em }
+h1{ font-size:3rem; font-weight:800; margin-bottom:16px; background:var(--title-gradient); -webkit-background-clip:text; background-clip:text; letter-spacing:-0.02em }
 .subtitle{ font-size:1.25rem; color:var(--muted); font-weight:500 }
 .tools-grid{ display:grid; grid-template-columns: repeat(2, minmax(320px,1fr)); gap:32px; margin-bottom:48px }
 .tool-card{ background: var(--card-bg); -webkit-backdrop-filter: blur(10px); backdrop-filter: blur(10px); border:1px solid var(--card-border); border-radius:24px; padding:28px; min-height:150px; position:relative; overflow:hidden; cursor:pointer; transition: transform .28s cubic-bezier(.4,0,.2,1), box-shadow .28s }
@@ -776,6 +789,7 @@ p.app-description {
   background: none !important;
   -webkit-background-clip: unset !important;
   -webkit-text-fill-color: #2A354A !important;
+  font-family: 'Segoe UI', -apple-system, 'system-ui', 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif !important;
   background-clip: unset !important;
 }
 
@@ -790,4 +804,68 @@ p.app-description {
 .dark .admin-subheading {
   color: #F9F8F6;
 }
+
+/* Final override: ensure admin H1 and dashboard headings are never rendered transparent.
+   This rule is intentionally appended last and uses !important to out-prioritize
+   any generated or vendor CSS that sets -webkit-text-fill-color: transparent. */
+.admin-dashboard h1,
+.admin-dashboard .admin-heading,
+.admin-dashboard .dashboard-title {
+    -webkit-text-fill-color: inherit !important;
+    -webkit-background-clip: initial !important;
+    background-clip: initial !important;
+    color: inherit !important;
+    opacity: 1 !important;
+    visibility: visible !important;
+}
+
+/* Ensure preference row text becomes light when hovered in dark mode */
+.dark .preference-row:hover .font-semibold,
+.dark .preference-row:focus-within .font-semibold {
+  color: #ffffff !important;
+}
+.dark .preference-row:hover .text-sm,
+.dark .preference-row:focus-within .text-sm {
+  color: #e6eefc !important;
+}
+
+/* -----------------------------
+   Header tooltip / helper text tweaks
+   Make the small helper/tooltips in the header compact hover-tooltips. These
+   are scoped to `header` so they won't affect other popovers/dropdowns. They
+   are small, non-intrusive, and won't interfere with the admin title visibility.
+   ----------------------------- */
+/* target the explicit header-tooltip class for safety */
+.header-tooltip,
+.text-right .header-tooltip,
+.group > .header-tooltip {
+  background: rgba(17,24,39,0.95) !important; /* dark translucent tooltip */
+  color: #ffffff !important;
+  box-shadow: 0 6px 20px rgba(2,6,23,0.4) !important;
+  padding: 6px 8px !important;
+  border-radius: 6px !important;
+  font-size: 12px !important;
+  line-height: 1 !important;
+  white-space: nowrap !important;
+  pointer-events: auto !important;
+  opacity: 0;
+  visibility: hidden;
+  transform: translateY(6px) !important;
+  transition: opacity .12s ease, transform .12s ease, visibility .12s ease;
+  z-index: 9999; /* keep above header content */
+}
+
+/* Show tooltip on hover of parent group */
+/* show when parent group is hovered */
+.group:hover > .header-tooltip,
+.text-right.group:hover > .header-tooltip {
+  opacity: 1;
+  visibility: visible;
+  transform: translateY(0) !important;
+}
+
+/* If you prefer these helpers never be visible, uncomment the rule below to
+   permanently hide them. Keep them commented by default for accessibility. */
+/* header .group > .absolute.top-full { display: none !important; } */
+
 

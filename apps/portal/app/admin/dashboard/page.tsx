@@ -490,7 +490,7 @@ export default function AdminDashboard() {
   }
 
   return (
-    <div className="min-h-screen bg-background admin-dashboard">
+    <div className={`min-h-screen admin-dashboard ${theme === 'dark' ? 'bg-[#0a1628]' : 'bg-[#f8f9fa]'}`}>
       <style jsx>{`
         .admin-dashboard :where(*) {
           color: ${forcedTextColor} !important;
@@ -512,7 +512,18 @@ export default function AdminDashboard() {
 
       <main className={`max-w-7xl mx-auto px-4 py-12 sm:px-6 lg:px-8 ${theme === 'dark' ? 'text-gray-100' : 'text-gray-900'}`}>
         <div className="mb-8">
-          <h1 className={`text-3xl font-bold ${theme === 'dark' ? 'text-gray-100' : 'text-gray-900'}`}>Admin Dashboard</h1>
+          <h1
+            className={`text-3xl font-bold admin-heading no-text-clip ${theme === 'dark' ? 'text-gray-100' : 'text-gray-900'}`}
+            style={{
+              color: forcedTextColor,
+              opacity: 1,
+              WebkitTextFillColor: forcedTextColor,
+              WebkitBackgroundClip: 'initial',
+              backgroundClip: 'initial',
+            }}
+          >
+            Admin Dashboard
+          </h1>
           <p className={`mt-2 ${theme === 'dark' ? 'text-gray-300' : 'text-gray-600'}`}>System analytics and user management</p>
         </div>
 

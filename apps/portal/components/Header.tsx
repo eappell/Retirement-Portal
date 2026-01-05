@@ -31,6 +31,7 @@ export function Header() {
   const linkText = theme === "light" ? "text-gray-700 hover:text-purple-600" : "text-slate-300 hover:text-purple-400";
   const borderColor = theme === "light" ? "border-gray-200" : "border-slate-700";
   const dropdownBg = theme === "light" ? "bg-[#F9F8F6]" : "bg-slate-800";
+  const headerBgColor = theme === "dark" ? "#1A2A40" : "#ffffff";
 
   // Shrinking header behavior: full height -> compact
   const [isScrolled, setIsScrolled] = useState(false);
@@ -119,7 +120,10 @@ export function Header() {
   };
 
   return (
-    <header className={`${headerBgClass} fixed top-0 left-0 right-0 z-50 bg-opacity-100 backdrop-blur-none ${headerBorderClass} transition-all duration-300`} style={{ height: isScrolled ? COMPACT_HEIGHT : EXPANDED_HEIGHT }}>
+    <header
+      className={`${headerBgClass} fixed top-0 left-0 right-0 bg-opacity-100 backdrop-blur-none ${headerBorderClass} transition-all duration-300`}
+      style={{ height: isScrolled ? COMPACT_HEIGHT : EXPANDED_HEIGHT, zIndex: 99999, backgroundColor: headerBgColor }}
+    >
       <div className={`max-w-[1400px] mx-auto px-4 sm:px-6 lg:px-8 transition-all duration-300 ${isScrolled ? 'py-2' : 'py-4'}`}>
         <div className="flex items-center">
           {/* App Launcher Grid Icon */}
@@ -178,7 +182,7 @@ export function Header() {
               ) : (
                 <MoonIcon className="h-5 w-5" />
               )}
-              <div className="absolute top-full left-1/2 transform -translate-x-1/2 mt-2 px-2 py-1 bg-gray-900 text-white text-xs rounded opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all whitespace-nowrap z-50 dark:bg-gray-700">
+              <div role="tooltip" aria-hidden="true" className="header-tooltip absolute top-full left-1/2 transform -translate-x-1/2 mt-2 px-2 py-1 bg-gray-900 text-white text-xs rounded opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all whitespace-nowrap z-50 dark:bg-gray-700">
                 {theme === "light" ? "Dark mode" : "Light mode"}
               </div>
             </button>
@@ -221,7 +225,7 @@ export function Header() {
                 <p className={`text-xs ${textSecondary}`}>
                   {tierLoading ? "Loading..." : getTierLabel()}
                 </p>
-                <div className="absolute top-full right-0 mt-2 px-3 py-2 bg-gray-900 text-white text-xs rounded opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all whitespace-nowrap z-50">
+                <div role="tooltip" aria-hidden="true" className="header-tooltip absolute top-full right-0 mt-2 px-3 py-2 bg-gray-900 text-white text-xs rounded opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all whitespace-nowrap z-50">
                   {user?.metadata?.creationTime
                     ? `Member since ${new Date(user.metadata.creationTime).toLocaleDateString()}`
                     : "Account information"}
