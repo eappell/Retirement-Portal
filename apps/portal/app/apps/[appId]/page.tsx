@@ -247,8 +247,9 @@ export default function AppPage() {
 
       {/* App Info Bar - sticky below header */}
       <div 
-        className="border-b sticky top-16 z-10"
+        className="border-b sticky z-10 transition-top duration-300"
         style={{ 
+          top: 'var(--portal-header-height, 4rem)',
           backgroundColor: theme === 'light' ? '#F9F8F6' : '#1e293b',
           borderColor: theme === 'light' ? '#e5e7eb' : '#334155'
         }}
