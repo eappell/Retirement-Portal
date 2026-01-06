@@ -109,9 +109,9 @@ export default function AppPage() {
   // Listen for app metadata from iframe
   useEffect(() => {
     const handleMessage = (event: MessageEvent) => {
-      console.log("Portal received message:", event.data);
+      console.debug("Portal received message:", event.data);
       if (event.data?.type === "APP_METADATA") {
-        console.log("Setting app title and description:", event.data.title, event.data.description);
+        console.debug("Setting app title and description:", event.data.title, event.data.description);
         setAppTitle(event.data.title || "");
         setAppDescription(event.data.description || "");
       }
@@ -258,6 +258,7 @@ export default function AppPage() {
           <div className="flex items-center gap-4 flex-1">
             {/* App Icon */}
             <AppIcon icon={appConfig.icon} className={`h-8 w-8 ${theme === 'light' ? 'text-gray-700' : 'text-gray-300'}`} />
+            
             {/* App Name and Description */}
             <div className="flex-1">
               <h2 className={`text-lg font-semibold ${theme === 'light' ? 'text-gray-900' : 'text-white'}`}>

@@ -52,7 +52,55 @@ export function IFrameWrapper({
     'REQUEST_APP_STATE', 'APP_STATE_UPDATE', 'APP_STATE_RESTORE', 'TOOLBAR_BUTTONS', 'TOOLBAR_BUTTON_ACTION', 'TOOLBAR_BUTTON_STATE', 'NAVIGATE',
     'REQUEST_INSIGHTS', 'REQUEST_INSIGHTS_RESPONSE', 'GET_SCENARIOS', 'GET_SCENARIOS_RESPONSE', 'INSIGHTS_RESPONSE', 'APP_DATA_TRANSFER',
     'REQUEST_HEALTHCARE_DATA', 'HEALTHCARE_DATA_RESPONSE', 'SCROLL_TO_TOP'
+    , 'APP_TOAST'
   ] as const);
+
+  // Lightweight portal toast renderer (deduplicates repeated messages)
+  const lastToastRef = useRef<{ text: string | null; ts: number }>({ text: null, ts: 0 });
+  const showPortalToast = (text: string, duration = 3000) => {
+    try {
+      const now = Date.now();
+      if (lastToastRef.current.text === text && now - lastToastRef.current.ts < 4000) return; // dedupe
+      lastToastRef.current = { text, ts: now };
+      let container = document.getElementById('portal-app-toast');
+      if (!container) {
+        container = document.createElement('div');
+        container.id = 'portal-app-toast';
+        container.style.position = 'fixed';
+        container.style.right = '16px';
+        container.style.top = '16px';
+        container.style.zIndex = '99999';
+        document.body.appendChild(container);
+      }
+      const toast = document.createElement('div');
+      toast.className = 'portal-toast';
+      toast.style.background = '#16a34a';
+      toast.style.color = 'white';
+      toast.style.padding = '12px 16px';
+      toast.style.borderRadius = '10px';
+      toast.style.boxShadow = '0 8px 30px rgba(2,6,23,0.35)';
+      toast.style.marginTop = '12px';
+      toast.style.maxWidth = '420px';
+      toast.style.fontSize = '15px';
+      toast.style.display = 'flex';
+      toast.style.alignItems = 'center';
+      toast.style.gap = '10px';
+      toast.style.fontWeight = '600';
+      toast.setAttribute('role', 'status');
+      // Check icon + message
+      toast.innerHTML = `
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true" focusable="false">
+          <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2z" fill="rgba(255,255,255,0.12)"/>
+          <path d="M9.29 16.29L5.7 12.7a1 1 0 10-1.4 1.42l4.6 4.6a1 1 0 001.4 0l9.6-9.6a1 1 0 10-1.4-1.42L9.29 16.29z" fill="#ffffff"/>
+        </svg>
+        <div style="line-height:1.1">${text}</div>
+      `;
+      (container as HTMLElement).appendChild(toast);
+      setTimeout(() => {
+        try { toast.style.transition = 'opacity 220ms ease'; toast.style.opacity = '0'; setTimeout(() => toast.remove(), 240); } catch (e) {}
+      }, duration);
+    } catch (e) {}
+  };
 
   const router = useRouter();
   const [authToken, setAuthToken] = useState<string>("");
@@ -96,14 +144,14 @@ export function IFrameWrapper({
       iframeRef.current.style.removeProperty('min-height');
     }
     
-    console.log('[IFrameWrapper] Reset height tracking for new app:', appId);
+    console.debug('[IFrameWrapper] Reset height tracking for new app:', appId);
   }, [appId]);
 
   // Request height from iframe on mount and after delays (handles direct URL and dropdown navigation)
   useEffect(() => {
     const requestHeight = () => {
       if (iframeRef.current?.contentWindow) {
-        console.log('[IFrameWrapper] Requesting content height from iframe');
+        console.debug('[IFrameWrapper] Requesting content height from iframe');
         iframeRef.current.contentWindow.postMessage({ type: 'REQUEST_CONTENT_HEIGHT' }, '*');
       }
     };
@@ -180,7 +228,7 @@ export function IFrameWrapper({
       currentAppliedRef.current = newFinal;
       // Inform child about the applied height so it can decide whether to request more
       iframeRef.current.contentWindow?.postMessage({ type: 'IFRAME_HEIGHT_APPLIED', height: newFinal }, '*');
-      console.log('[IFrameWrapper] Reapplied height due to extraPadding change:', newFinal, 'extraPadding:', extraPaddingRef.current);
+      console.debug('[IFrameWrapper] Reapplied height due to extraPadding change:', newFinal, 'extraPadding:', extraPaddingRef.current);
     } catch (e) {}
   }, [extraPadding]);
 
@@ -349,7 +397,7 @@ export function IFrameWrapper({
   // Send theme changes to iframe
   useEffect(() => {
     if (iframeRef.current && !loading) {
-      console.log('[IFrameWrapper] Sending THEME_CHANGE:', theme);
+      console.debug('[IFrameWrapper] Sending THEME_CHANGE:', theme);
       iframeRef.current.contentWindow?.postMessage(
         {
           type: "THEME_CHANGE",
@@ -405,7 +453,7 @@ export function IFrameWrapper({
           } catch (e) {}
           el = parent;
         }
-        if (changedAncestors.length) console.log('[IFrameWrapper] Updated ancestors to prevent clipping:', changedAncestors);
+        if (changedAncestors.length) console.debug('[IFrameWrapper] Updated ancestors to prevent clipping:', changedAncestors);
         return changedAncestors.length > 0;
       } catch (e) { return false; }
     };
@@ -527,7 +575,7 @@ export function IFrameWrapper({
               diagnostics.push({ tag: el.tagName, id: el.id || null, class: el.className || null, computedHeight: cs.height, overflow: cs.overflow, maxHeight: cs.maxHeight, display: cs.display });
               el = el.parentElement;
             }
-            console.log('[IFrameWrapper] Ancestor diagnostics:', diagnostics);
+            console.debug('[IFrameWrapper] Ancestor diagnostics:', diagnostics);
           } catch (e) {}
 
           // Apply with priority - but cap to viewport height to enable internal scrolling for sticky navbars
@@ -562,7 +610,7 @@ export function IFrameWrapper({
           iframeRef.current?.contentWindow?.postMessage({ type: 'IFRAME_HEIGHT_APPLIED', height: cappedHeight }, '*');
           scheduleRequestContent(STABILIZE_BASE_DELAY);
 
-          console.log('[IFrameWrapper] Applied capped height to iframe:', cappedHeight, 'original:', finalApplied, 'viewportMax:', viewportMaxHeight);
+          console.debug('[IFrameWrapper] Applied capped height to iframe:', cappedHeight, 'original:', finalApplied, 'viewportMax:', viewportMaxHeight);
         }
 
         if (event.data?.type === 'CONTENT_HEIGHT') {
@@ -601,7 +649,7 @@ export function IFrameWrapper({
                 stabilizer.attempts = 0;
                 stabilizer.applied = finalDesired;
                 scheduleRequestContent(STABILIZE_BASE_DELAY);
-                console.log('[IFrameWrapper] Applied CONTENT_HEIGHT (unsolicited) -> final:', finalDesired, 'buffer:', buffer, 'extraPadding:', extraPaddingRef.current);
+                console.debug('[IFrameWrapper] Applied CONTENT_HEIGHT (unsolicited) -> final:', finalDesired, 'buffer:', buffer, 'extraPadding:', extraPaddingRef.current);
               } catch (e) {}
             } else {
               console.debug('[IFrameWrapper] CONTENT_HEIGHT received but not larger than current applied; ignoring', desired, currentApplied);
@@ -632,7 +680,7 @@ export function IFrameWrapper({
                   stabilizer.attempts++;
                   const delay = STABILIZE_BASE_DELAY * Math.pow(2, stabilizer.attempts);
                   scheduleRequestContent(delay);
-                  console.log('[IFrameWrapper] Applied after relaxing ancestors -> final:', finalDesired, 'attempt:', stabilizer.attempts, 'extraPadding:', extraPaddingRef.current);
+                  console.debug('[IFrameWrapper] Applied after relaxing ancestors -> final:', finalDesired, 'attempt:', stabilizer.attempts, 'extraPadding:', extraPaddingRef.current);
                 } catch (e) {
                   clearStabilizer();
                 }
@@ -660,7 +708,7 @@ export function IFrameWrapper({
               stabilizer.applied = finalDesired;
               const delay = STABILIZE_BASE_DELAY * Math.pow(2, stabilizer.attempts);
               scheduleRequestContent(delay);
-              console.log('[IFrameWrapper] Increased iframe to measured desired height:', desired, 'final:', finalDesired, 'attempt:', stabilizer.attempts, 'extraPadding:', extraPaddingRef.current);
+              console.debug('[IFrameWrapper] Increased iframe to measured desired height:', desired, 'final:', finalDesired, 'attempt:', stabilizer.attempts, 'extraPadding:', extraPaddingRef.current);
             } catch (e) {
               clearStabilizer();
             }
@@ -680,7 +728,7 @@ export function IFrameWrapper({
             clearStabilizer();
           } else {
             // measurement within tolerance or we've exhausted attempts
-            console.log('[IFrameWrapper] Stabilized; final height:', stabilizer.applied, 'measured:', measured);
+            console.debug('[IFrameWrapper] Stabilized; final height:', stabilizer.applied, 'measured:', measured);
             clearStabilizer();
           }
         }
@@ -747,7 +795,7 @@ export function IFrameWrapper({
         // ignore suppression errors
       }
 
-      console.log("IFrameWrapper received message:", d);
+      console.debug("IFrameWrapper received message:", d);
       // In production, verify the origin
       
       // If iframe requests current theme, reply with the portal theme
@@ -765,9 +813,9 @@ export function IFrameWrapper({
       }
 
       // Debug: log when iframe notifies scroll state
-      if (d?.type === 'IFRAME_SCROLL') {
+          if (d?.type === 'IFRAME_SCROLL') {
         try {
-          console.log('[IFrameWrapper] IFRAME_SCROLL from child, scrolled:', !!d.scrolled, 'source:', event.origin || 'unknown');
+          console.debug('[IFrameWrapper] IFRAME_SCROLL from child, scrolled:', !!d.scrolled, 'source:', event.origin || 'unknown');
         } catch (e) {}
       }
 
@@ -814,6 +862,17 @@ export function IFrameWrapper({
             "*"
           );
         }
+        return;
+      }
+
+      // Allow embedded apps to request the portal to show a toast (APP_TOAST)
+      if (d?.type === 'APP_TOAST') {
+        try {
+          const msg = String(d?.message || d?.text || d?.msg || '');
+          if (msg) {
+                showPortalToast(msg, typeof d?.duration === 'number' ? d.duration : 3000);
+              }
+        } catch (e) {}
         return;
       }
 
