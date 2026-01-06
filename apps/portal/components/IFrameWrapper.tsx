@@ -578,39 +578,42 @@ export function IFrameWrapper({
             console.debug('[IFrameWrapper] Ancestor diagnostics:', diagnostics);
           } catch (e) {}
 
-          // Apply with priority - but cap to viewport height to enable internal scrolling for sticky navbars
-          // Calculate max height based on viewport (reuse headerHeight from above)
-          const viewportMaxHeight = window.innerHeight - headerHeight - 130;
-          
-          // Don't let iframe grow beyond viewport - this enables internal scrolling and sticky navbars
-          const cappedHeight = Math.min(finalApplied, viewportMaxHeight);
-          
+          // Prefer applying the measured content height so the portal (parent) scrolls
+          // rather than forcing the iframe to internally scroll. Cap to a safety max.
+          const SAFETY_MAX = 8000;
+          const appliedHeight = Math.min(finalApplied, SAFETY_MAX);
+
           try {
-            iframeRef.current!.style.setProperty('height', `${cappedHeight}px`, 'important');
-            iframeRef.current!.style.minHeight = `${cappedHeight}px`;
-            iframeRef.current!.style.setProperty('max-height', `${viewportMaxHeight}px`, 'important');
+            iframeRef.current!.style.setProperty('height', `${appliedHeight}px`, 'important');
+            iframeRef.current!.style.minHeight = `${appliedHeight}px`;
+            // Remove any restrictive max-height so iframe won't produce an inner scrollbar
+            iframeRef.current!.style.removeProperty('max-height');
             iframeRef.current!.style.display = 'block';
             iframeRef.current!.classList.remove('flex-1');
             iframeRef.current!.classList.add('flex-none');
 
             // Defensive: ensure no ancestor is clipping the iframe; use helper to relax if needed
             try {
-              relaxAncestorsIfClipping(cappedHeight);
+              relaxAncestorsIfClipping(appliedHeight);
             } catch (e) {}
 
           } catch (e) {}
 
           stabilizer.active = true;
           stabilizer.attempts = 0;
-          stabilizer.applied = cappedHeight;
-          currentAppliedRef.current = cappedHeight;
-          baseAppliedRef.current = cappedHeight;
+          stabilizer.applied = appliedHeight;
+          currentAppliedRef.current = appliedHeight;
+          baseAppliedRef.current = appliedHeight;
 
-          // Inform iframe of the final applied height (send capped height so app knows scroll is enabled)
-          iframeRef.current?.contentWindow?.postMessage({ type: 'IFRAME_HEIGHT_APPLIED', height: cappedHeight }, '*');
+          // Inform iframe of the final applied height
+          iframeRef.current?.contentWindow?.postMessage({ type: 'IFRAME_HEIGHT_APPLIED', height: appliedHeight }, '*');
+          // Short re-measure handshake to ensure stable final size
+          setTimeout(() => {
+            try { iframeRef.current?.contentWindow?.postMessage({ type: 'REQUEST_CONTENT_HEIGHT' }, '*'); } catch (e) {}
+          }, 250);
           scheduleRequestContent(STABILIZE_BASE_DELAY);
 
-          console.debug('[IFrameWrapper] Applied capped height to iframe:', cappedHeight, 'original:', finalApplied, 'viewportMax:', viewportMaxHeight);
+          console.debug('[IFrameWrapper] Applied measured height to iframe:', appliedHeight, 'original:', finalApplied);
         }
 
         if (event.data?.type === 'CONTENT_HEIGHT') {
