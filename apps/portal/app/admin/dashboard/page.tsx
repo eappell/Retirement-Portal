@@ -512,19 +512,8 @@ export default function AdminDashboard() {
 
       <main className={`max-w-7xl mx-auto px-4 py-12 sm:px-6 lg:px-8 ${theme === 'dark' ? 'text-gray-100' : 'text-gray-900'}`}>
         <div className="mb-8">
-          <h1
-            className={`text-3xl font-bold admin-heading no-text-clip ${theme === 'dark' ? 'text-gray-100' : 'text-gray-900'}`}
-            style={{
-              color: forcedTextColor,
-              opacity: 1,
-              WebkitTextFillColor: forcedTextColor,
-              WebkitBackgroundClip: 'initial',
-              backgroundClip: 'initial',
-            }}
-          >
-            Admin Dashboard
-          </h1>
-          <p className={`mt-2 ${theme === 'dark' ? 'text-gray-300' : 'text-gray-600'}`}>System analytics and user management</p>
+          <h1 className="text-3xl font-bold" style={{ color: forcedTextColor, WebkitTextFillColor: forcedTextColor, WebkitBackgroundClip: 'unset' }}>Admin Dashboard</h1>
+          <p className="mt-2" style={{ color: theme === 'dark' ? '#d1d5db' : '#6b5e62' }}>System analytics and user management</p>
         </div>
 
         {/* Users Modal */}
