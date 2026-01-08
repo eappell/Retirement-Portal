@@ -65,6 +65,7 @@ interface App {
   gradient?: string;
   disabled?: boolean;
   badge?: string;
+  sortOrder?: number;
 }
 
 const DEFAULT_APPS: App[] = [
@@ -182,6 +183,7 @@ export default function DashboardPage() {
             gradient: data.gradient,
             disabled: data.disabled,
             badge: data.badge,
+            sortOrder: data.sortOrder || 0,
           });
         });
 
@@ -218,19 +220,37 @@ export default function DashboardPage() {
                   gradient: override.gradient || d.gradient,
                   disabled: typeof override.disabled === 'boolean' ? override.disabled : d.disabled,
                   badge: override.badge || d.badge,
+                  sortOrder: override.sortOrder || d.sortOrder || 0,
                 }
               : d;
-          }).concat(loadedApps.filter((a) => !DEFAULT_APPS.some((d) => matchesDefault(d, a))).map(a => ({ id: a.id, name: a.name, description: a.description, icon: a.icon || '📦', url: a.url || '', freeAllowed: a.freeAllowed, gradient: a.gradient || '', disabled: a.disabled, badge: a.badge || '' })));
+          }).concat(loadedApps.filter((a) => !DEFAULT_APPS.some((d) => matchesDefault(d, a))).map(a => ({ id: a.id, name: a.name, description: a.description, icon: a.icon || '📦', url: a.url || '', freeAllowed: a.freeAllowed, gradient: a.gradient || '', disabled: a.disabled, badge: a.badge || '', sortOrder: a.sortOrder || 0 })));
           // Hide disabled apps from the dashboard list
           const visible = merged.filter(a => !a.disabled);
+          // Sort apps by sortOrder, then alphabetically by name
+          visible.sort((a, b) => {
+            const orderA = a.sortOrder || 0;
+            const orderB = b.sortOrder || 0;
+            if (orderA !== orderB) return orderA - orderB;
+            return a.name.localeCompare(b.name);
+          });
           setApps(visible);
         } else {
-          setApps(DEFAULT_APPS);
+          setApps([...DEFAULT_APPS].sort((a, b) => {
+            const orderA = a.sortOrder || 0;
+            const orderB = b.sortOrder || 0;
+            if (orderA !== orderB) return orderA - orderB;
+            return a.name.localeCompare(b.name);
+          }));
         }
       } catch (error) {
         console.error("Error loading apps:", error);
         // Fall back to default apps
-        setApps(DEFAULT_APPS);
+        setApps([...DEFAULT_APPS].sort((a, b) => {
+          const orderA = a.sortOrder || 0;
+          const orderB = b.sortOrder || 0;
+          if (orderA !== orderB) return orderA - orderB;
+          return a.name.localeCompare(b.name);
+        }));
       } finally {
         setLoadingApps(false);
       }

@@ -133,7 +133,7 @@ export default function AdminDashboard() {
   // users tab state
   const [selectedUser, setSelectedUser] = useState<any | null>(null);
   // apps tab state
-  type SimpleApp = { id: string; name: string; url: string; description?: string; icon?: string; badge?: string; gradient?: string; freeAllowed?: boolean; firestoreId?: string; disabled?: boolean };
+  type SimpleApp = { id: string; name: string; url: string; description?: string; icon?: string; badge?: string; gradient?: string; freeAllowed?: boolean; firestoreId?: string; disabled?: boolean; sortOrder?: number };
   const [appsLoading, setAppsLoading] = useState(false);
   const [appsList, setAppsList] = useState<SimpleApp[]>([]);
   const [showNewAppForm, setShowNewAppForm] = useState(false);
@@ -403,8 +403,18 @@ export default function AdminDashboard() {
           gradient: d.gradient || '',
           freeAllowed: d.freeAllowed ?? true,
           disabled: d.disabled,
+          sortOrder: d.sortOrder || 0,
           firestoreId: docu.id,
         });
+      });
+      // Sort: Disabled last, then by sortOrder (asc), then name
+      rows.sort((a, b) => {
+        if (!!a.disabled !== !!b.disabled) return a.disabled ? 1 : -1;
+        
+        const orderA = a.sortOrder || 0;
+        const orderB = b.sortOrder || 0;
+        if (orderA !== orderB) return orderA - orderB;
+        return a.name.localeCompare(b.name);
       });
       setAppsList(rows);
     } catch (err) {
@@ -432,9 +442,16 @@ export default function AdminDashboard() {
         gradient: newApp.gradient || '',
         disabled: newApp.disabled ?? false,
         badge: newApp.badge || '',
+        sortOrder: Number(newApp.sortOrder) || 0,
         createdAt: new Date(),
       });
-      setAppsList(prev => [...prev, { id: newApp.id as string, name: newApp.name as string, url: newApp.url as string, firestoreId: docRef.id, icon: newApp.icon || 'Calculator', badge: newApp.badge || '', gradient: newApp.gradient || '', freeAllowed: newApp.freeAllowed ?? true, disabled: newApp.disabled ?? false }]);
+      setAppsList(prev => [...prev, { id: newApp.id as string, name: newApp.name as string, url: newApp.url as string, firestoreId: docRef.id, icon: newApp.icon || 'Calculator', badge: newApp.badge || '', gradient: newApp.gradient || '', freeAllowed: newApp.freeAllowed ?? true, disabled: newApp.disabled ?? false, sortOrder: Number(newApp.sortOrder) || 0 }].sort((a,b) => {
+        if (!!a.disabled !== !!b.disabled) return a.disabled ? 1 : -1;
+        const orderA = a.sortOrder || 0;
+        const orderB = b.sortOrder || 0;
+        if (orderA !== orderB) return orderA - orderB;
+        return a.name.localeCompare(b.name);
+      }));
       setNewApp({ id: '', name: '', url: '' });
       setShowNewAppForm(false);
       toast.showToast('App created', 'success');
@@ -452,7 +469,13 @@ export default function AdminDashboard() {
       setAppsLoading(true);
       const ref = doc(db, 'apps', app.firestoreId);
       await updateDoc(ref, { disabled: !app.disabled });
-      setAppsList(prev => prev.map(a => a.firestoreId === app.firestoreId ? ({...a, disabled: !a.disabled}) : a));
+      setAppsList(prev => prev.map(a => a.firestoreId === app.firestoreId ? ({...a, disabled: !a.disabled}) : a).sort((a,b) => {
+        if (!!a.disabled !== !!b.disabled) return a.disabled ? 1 : -1;
+        const orderA = a.sortOrder || 0;
+        const orderB = b.sortOrder || 0;
+        if (orderA !== orderB) return orderA - orderB;
+        return a.name.localeCompare(b.name);
+      }));
     } catch (err) {
       console.error('Error toggling app', err);
       toast.showToast('Failed to update app. See console.', 'error');
@@ -1011,32 +1034,37 @@ export default function AdminDashboard() {
               {showNewAppForm && (
                 <div className="fixed inset-0 z-50 flex items-center justify-center">
                   <div className="absolute inset-0 bg-black/40" onClick={() => { setShowNewAppForm(false); setNewApp({ id: '', name: '', url: '' }); }} />
-                  <div className="relative bg-white dark:bg-slate-800 rounded-lg shadow-lg w-full max-w-3xl mx-4 p-6 z-50">
+                  <div className="relative rounded-lg shadow-lg w-full max-w-3xl mx-4 p-6 z-50" style={{ backgroundColor: theme === 'dark' ? '#1e293b' : '#ffffff' }}>
                     <h3 className="text-lg font-semibold text-gray-900 dark:text-gray-100 mb-4">Create Application</h3>
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                       <label className="block">
                         <div className="text-sm text-gray-600 mb-1">App ID</div>
-                        <input value={newApp.id || ''} onChange={(e) => setNewApp(prev => ({ ...prev, id: e.target.value }))} className="w-full border rounded px-3 py-2" />
+                        <input value={newApp.id || ''} onChange={(e) => setNewApp(prev => ({ ...prev, id: e.target.value }))} className="w-full border rounded px-3 py-2 bg-gray-50 text-gray-900" />
                       </label>
 
                       <label className="block">
                         <div className="text-sm text-gray-600 mb-1">Application Name</div>
-                        <input value={newApp.name || ''} onChange={(e) => setNewApp(prev => ({ ...prev, name: e.target.value }))} className="w-full border rounded px-3 py-2" />
+                        <input value={newApp.name || ''} onChange={(e) => setNewApp(prev => ({ ...prev, name: e.target.value }))} className="w-full border rounded px-3 py-2 bg-gray-50 text-gray-900" />
+                      </label>
+
+                      <label className="block">
+                        <div className="text-sm text-gray-600 mb-1">Sort Order (Low to High)</div>
+                        <input type="number" value={newApp.sortOrder || 0} onChange={(e) => setNewApp(prev => ({ ...prev, sortOrder: parseInt(e.target.value) || 0 }))} className="w-full border rounded px-3 py-2 bg-gray-50 text-gray-900" placeholder="0" />
                       </label>
 
                       <label className="block md:col-span-2">
                         <div className="text-sm text-gray-600 mb-1">Description</div>
-                        <textarea value={newApp.description || ''} onChange={(e) => setNewApp(prev => ({ ...prev, description: e.target.value }))} className="w-full border rounded px-3 py-2 h-24" />
+                        <textarea value={newApp.description || ''} onChange={(e) => setNewApp(prev => ({ ...prev, description: e.target.value }))} className="w-full border rounded px-3 py-2 bg-gray-50 text-gray-900 h-24" />
                       </label>
 
                       <label className="block md:col-span-2">
                         <div className="text-sm text-gray-600 mb-1">Badge Text</div>
-                        <input value={newApp.badge || ''} onChange={(e) => setNewApp(prev => ({ ...prev, badge: e.target.value }))} className="w-full border rounded px-3 py-2" placeholder="e.g., AI-Powered, Personalized" />
+                        <input value={newApp.badge || ''} onChange={(e) => setNewApp(prev => ({ ...prev, badge: e.target.value }))} className="w-full border rounded px-3 py-2 bg-gray-50 text-gray-900" placeholder="e.g., AI-Powered, Personalized" />
                       </label>
 
                       <label className="block md:col-span-2">
                         <div className="text-sm text-gray-600 mb-1">Icon</div>
-                        <input value={iconFilter} onChange={(e) => setIconFilter(e.target.value)} placeholder="Search icons..." className="mb-2 w-full border rounded px-3 py-2" />
+                        <input value={iconFilter} onChange={(e) => setIconFilter(e.target.value)} placeholder="Search icons..." className="mb-2 w-full border rounded px-3 py-2 bg-gray-50 text-gray-900" />
                         <div className="flex flex-wrap gap-2 max-h-40 overflow-auto">
                           {ICON_OPTIONS.filter(k => k.toLowerCase().includes(iconFilter.toLowerCase())).map((key) => (
                             <button key={key} type="button" onClick={() => setNewApp(prev => ({ ...prev, icon: key }))} className={`p-2 rounded border ${newApp?.icon === key ? 'ring-2 ring-offset-2 ring-slate-300 dark:ring-slate-600' : ''}`} title={key}>
@@ -1050,7 +1078,7 @@ export default function AdminDashboard() {
 
                       <label className="block md:col-span-2">
                         <div className="text-sm text-gray-600 mb-1">URL</div>
-                        <input value={newApp.url || ''} onChange={(e) => setNewApp(prev => ({ ...prev, url: e.target.value }))} className="w-full border rounded px-3 py-2" />
+                        <input value={newApp.url || ''} onChange={(e) => setNewApp(prev => ({ ...prev, url: e.target.value }))} className="w-full border rounded px-3 py-2 bg-gray-50 text-gray-900" />
                       </label>
 
                       <div className="flex items-center gap-6">
@@ -1078,7 +1106,7 @@ export default function AdminDashboard() {
                             const start = createGradientMatches[0] || '#34d399';
                             setNewApp(prev => ({ ...prev, gradient: `linear-gradient(135deg, ${start} 0%, ${end} 100%)` }));
                           }} />
-                          <input value={newApp.gradient || ''} onChange={(e) => setNewApp(prev => ({ ...prev, gradient: e.target.value }))} className="flex-1 border rounded px-3 py-2" />
+                          <input value={newApp.gradient || ''} onChange={(e) => setNewApp(prev => ({ ...prev, gradient: e.target.value }))} className="flex-1 border rounded px-3 py-2 bg-gray-50 text-gray-900" />
                           <div className="w-16 h-8 rounded ml-2" style={{ background: newApp.gradient || '#34d399' }} />
                         </div>
                       </label>
@@ -1086,7 +1114,7 @@ export default function AdminDashboard() {
 
                     <div className="mt-4 flex justify-end gap-2">
                       <button className="px-4 py-2 bg-gray-200 dark:bg-slate-700 dark:text-white rounded" onClick={() => { setShowNewAppForm(false); setNewApp({ id: '', name: '', url: '' }); }}>Cancel</button>
-                      <button className="px-4 py-2 bg-blue-600 text-white rounded" onClick={handleAddApp}>Create</button>
+                      <button className="px-4 py-2 bg-blue-600 text-white force-light-text rounded" onClick={handleAddApp}>Create</button>
                     </div>
                   </div>
                 </div>
@@ -1156,6 +1184,35 @@ export default function AdminDashboard() {
                                       <span className="inline-block px-2 py-1 bg-emerald-100 text-emerald-800 force-dark-text rounded text-sm font-medium">Free Allowed</span>
                                     </div>
                                   )}
+                                  <div className="mt-1 text-right flex items-center justify-end gap-2">
+                                    <span className="text-xs text-gray-500 dark:text-gray-400">Order:</span>
+                                    <input
+                                      type="number"
+                                      className="w-16 border border-gray-300 dark:border-slate-600 rounded px-2 py-0.5 text-right text-sm"
+                                      style={{ backgroundColor: theme === 'dark' ? '#334155' : '#ffffff', color: theme === 'dark' ? '#ffffff' : '#111827' }}
+                                      defaultValue={app.sortOrder || 0}
+                                      onBlur={async (e) => {
+                                        const newOrder = parseInt(e.target.value) || 0;
+                                        if (newOrder === (app.sortOrder || 0)) return;
+                                        try {
+                                          if (!app.firestoreId) return;
+                                          const ref = doc(db, 'apps', app.firestoreId);
+                                          await updateDoc(ref, { sortOrder: newOrder });
+                                          setAppsList(prev => prev.map(a => a.firestoreId === app.firestoreId ? { ...a, sortOrder: newOrder } : a).sort((a,b) => {
+                                            if (!!a.disabled !== !!b.disabled) return a.disabled ? 1 : -1;
+                                            const orderA = a.firestoreId === app.firestoreId ? newOrder : (a.sortOrder || 0);
+                                            const orderB = b.firestoreId === app.firestoreId ? newOrder : (b.sortOrder || 0);
+                                            if (orderA !== orderB) return orderA - orderB;
+                                            return a.name.localeCompare(b.name);
+                                          }));
+                                          toast.showToast('Order updated', 'success');
+                                        } catch (err) {
+                                          console.error('Failed to update sort order', err);
+                                          toast.showToast('Failed to update order', 'error');
+                                        }
+                                      }}
+                                    />
+                                  </div>
                                 </div>
                               </div>
 
@@ -1190,13 +1247,13 @@ export default function AdminDashboard() {
                   {editingForm && (
                     <div className="fixed inset-0 z-50 flex items-center justify-center">
                       <div className="absolute inset-0 bg-black/40" onClick={() => { setEditingForm(null); setEditingAppFirestoreId(null); }} />
-                      <div className="relative bg-white dark:bg-slate-800 rounded-lg shadow-lg w-full max-w-3xl mx-4 p-6 z-50">
+                      <div className="relative rounded-lg shadow-lg w-full max-w-3xl mx-4 p-6 z-50" style={{ backgroundColor: theme === 'dark' ? '#1e293b' : '#ffffff' }}>
                         <h3 id="edit-app-title" className="text-lg font-semibold text-gray-900 dark:text-gray-100 mb-4">Edit Application</h3>
                         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                           <label className="block">
                             <div className="text-sm text-gray-600 mb-1">App ID</div>
                             <div className="flex items-center gap-2">
-                              <input readOnly value={editingForm.id || ''} className="flex-1 border rounded px-3 py-2 bg-white dark:bg-slate-700 text-gray-900 dark:text-white opacity-70" title="App ID is read-only" />
+                              <input readOnly value={editingForm.id || ''} className="flex-1 border rounded px-3 py-2 bg-gray-50 text-gray-900 opacity-70" title="App ID is read-only" />
                               <button type="button" onClick={async () => {
                                 try {
                                   const text = editingForm?.id || '';
@@ -1223,22 +1280,27 @@ export default function AdminDashboard() {
 
                           <label className="block">
                             <div className="text-sm text-gray-600 mb-1">Application Name</div>
-                            <input id="edit-app-name" value={editingForm.name || ''} onChange={(e) => setEditingForm(prev => (prev ? { ...prev, name: e.target.value } : prev))} className="w-full border rounded px-3 py-2 bg-white dark:bg-slate-700 text-gray-900 dark:text-white" />
+                            <input id="edit-app-name" value={editingForm.name || ''} onChange={(e) => setEditingForm(prev => (prev ? { ...prev, name: e.target.value } : prev))} className="w-full border rounded px-3 py-2 bg-gray-50 text-gray-900" />
+                          </label>
+
+                          <label className="block">
+                            <div className="text-sm text-gray-600 mb-1">Sort Order</div>
+                            <input type="number" value={editingForm.sortOrder || 0} onChange={(e) => setEditingForm(prev => (prev ? { ...prev, sortOrder: parseInt(e.target.value) || 0 } : prev))} className="w-full border rounded px-3 py-2 bg-gray-50 text-gray-900" placeholder="0" />
                           </label>
 
                           <label className="block md:col-span-2">
                             <div className="text-sm text-gray-600 mb-1">Description</div>
-                            <textarea value={editingForm.description || ''} onChange={(e) => setEditingForm(prev => (prev ? { ...prev, description: e.target.value } : prev))} className="w-full border rounded px-3 py-2 bg-white dark:bg-slate-700 text-gray-900 dark:text-white h-24" />
+                            <textarea value={editingForm.description || ''} onChange={(e) => setEditingForm(prev => (prev ? { ...prev, description: e.target.value } : prev))} className="w-full border rounded px-3 py-2 bg-gray-50 text-gray-900 h-24" />
                           </label>
 
                           <label className="block md:col-span-2">
                             <div className="text-sm text-gray-600 mb-1">Badge Text</div>
-                            <input value={editingForm.badge || ''} onChange={(e) => setEditingForm(prev => (prev ? { ...prev, badge: e.target.value } : prev))} className="w-full border rounded px-3 py-2 bg-white dark:bg-slate-700 text-gray-900 dark:text-white" placeholder="e.g., AI-Powered, Personalized" />
+                            <input value={editingForm.badge || ''} onChange={(e) => setEditingForm(prev => (prev ? { ...prev, badge: e.target.value } : prev))} className="w-full border rounded px-3 py-2 bg-gray-50 text-gray-900" placeholder="e.g., AI-Powered, Personalized" />
                           </label>
 
                           <label className="block md:col-span-2">
                             <div className="text-sm text-gray-600 mb-1">Icon</div>
-                            <input value={iconFilter} onChange={(e) => setIconFilter(e.target.value)} placeholder="Search icons..." className="mb-2 w-full border rounded px-3 py-2" />
+                            <input value={iconFilter} onChange={(e) => setIconFilter(e.target.value)} placeholder="Search icons..." className="mb-2 w-full border rounded px-3 py-2 bg-gray-50 text-gray-900" />
                             <div className="flex flex-wrap gap-2 max-h-40 overflow-auto">
                               {ICON_OPTIONS.filter(k => k.toLowerCase().includes(iconFilter.toLowerCase())).map((key) => (
                                 <button key={key} type="button" onClick={() => setEditingForm(prev => (prev ? { ...prev, icon: key } : prev))} className={`p-2 rounded border ${editingForm?.icon === key ? 'ring-2 ring-offset-2 ring-slate-300 dark:ring-slate-600' : ''}`} title={key}>
@@ -1252,7 +1314,7 @@ export default function AdminDashboard() {
 
                           <label className="block md:col-span-2">
                             <div className="text-sm text-gray-600 mb-1">URL</div>
-                            <input value={editingForm.url || ''} onChange={(e) => setEditingForm(prev => (prev ? { ...prev, url: e.target.value } : prev))} className="w-full border rounded px-3 py-2 bg-white dark:bg-slate-700 text-gray-900 dark:text-white" />
+                            <input value={editingForm.url || ''} onChange={(e) => setEditingForm(prev => (prev ? { ...prev, url: e.target.value } : prev))} className="w-full border rounded px-3 py-2 bg-gray-50 text-gray-900" />
                           </label>
 
 
@@ -1282,7 +1344,7 @@ export default function AdminDashboard() {
                                 const start = editingGradientMatches[0] || '#34d399';
                                 setEditingForm(prev => (prev ? { ...prev, gradient: `linear-gradient(135deg, ${start} 0%, ${end} 100%)` } : prev));
                               }} />
-                              <input value={editingForm.gradient || ''} onChange={(e) => setEditingForm(prev => (prev ? { ...prev, gradient: e.target.value } : prev))} className="flex-1 border rounded px-3 py-2" />
+                              <input value={editingForm.gradient || ''} onChange={(e) => setEditingForm(prev => (prev ? { ...prev, gradient: e.target.value } : prev))} className="flex-1 border rounded px-3 py-2 bg-gray-50 text-gray-900" />
                               <div className="w-16 h-8 rounded ml-2" style={{ background: editingForm.gradient || '#34d399' }} />
                             </div>
                           </label>
@@ -1290,7 +1352,7 @@ export default function AdminDashboard() {
 
                         <div className="mt-4 flex justify-end gap-2">
                           <button className="px-4 py-2 bg-gray-200 dark:bg-slate-700 dark:text-white rounded" onClick={() => { setEditingForm(null); setEditingAppFirestoreId(null); }}>Cancel</button>
-                          <button className="px-4 py-2 bg-blue-600 text-white rounded" onClick={async () => {
+                          <button className="px-4 py-2 bg-blue-600 text-white force-light-text rounded" onClick={async () => {
                             if (!editingForm) return;
                             try {
                               if (!editingAppFirestoreId) throw new Error('Missing app ref');
@@ -1305,9 +1367,16 @@ export default function AdminDashboard() {
                                 gradient: editingForm.gradient || '',
                                 badge: editingForm.badge || '',
                                 disabled: editingForm.disabled ?? false,
+                                sortOrder: Number(editingForm.sortOrder) || 0,
                               });
                               // update local list
-                              setAppsList(prev => prev.map(a => a.firestoreId === editingAppFirestoreId ? ({ ...a, ...(editingForm as SimpleApp) }) : a));
+                              setAppsList(prev => prev.map(a => a.firestoreId === editingAppFirestoreId ? ({ ...a, ...(editingForm as SimpleApp), sortOrder: Number(editingForm.sortOrder) || 0 }) : a).sort((a,b) => {
+                                if (!!a.disabled !== !!b.disabled) return a.disabled ? 1 : -1;
+                                const orderA = a.id === editingForm.id ? (Number(editingForm.sortOrder) || 0) : (a.sortOrder || 0);
+                                const orderB = b.id === editingForm.id ? (Number(editingForm.sortOrder) || 0) : (b.sortOrder || 0);
+                                if (orderA !== orderB) return orderA - orderB;
+                                return a.name.localeCompare(b.name);
+                              }));
                               setEditingForm(null); setEditingAppFirestoreId(null);
                               toast.showToast('App updated', 'success');
                             } catch (err) {

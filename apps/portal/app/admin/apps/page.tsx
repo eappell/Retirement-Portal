@@ -89,6 +89,7 @@ interface App {
   gradient?: string;
   disabled?: boolean;
   badge?: string;
+  sortOrder?: number;
 }
 
 // Dev mode settings stored in localStorage
@@ -145,6 +146,7 @@ export default function AdminAppsPage() {
     gradient: ''
     , disabled: false,
     badge: "",
+    sortOrder: 0,
   });
   const [newGradientStart, setNewGradientStart] = useState('#34d399');
   const [newGradientEnd, setNewGradientEnd] = useState('#10b981');
@@ -208,8 +210,17 @@ export default function AdminAppsPage() {
           gradient: data.gradient,
           disabled: data.disabled,
           badge: data.badge,
+          sortOrder: data.sortOrder || 0,
           firestoreId: doc.id,
         });
+      });
+
+      // Sort by sortOrder, then by name
+      loadedApps.sort((a, b) => {
+        const orderA = a.sortOrder || 0;
+        const orderB = b.sortOrder || 0;
+        if (orderA !== orderB) return orderA - orderB;
+        return a.name.localeCompare(b.name);
       });
 
       setApps(loadedApps);
@@ -247,10 +258,15 @@ export default function AdminAppsPage() {
           icon: editForm.icon,
           freeAllowed: editForm.freeAllowed,
             gradient: editForm.gradient || `linear-gradient(135deg, ${editGradientStart} 0%, ${editGradientEnd} 100%)`,
-            disabled: !!editForm.disabled,          badge: editForm.badge || "",        });
+            disabled: !!editForm.disabled,          badge: editForm.badge || "",        sortOrder: Number(editForm.sortOrder) || 0,});
       }
 
-      setApps(apps.map((app) => (app.id === appId ? editForm : app)));
+      setApps(apps.map((app) => (app.id === appId ? editForm : app)).sort((a, b) => {
+        const orderA = a.id === appId ? (editForm.sortOrder || 0) : (a.sortOrder || 0);
+        const orderB = b.id === appId ? (editForm.sortOrder || 0) : (b.sortOrder || 0);
+        if (orderA !== orderB) return orderA - orderB;
+        return a.name.localeCompare(b.name);
+      }));
       setSuccess("Application updated successfully");
       setTimeout(() => setSuccess(""), 3000);
       setIsEditing(null);
@@ -330,6 +346,7 @@ export default function AdminAppsPage() {
         gradient: newApp.gradient || `linear-gradient(135deg, ${newGradientStart} 0%, ${newGradientEnd} 100%)`,
         disabled: !!newApp.disabled,
         badge: newApp.badge || "",
+        sortOrder: Number(newApp.sortOrder) || 0,
         createdAt: new Date(),
       });
 
@@ -343,10 +360,16 @@ export default function AdminAppsPage() {
         gradient: newApp.gradient || `linear-gradient(135deg, ${newGradientStart} 0%, ${newGradientEnd} 100%)`,
         disabled: !!newApp.disabled,
         badge: newApp.badge || "",
+        sortOrder: Number(newApp.sortOrder) || 0,
         firestoreId: docRef.id,
       };
 
-      setApps([...apps, app]);
+      setApps([...apps, app].sort((a, b) => {
+        const orderA = a.sortOrder || 0;
+        const orderB = b.sortOrder || 0;
+        if (orderA !== orderB) return orderA - orderB;
+        return a.name.localeCompare(b.name);
+      }));
       setSuccess("Application created successfully");
       setTimeout(() => setSuccess(""), 3000);
       setShowNewForm(false);
@@ -359,6 +382,7 @@ export default function AdminAppsPage() {
         freeAllowed: true,
         gradient: '',
         badge: "",
+        sortOrder: 0,
       });
       setNewGradientStart('#34d399');
       setNewGradientEnd('#10b981');
@@ -468,17 +492,31 @@ export default function AdminAppsPage() {
               />
             </div>
 
-            <div className="mb-6">
-              <label className="block text-sm font-medium text-gray-700 mb-2">
-                Badge Text
-              </label>
-              <input
-                type="text"
-                value={newApp.badge || ""}
-                onChange={(e) => setNewApp({ ...newApp, badge: e.target.value })}
-                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-indigo-500 focus:border-indigo-500"
-                placeholder="e.g., AI-Powered, Personalized, Data-Driven"
-              />
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">
+                  Badge Text
+                </label>
+                <input
+                  type="text"
+                  value={newApp.badge || ""}
+                  onChange={(e) => setNewApp({ ...newApp, badge: e.target.value })}
+                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-indigo-500 focus:border-indigo-500"
+                  placeholder="e.g., AI-Powered, Personalized, Data-Driven"
+                />
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">
+                  Sort Order (Low to High)
+                </label>
+                <input
+                  type="number"
+                  value={newApp.sortOrder || 0}
+                  onChange={(e) => setNewApp({ ...newApp, sortOrder: parseInt(e.target.value) || 0 })}
+                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-indigo-500 focus:border-indigo-500"
+                  placeholder="0"
+                />
+              </div>
             </div>
 
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
@@ -645,17 +683,31 @@ export default function AdminAppsPage() {
                     />
                   </div>
 
-                  <div className="mb-6">
-                    <label className="block text-sm font-medium text-gray-700 mb-2">
-                      Badge Text
-                    </label>
-                    <input
-                      type="text"
-                      value={editForm.badge || ""}
-                      onChange={(e) => setEditForm({ ...editForm, badge: e.target.value })}
-                      className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-indigo-500 focus:border-indigo-500"
-                      placeholder="e.g., AI-Powered, Personalized, Data-Driven"
-                    />
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 mb-2">
+                        Badge Text
+                      </label>
+                      <input
+                        type="text"
+                        value={editForm.badge || ""}
+                        onChange={(e) => setEditForm({ ...editForm, badge: e.target.value })}
+                        className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-indigo-500 focus:border-indigo-500"
+                        placeholder="e.g., AI-Powered, Personalized, Data-Driven"
+                      />
+                    </div>
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 mb-2">
+                        Sort Order (Low to High)
+                      </label>
+                      <input
+                        type="number"
+                        value={editForm.sortOrder || 0}
+                        onChange={(e) => setEditForm({ ...editForm, sortOrder: parseInt(e.target.value) || 0 })}
+                        className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-indigo-500 focus:border-indigo-500"
+                        placeholder="0"
+                      />
+                    </div>
                   </div>
 
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
