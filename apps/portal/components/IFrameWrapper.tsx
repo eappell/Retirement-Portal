@@ -638,9 +638,12 @@ export function IFrameWrapper({
           // Determine the currently applied height (could have been applied earlier or via other UI action)
           const currentApplied = currentAppliedRef.current || (iframeRef.current ? Math.round(parseFloat(getComputedStyle(iframeRef.current).height) || 0) : 0);
 
-          // If not currently stabilizing, allow CONTENT_HEIGHT to increase the iframe if needed
+          // Allow shrinking if the new desired height is meaningfully smaller (e.g., returning to a shorter view)
+          const allowShrink = event.data?.allowShrink === true || desired < currentApplied - 100;
+
+          // If not currently stabilizing, allow CONTENT_HEIGHT to resize the iframe
           if (!stabilizer.active) {
-            if (desired > currentApplied + MIN_DELTA) {
+            if (desired > currentApplied + MIN_DELTA || allowShrink) {
               try {
                 const finalDesired = desired + (Number(extraPaddingRef.current) || 0);
                 baseAppliedRef.current = desired;
@@ -652,7 +655,7 @@ export function IFrameWrapper({
                 stabilizer.attempts = 0;
                 stabilizer.applied = finalDesired;
                 scheduleRequestContent(STABILIZE_BASE_DELAY);
-                console.debug('[IFrameWrapper] Applied CONTENT_HEIGHT (unsolicited) -> final:', finalDesired, 'buffer:', buffer, 'extraPadding:', extraPaddingRef.current);
+                console.debug('[IFrameWrapper] Applied CONTENT_HEIGHT -> final:', finalDesired, 'buffer:', buffer, 'extraPadding:', extraPaddingRef.current, 'shrink:', allowShrink);
               } catch (e) {}
             } else {
               console.debug('[IFrameWrapper] CONTENT_HEIGHT received but not larger than current applied; ignoring', desired, currentApplied);
