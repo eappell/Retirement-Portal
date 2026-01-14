@@ -23,6 +23,10 @@ export function Header() {
   const { theme, toggleTheme } = useTheme();
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [isProfileMenuOpen, setIsProfileMenuOpen] = useState(false);
+  const [hoveredTheme, setHoveredTheme] = useState(false);
+  const [hoveredUserInfo, setHoveredUserInfo] = useState(false);
+  const [hoveredUpgrade, setHoveredUpgrade] = useState(false);
+  const [suppressHoverTooltips, setSuppressHoverTooltips] = useState(false);
 
   const headerBgClass = theme === "dark" ? "bg-[#1A2A40] shadow" : "bg-white shadow";
   const headerBorderClass = theme === "dark" ? "border-b border-[#1A2A40]" : "border-b border-white";
@@ -76,6 +80,54 @@ export function Header() {
       // ignore
     }
   }, [isScrolled]);
+
+  useEffect(() => {
+    console.log('Header mounted');
+  }, []);
+
+  // When other menus open (like the app launcher), temporarily suppress header tooltips
+  useEffect(() => {
+    const handlePortalMenuOpened = () => {
+      console.log('Header: portal-menu-opened received, suppressing tooltips');
+      setSuppressHoverTooltips(true);
+      // Also add a global class so non-React tooltip elements are suppressed
+      document.documentElement.classList.add('suppress-tooltips');
+
+      // hide any visible tooltips immediately
+      setHoveredTheme(false);
+      setHoveredUserInfo(false);
+      setHoveredUpgrade(false);
+
+      const openTs = performance.now();
+      const onFirstPointerMove = () => {
+        const now = performance.now();
+        console.log('Header: pointermove after open delta=', now - openTs);
+        // only clear suppression if the move happened after a short delay (ignore synthetic moves from the click itself)
+        if (now - openTs > 40) {
+          setSuppressHoverTooltips(false);
+          document.documentElement.classList.remove('suppress-tooltips');
+          document.removeEventListener('pointermove', onFirstPointerMove, true);
+        }
+      };
+
+      // Capture the next pointer move anywhere on the page to re-enable tooltips
+      document.addEventListener('pointermove', onFirstPointerMove, true);
+    };
+
+    const handlePortalMenuClosed = () => {
+      // Ensure the class is removed when menus are explicitly closed
+      console.log('Header: portal-menu-closed received, removing suppress class');
+      setSuppressHoverTooltips(false);
+      document.documentElement.classList.remove('suppress-tooltips');
+    };
+
+    window.addEventListener('portal-menu-opened', handlePortalMenuOpened);
+    window.addEventListener('portal-menu-closed', handlePortalMenuClosed);
+    return () => {
+      window.removeEventListener('portal-menu-opened', handlePortalMenuOpened);
+      window.removeEventListener('portal-menu-closed', handlePortalMenuClosed);
+    };
+  }, []);
 
   // Use the small no-tag logo variants for the header, and change display height when scrolled
   const logoSrc = theme === "light" ? logoSmBlack : logoSmWhite;
@@ -149,15 +201,23 @@ export function Header() {
           {/* Right Side Navigation */}
           <nav className="hidden md:flex items-center gap-4">
             {!user?.isAnonymous && !tierLoading && tier !== "paid" && tier !== "admin" && (
-              <div className="group relative">
+              <div
+                className="relative"
+                onPointerMove={() => { setSuppressHoverTooltips(false); setHoveredUpgrade(true); }}
+                onPointerLeave={() => setHoveredUpgrade(false)}
+              >
                 <Link href="/upgrade" className="inline-flex items-center px-3 py-1.5 bg-purple-600 text-white rounded-md text-sm font-medium hover:bg-purple-700 focus:outline-none focus:ring-2 focus:ring-purple-300 mr-4 transition">
                   Upgrade
                 </Link>
-                <div className="absolute top-full left-0 mt-2 px-2 py-1 bg-gray-900 text-white text-xs rounded opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all whitespace-nowrap">
+                <div
+                  role="tooltip"
+                  aria-hidden={!hoveredUpgrade || suppressHoverTooltips}
+                  className={`absolute top-full left-0 mt-2 px-2 py-1 bg-gray-900 text-white text-xs rounded transition-all whitespace-nowrap z-50 ${hoveredUpgrade && !suppressHoverTooltips ? 'opacity-100 visible' : 'opacity-0 invisible'}`}
+                >
                   Upgrade to premium
                 </div>
               </div>
-            )}
+            )} 
           </nav>
 
           {/* User Menu */}
@@ -174,7 +234,9 @@ export function Header() {
             {/* Theme Toggle Button */}
             <button
               onClick={toggleTheme}
-              className={`hidden sm:inline-flex items-center justify-center p-2 rounded-lg ${theme === 'light' ? 'text-gray-700 hover:bg-gray-100' : 'text-gray-300 hover:bg-gray-800'} transition-colors group relative cursor-pointer`}
+              onPointerMove={() => { setSuppressHoverTooltips(false); setHoveredTheme(true); }}
+              onPointerLeave={() => setHoveredTheme(false)}
+              className={`hidden sm:inline-flex items-center justify-center p-2 rounded-lg ${theme === 'light' ? 'text-gray-700 hover:bg-gray-100' : 'text-gray-300 hover:bg-gray-800'} transition-colors relative cursor-pointer`}
               title={`Switch to ${theme === "light" ? "dark" : "light"} mode`}
             >
               {theme === "light" ? (
@@ -182,7 +244,11 @@ export function Header() {
               ) : (
                 <MoonIcon className="h-5 w-5" />
               )}
-              <div role="tooltip" aria-hidden="true" className="header-tooltip absolute top-full left-1/2 transform -translate-x-1/2 mt-2 px-2 py-1 bg-gray-900 text-white text-xs rounded opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all whitespace-nowrap z-50 dark:bg-gray-700">
+              <div
+                role="tooltip"
+                aria-hidden={!hoveredTheme || suppressHoverTooltips}
+                className={`header-tooltip absolute top-full left-1/2 transform -translate-x-1/2 mt-2 px-2 py-1 bg-gray-900 text-white text-xs rounded transition-all whitespace-nowrap z-50 dark:bg-gray-700 ${hoveredTheme && !suppressHoverTooltips ? 'opacity-100 visible' : 'opacity-0 invisible'}`}
+              >
                 {theme === "light" ? "Dark mode" : "Light mode"}
               </div>
             </button>
@@ -218,14 +284,22 @@ export function Header() {
 
             {/* Desktop User Menu */}
             <div className={`hidden md:flex items-center gap-4 border-l ${borderColor} pl-4`}>
-              <div className="text-right group relative">
+              <div
+                className="text-right relative"
+                onPointerMove={() => { setSuppressHoverTooltips(false); setHoveredUserInfo(true); }}
+                onPointerLeave={() => setHoveredUserInfo(false)}
+              >
                 <p className={`text-sm font-semibold ${textPrimary} cursor-help`}>
                   {user?.email || "Guest User"}
                 </p>
                 <p className={`text-xs ${textSecondary}`}>
                   {tierLoading ? "Loading..." : getTierLabel()}
                 </p>
-                <div role="tooltip" aria-hidden="true" className="header-tooltip absolute top-full right-0 mt-2 px-3 py-2 bg-gray-900 text-white text-xs rounded opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all whitespace-nowrap z-50">
+                <div
+                  role="tooltip"
+                  aria-hidden={!hoveredUserInfo || suppressHoverTooltips}
+                  className={`header-tooltip absolute top-full right-0 mt-2 px-3 py-2 bg-gray-900 text-white text-xs rounded transition-all whitespace-nowrap z-50 ${hoveredUserInfo && !suppressHoverTooltips ? 'opacity-100 visible' : 'opacity-0 invisible'}`}
+                >
                   {user?.metadata?.creationTime
                     ? `Member since ${new Date(user.metadata.creationTime).toLocaleDateString()}`
                     : "Account information"}

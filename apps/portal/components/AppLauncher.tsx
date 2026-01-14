@@ -116,9 +116,23 @@ export function AppLauncher() {
     };
   }, [isOpen]);
 
+
+
   const handleAppClick = (appId: string) => {
     setIsOpen(false);
     router.push(`/apps/${appId}`);
+  };
+
+
+
+  const toggleLauncher = () => {
+    const opening = !isOpen;
+    setIsOpen(opening);
+    if (opening) {
+      window.dispatchEvent(new CustomEvent('portal-menu-opened'));
+    } else {
+      window.dispatchEvent(new CustomEvent('portal-menu-closed'));
+    }
   };
 
   const iconColor = theme === "light" ? "text-gray-600 hover:text-gray-900" : "text-gray-400 hover:text-gray-100";
@@ -132,11 +146,12 @@ export function AppLauncher() {
     <div ref={menuRef} className="relative">
       {/* Launcher Button */}
       <button
-        onClick={() => setIsOpen(!isOpen)}
+        onClick={toggleLauncher}
         className={`p-2 rounded-lg transition-colors ${iconColor} ${theme === 'light' ? 'hover:bg-gray-100' : 'hover:bg-slate-700'} cursor-pointer`}
         title="Open app launcher"
         aria-label="Open app launcher"
         aria-expanded={isOpen}
+        data-testid="app-launcher-toggle"
       >
         <GridIcon className="h-8 w-8" />
       </button>
@@ -165,45 +180,21 @@ export function AppLauncher() {
               </div>
             ) : (
               <div className="grid grid-cols-3 gap-2">
-                {apps.map((app, index) => {
-                  // First row (index < 3) shows tooltip below, rest show above
-                  const isTopRow = index < 3;
-                  return (
-                    <div key={app.id} className="relative group">
-                      <button
-                        onClick={() => handleAppClick(app.id)}
-                        className={`flex flex-col items-center p-3 rounded-lg ${itemHover} transition-colors cursor-pointer w-full`}
-                        role="menuitem"
-                      >
-                        <div className={`w-12 h-12 rounded-xl flex items-center justify-center mb-2 ${theme === 'light' ? 'bg-indigo-100' : 'bg-indigo-900/30'}`}>
-                          <AppIcon icon={app.icon} className={`h-6 w-6 ${theme === 'light' ? 'text-indigo-600' : 'text-indigo-400'}`} />
-                        </div>
-                        <span className={`text-xs text-center ${textPrimary} line-clamp-2 leading-tight`}>
-                          {app.name}
-                        </span>
-                      </button>
-                      {/* Tooltip - below for top row, above for others */}
-                      <div
-                        className={`absolute left-1/2 -translate-x-1/2 px-2 py-1 text-xs rounded shadow-lg opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none z-50 w-[90px] text-center ${isTopRow ? 'top-full mt-1' : 'bottom-full mb-1'}`}
-                        style={
-                          theme === 'light'
-                            ? { backgroundColor: '#111827', color: '#ffffff' }
-                            : { backgroundColor: '#ffffff', color: '#0b1220' }
-                        }
-                      >
-                        {app.name}
-                        <div
-                          className={`absolute left-1/2 -translate-x-1/2 border-4 border-transparent`}
-                          style={
-                            isTopRow
-                              ? (theme === 'light' ? { borderBottomColor: '#111827' } : { borderBottomColor: '#ffffff' })
-                              : (theme === 'light' ? { borderTopColor: '#111827' } : { borderTopColor: '#ffffff' })
-                          }
-                        />
-                      </div>
+                {apps.map((app) => (
+                  <button
+                    key={app.id}
+                    onClick={() => handleAppClick(app.id)}
+                    className={`flex flex-col items-center p-3 rounded-lg ${itemHover} transition-colors cursor-pointer w-full`}
+                    role="menuitem"
+                  >
+                    <div className={`w-12 h-12 rounded-xl flex items-center justify-center mb-2 ${theme === 'light' ? 'bg-indigo-100' : 'bg-indigo-900/30'}`}>
+                      <AppIcon icon={app.icon} className={`h-6 w-6 ${theme === 'light' ? 'text-indigo-600' : 'text-indigo-400'}`} />
                     </div>
-                  );
-                })}
+                    <span className={`text-xs text-center ${textPrimary} line-clamp-2 leading-tight`}>
+                      {app.name}
+                    </span>
+                  </button>
+                ))} 
               </div>
             )}
           </div>

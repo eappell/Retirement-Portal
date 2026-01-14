@@ -49,6 +49,33 @@ body {
   color-scheme: dark;
 }
 
+/* App launcher tooltip styles - need !important to override admin dashboard forced colors */
+.app-tooltip-light {
+  background-color: #111827 !important;
+  color: #ffffff !important;
+}
+
+.app-tooltip-dark {
+  background-color: #ffffff !important;
+  color: #000000 !important;
+}
+
+.app-tooltip-arrow-bottom-light {
+  border-bottom-color: #111827 !important;
+}
+
+.app-tooltip-arrow-bottom-dark {
+  border-bottom-color: #ffffff !important;
+}
+
+.app-tooltip-arrow-top-light {
+  border-top-color: #111827 !important;
+}
+
+.app-tooltip-arrow-top-dark {
+  border-top-color: #ffffff !important;
+}
+
 /* Dark mode component overrides */
 /* Header background in dark mode: use a deep navy (#1A2A40) for the navbar and matching border */
 .dark header {
@@ -323,13 +350,36 @@ html.light .dashboard-redesign .background-particles .particle-light,
    This counteracts global gradient text clipping and other rules that may make text transparent. */
 .admin-dashboard .admin-heading,
 .admin-dashboard h1,
-.admin-dashboard .dashboard-title,
-.admin-dashboard header,
-.admin-dashboard header * {
+.admin-dashboard .dashboard-title {
   -webkit-text-fill-color: inherit !important;
   -webkit-background-clip: initial !important;
   background-clip: initial !important;
   color: inherit !important;
+  opacity: 1 !important;
+  visibility: visible !important;
+}
+
+/* Header text visibility - exclude tooltips so they can hide properly */
+.admin-dashboard header,
+.admin-dashboard header *:not([role="tooltip"]):not(.header-tooltip) {
+  -webkit-text-fill-color: inherit !important;
+  -webkit-background-clip: initial !important;
+  background-clip: initial !important;
+  color: inherit !important;
+}
+
+/* Force tooltips in admin dashboard header to respect their visibility state */
+.admin-dashboard header [role="tooltip"],
+.admin-dashboard header .header-tooltip {
+  opacity: 0 !important;
+  visibility: hidden !important;
+}
+
+/* Only show tooltips when their parent has the hovered state classes */
+.admin-dashboard header [role="tooltip"].opacity-100,
+.admin-dashboard header .header-tooltip.opacity-100,
+.admin-dashboard header [role="tooltip"].visible,
+.admin-dashboard header .header-tooltip.visible {
   opacity: 1 !important;
   visibility: visible !important;
 }
@@ -395,6 +445,26 @@ html.light .dashboard-redesign .background-particles .particle-light,
 }
 .app-gradient-retire-abroad {
   background-image: linear-gradient(135deg, #60a5fa 0%, #3b82f6 100%);
+}
+
+/* App tile hover behavior: slightly darken the tile's gradient on hover/focus.
+   Uses a brightness filter so it applies consistently to both inline gradients
+*/
+
+/* Temporarily suppress any tooltip-like elements when menus open to avoid
+   tooltips appearing on open. This hides elements that use common patterns
+   (role="tooltip", .header-tooltip, or our data-source tooltips). */
+.suppress-tooltips [role="tooltip"],
+.suppress-tooltips .header-tooltip,
+.suppress-tooltips [data-source="app-launcher-tooltip"],
+.suppress-tooltips [data-source="app-launcher-menu"],
+/* Also catch tooltips injected dynamically that use Tailwind's group-hover utilities */
+.suppress-tooltips [class*="group-hover:visible"],
+.suppress-tooltips [class*="group-hover:opacity-100"] {
+  opacity: 0 !important;
+  visibility: hidden !important;
+  pointer-events: none !important;
+  transition: none !important;
 }
 
 /* App tile hover behavior: slightly darken the tile's gradient on hover/focus.
@@ -867,5 +937,39 @@ p.app-description {
 /* If you prefer these helpers never be visible, uncomment the rule below to
    permanently hide them. Keep them commented by default for accessibility. */
 /* header .group > .absolute.top-full { display: none !important; } */
+
+/* -----------------------------
+   Admin Dashboard tooltip overrides
+   The admin dashboard uses forced text colors that can break tooltip styling.
+   These rules ensure tooltips retain their proper colors AND respect visibility.
+   ----------------------------- */
+
+/* Default: hide all tooltips in admin dashboard */
+.admin-dashboard [role="tooltip"],
+.admin-dashboard .header-tooltip {
+  opacity: 0 !important;
+  visibility: hidden !important;
+  background: rgba(17,24,39,0.95) !important;
+  color: #ffffff !important;
+}
+
+/* Show tooltips only when they have the visible/opacity-100 class (set by React state) */
+.admin-dashboard [role="tooltip"].visible,
+.admin-dashboard [role="tooltip"].opacity-100,
+.admin-dashboard .header-tooltip.visible,
+.admin-dashboard .header-tooltip.opacity-100 {
+  opacity: 1 !important;
+  visibility: visible !important;
+}
+
+.admin-dashboard .app-tooltip-light {
+  background-color: #111827 !important;
+  color: #ffffff !important;
+}
+
+.admin-dashboard .app-tooltip-dark {
+  background: #ffffff !important;
+  color: #000000 !important;
+}
 
 
