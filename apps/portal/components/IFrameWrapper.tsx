@@ -1373,6 +1373,6 @@ export function IFrameWrapper({
         allow="camera;microphone;geolocation"
         sandbox="allow-same-origin allow-scripts allow-popups allow-forms allow-modals allow-top-navigation allow-downloads"
       />
-
+    </div>
   );
 }
