@@ -179,18 +179,18 @@ export function AppLauncher() {
                 No apps available
               </div>
             ) : (
-              <div className="grid grid-cols-3 gap-2">
+              <div className="flex flex-col space-y-1">
                 {apps.map((app) => (
                   <button
                     key={app.id}
                     onClick={() => handleAppClick(app.id)}
-                    className={`flex flex-col items-center p-3 rounded-lg ${itemHover} transition-colors cursor-pointer w-full`}
+                    className={`flex items-center p-2 rounded-lg ${itemHover} transition-colors cursor-pointer w-full text-left`}
                     role="menuitem"
                   >
-                    <div className={`w-12 h-12 rounded-xl flex items-center justify-center mb-2 ${theme === 'light' ? 'bg-indigo-100' : 'bg-indigo-900/30'}`}>
-                      <AppIcon icon={app.icon} className={`h-6 w-6 ${theme === 'light' ? 'text-indigo-600' : 'text-indigo-400'}`} />
+                    <div className={`w-10 h-10 rounded-lg flex items-center justify-center mr-3 shrink-0 ${theme === 'light' ? 'bg-indigo-100' : 'bg-indigo-900/30'}`}>
+                      <AppIcon icon={app.icon} className={`h-5 w-5 ${theme === 'light' ? 'text-indigo-600' : 'text-indigo-400'}`} />
                     </div>
-                    <span className={`text-xs text-center ${textPrimary} line-clamp-2 leading-tight`}>
+                    <span className={`text-sm ${textPrimary} font-medium leading-tight`}>
                       {app.name}
                     </span>
                   </button>
