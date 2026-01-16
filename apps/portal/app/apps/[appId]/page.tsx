@@ -242,13 +242,14 @@ export default function AppPage() {
   const finalAppName = appName || appConfig.name;
 
   return (
-    <div className={`h-full flex flex-col ${theme === 'light' ? 'bg-[#F9F8F6]' : 'bg-[#0f172a]'}`}>
+    <div className={`min-h-screen ${theme === 'light' ? 'bg-[#F9F8F6]' : 'bg-[#0f172a]'}`}>
       <Header />
 
-      {/* App Info Bar */}
+      {/* App Info Bar - sticky below header */}
       <div 
-        className="border-b z-10 flex-none"
+        className="border-b sticky z-10 transition-top duration-300"
         style={{ 
+          top: 'var(--portal-header-height, 4rem)',
           backgroundColor: theme === 'light' ? '#F9F8F6' : '#1e293b',
           borderColor: theme === 'light' ? '#e5e7eb' : '#334155'
         }}
@@ -273,15 +274,13 @@ export default function AppPage() {
       </div>
 
       {/* iFrame Container */}
-      <div className="flex-1 relative overflow-hidden">
-        <IFrameWrapper
-          key={appId}
-          appId={appId}
-          appName={finalAppName}
-          appUrl={finalAppUrl}
-          description={appConfig.description}
-        />
-      </div>
+      <IFrameWrapper
+        key={appId}
+        appId={appId}
+        appName={finalAppName}
+        appUrl={finalAppUrl}
+        description={appConfig.description}
+      />
     </div>
   );
 }

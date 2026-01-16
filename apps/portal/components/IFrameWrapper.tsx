@@ -1342,12 +1342,21 @@ export function IFrameWrapper({
   }
 
   return (
+    <div className="relative">
       <iframe
         key={appUrl}
         ref={iframeRef}
         src={appUrl}
         title={appName}
-        className="w-full h-full border-0 block"
+        className="w-full border-0 block overflow-auto"
+        style={{ 
+          height: (appId === 'retire-abroad' || appId === 'retire-abroad-ai') 
+            ? 'calc(100vh - var(--portal-header-height, 100px) - 80px)' 
+            : 'calc(100vh - var(--portal-header-height, 100px) - 130px)', 
+          minHeight: (appId === 'retire-abroad' || appId === 'retire-abroad-ai') 
+            ? 'calc(100vh - var(--portal-header-height, 100px) - 80px)' 
+            : 'calc(100vh - var(--portal-header-height, 100px) - 130px)',
+        }}
         onLoad={() => {
           console.log('[IFrameWrapper] iframe onLoad fired for:', appUrl);
           // Request height immediately on load
