@@ -271,7 +271,7 @@ export default function DashboardPage() {
 
   if (!mounted || !user) {
     return (
-      <div className="flex min-h-screen items-center justify-center bg-gradient-to-br from-[#E8E3DF] to-[#BFCDE0]">
+      <div className="flex h-full items-center justify-center bg-gradient-to-br from-[#E8E3DF] to-[#BFCDE0] py-12">
         <div className="text-center">
           <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-[#0B5394] mx-auto mb-4"></div>
           <p className="text-gray-600">Loading dashboard...</p>
@@ -283,7 +283,7 @@ export default function DashboardPage() {
   
 
   return (
-    <div className="min-h-screen bg-background portal-dashboard dashboard-redesign">
+    <div className="h-full bg-background portal-dashboard dashboard-redesign pb-8">
       <Header />
 
       {/* Background particles (static, no animation) */}
