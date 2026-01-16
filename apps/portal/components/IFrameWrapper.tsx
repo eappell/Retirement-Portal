@@ -1342,18 +1342,12 @@ export function IFrameWrapper({
   }
 
   return (
-    <div className="relative">
       <iframe
         key={appUrl}
         ref={iframeRef}
         src={appUrl}
         title={appName}
-        className="w-full border-0 block overflow-auto"
-        style={{ 
-          height: 'calc(100vh - var(--portal-header-height, 100px) - 130px)', 
-          minHeight: 'calc(100vh - var(--portal-header-height, 100px) - 130px)',
-          maxHeight: 'calc(100vh - var(--portal-header-height, 100px) - 130px)'
-        }}
+        className="w-full h-full border-0 block"
         onLoad={() => {
           console.log('[IFrameWrapper] iframe onLoad fired for:', appUrl);
           // Request height immediately on load
@@ -1370,6 +1364,6 @@ export function IFrameWrapper({
         allow="camera;microphone;geolocation"
         sandbox="allow-same-origin allow-scripts allow-popups allow-forms allow-modals allow-top-navigation allow-downloads"
       />
-    </div>
+
   );
 }
