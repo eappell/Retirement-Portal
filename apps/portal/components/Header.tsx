@@ -12,6 +12,8 @@ import logoSmBlack from "../public/images/RetireWise-Logo-sm-black-notag.png";
 import logoSmWhite from "../public/images/RetireWise-Logo-sm-white-notag.png";
 import logo80Black from "../public/images/RetireWise-Logo-80h-black-tag.png";
 import logo80White from "../public/images/RetireWise-Logo-80h-white-tag.png";
+import nesteggLight from "../public/images/Nestegg-light.png";
+import nesteggDark from "../public/images/NesteggOnly-dark.png";
 import { AppLauncher } from "./AppLauncher";
 import { SunIcon, MoonIcon } from "@heroicons/react/24/outline";
 
@@ -194,6 +196,22 @@ export function Header() {
               priority
             />
           </Link>
+
+          {/* Spacer */}
+          <div className="flex-1" />
+
+          {/* Centered Tagline with Nestegg */}
+          <div className={`hidden lg:flex items-center gap-3 transition-all duration-300 ${isScrolled ? 'opacity-0 invisible' : 'opacity-100 visible'}`}>
+            <span className={`text-lg font-medium ${textSecondary}`}>Plan with Clarity.</span>
+            <Image
+              src={theme === "light" ? nesteggLight : nesteggDark}
+              alt="Nestegg"
+              width={32}
+              height={32}
+              className="w-8 h-8 object-contain hidden"
+            />
+            <span className={`text-lg font-medium ${textSecondary}`}>Live with Confidence.</span>
+          </div>
 
           {/* Spacer */}
           <div className="flex-1" />

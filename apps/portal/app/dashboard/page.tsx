@@ -304,24 +304,6 @@ export default function DashboardPage() {
 
         {/* Apps Grid */}
         <div>
-          <h2 
-            className="mb-2 text-center dashboard-title"
-            style={{ 
-              fontFamily: "'Segoe UI', -apple-system, 'system-ui', system-ui, sans-serif", 
-              fontSize: '48px', 
-              fontWeight: 800, 
-              fontStyle: 'normal',
-              letterSpacing: '-0.02em'
-            }}
-          >
-            Available Tools
-          </h2>
-          <p className="text-center text-slate-400 tagline-with-egg" style={{ fontSize: '20px', fontWeight: 500, marginBottom: '50px', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px' }}>
-            <span>Plan with Clarity.</span>
-            <img src="/images/NesteggOnly-dark.png" alt="" className="tagline-egg tagline-egg-dark" style={{ height: '24px', width: 'auto' }} />
-            <img src="/images/Nestegg-light.png" alt="" className="tagline-egg tagline-egg-light" style={{ height: '24px', width: 'auto' }} />
-            <span>Live with Confidence.</span>
-          </p>
           <div className="tools-grid-custom">
             {apps.map((app, index) => {
               // Determine app type from id/name
@@ -442,7 +424,7 @@ export default function DashboardPage() {
               return (
                 <Link
                   key={app.id}
-                  href={`/apps/${app.id}?name=${encodeURIComponent(app.name)}&url=${encodeURIComponent(effectiveUrl)}`}
+                  href={`/apps/${app.id}`}
                   onClick={() => handleAppClick(app)}
                   data-app-id={app.id}
                   className="app-tile app-tile-unified rounded-2xl shadow-lg hover:shadow-2xl transform transition-all duration-200 hover:scale-[1.035] block group"

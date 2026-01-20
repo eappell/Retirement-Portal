@@ -1,104 +1,35 @@
-import {
-  CalculatorIcon,
-  CurrencyDollarIcon,
-  GlobeAltIcon,
-  BuildingOfficeIcon,
-  CubeIcon,
-  HeartIcon,
-  BellIcon,
-  ChartPieIcon,
-  SparklesIcon,
-  BoltIcon,
-  RocketLaunchIcon,
-  CalendarIcon,
-  BookmarkIcon,
-  CheckCircleIcon,
-  ClipboardDocumentIcon,
-  ShoppingCartIcon,
-  CreditCardIcon,
-  UserGroupIcon,
-  DocumentTextIcon,
-  ChatBubbleLeftIcon,
-  CodeBracketIcon,
-  Cog6ToothIcon,
-  ChartBarIcon,
-  ChartBarSquareIcon,
-  DocumentChartBarIcon,
-  PresentationChartBarIcon,
-  HomeIcon,
-} from "@heroicons/react/24/outline";
+import * as HeroiconsOutline from "@heroicons/react/24/outline";
 
-export const ICON_MAP: Record<string, React.ComponentType<{ className?: string }>> = {
-  Calculator: CalculatorIcon,
-  CalculatorIcon: CalculatorIcon,
+// Default fallback icon
+const { CalculatorIcon } = HeroiconsOutline;
 
-  CurrencyDollar: CurrencyDollarIcon,
-  CurrencyDollarIcon: CurrencyDollarIcon,
-  "Currency Dollar": CurrencyDollarIcon,
+// Build a comprehensive icon map from all Heroicons
+// This maps various name formats to the actual icon components
+const ICON_MAP: Record<string, React.ComponentType<{ className?: string }>> = {};
 
-  Globe: GlobeAltIcon,
-  GlobeAltIcon: GlobeAltIcon,
-  GlobeAlt: GlobeAltIcon,
+// Process all Heroicons and add multiple name variants for each
+Object.entries(HeroiconsOutline).forEach(([name, component]) => {
+  if (!name.endsWith('Icon')) return;
 
-  Building: BuildingOfficeIcon,
-  BuildingOffice: BuildingOfficeIcon,
-  BuildingOfficeIcon: BuildingOfficeIcon,
+  const iconComponent = component as React.ComponentType<{ className?: string }>;
 
-  Cube: CubeIcon,
-  CubeIcon: CubeIcon,
+  // Add the full name (e.g., "CalculatorIcon")
+  ICON_MAP[name] = iconComponent;
 
-  Heart: HeartIcon,
-  HeartIcon: HeartIcon,
-  Bell: BellIcon,
-  BellIcon: BellIcon,
-  "Chart Pie": ChartPieIcon,
-  ChartPie: ChartPieIcon,
-  ChartPieIcon: ChartPieIcon,
-  Chart: ChartBarIcon,
-  ChartBar: ChartBarIcon,
-  ChartBarIcon: ChartBarIcon,
-  "Chart Bar": ChartBarIcon,
-  ChartBarSquare: ChartBarSquareIcon,
-  ChartBarSquareIcon: ChartBarSquareIcon,
-  DocumentChartBar: DocumentChartBarIcon,
-  DocumentChartBarIcon: DocumentChartBarIcon,
-  Sparkles: SparklesIcon,
-  SparklesIcon: SparklesIcon,
-  Bolt: BoltIcon,
-  BoltIcon: BoltIcon,
-  Rocket: RocketLaunchIcon,
-  RocketLaunch: RocketLaunchIcon,
-  RocketLaunchIcon: RocketLaunchIcon,
-  CreditCard: CreditCardIcon,
-  CreditCardIcon: CreditCardIcon,
-  "Credit Card": CreditCardIcon,
-  Shopping: ShoppingCartIcon,
-  ShoppingCart: ShoppingCartIcon,
-  ShoppingCartIcon: ShoppingCartIcon,
-  UserGroup: UserGroupIcon,
-  UserGroupIcon: UserGroupIcon,
-  "User Group": UserGroupIcon,
-  Document: DocumentTextIcon,
-  DocumentTextIcon: DocumentTextIcon,
-  Chat: ChatBubbleLeftIcon,
-  ChatBubbleLeftIcon: ChatBubbleLeftIcon,
-  PresentationChartBar: PresentationChartBarIcon,
-  PresentationChartBarIcon: PresentationChartBarIcon,
-  Calendar: CalendarIcon,
-  CalendarIcon: CalendarIcon,
-  Bookmark: BookmarkIcon,
-  BookmarkIcon: BookmarkIcon,
-  "Check Circle": CheckCircleIcon,
-  CheckCircleIcon: CheckCircleIcon,
-  Clipboard: ClipboardDocumentIcon,
-  ClipboardDocumentIcon: ClipboardDocumentIcon,
-  Code: CodeBracketIcon,
-  CodeBracketIcon: CodeBracketIcon,
-  Cog: Cog6ToothIcon,
-  Cog6ToothIcon: Cog6ToothIcon,
-  Home: HomeIcon,
-  HomeIcon: HomeIcon,
-};
+  // Add without "Icon" suffix (e.g., "Calculator")
+  const withoutSuffix = name.replace(/Icon$/, '');
+  ICON_MAP[withoutSuffix] = iconComponent;
+
+  // Add with spaces between words (e.g., "Calculator" -> "Calculator", "ChartBar" -> "Chart Bar")
+  const withSpaces = withoutSuffix.replace(/([A-Z])/g, ' $1').trim();
+  ICON_MAP[withSpaces] = iconComponent;
+
+  // Add lowercase version
+  ICON_MAP[withoutSuffix.toLowerCase()] = iconComponent;
+});
+
+// Export the map for external use
+export { ICON_MAP };
 
 function toPascalCase(s: string) {
   return s
@@ -111,17 +42,25 @@ function toPascalCase(s: string) {
 export function getIconComponent(name?: string) {
   if (!name) return CalculatorIcon;
 
-  const variants = [name, name.replace(/Icon$/i, "")];
-  variants.push(toPascalCase(name));
-  variants.push(toPascalCase(name.replace(/Icon$/i, "")));
+  // Direct lookup
+  if (ICON_MAP[name]) return ICON_MAP[name];
 
-  for (const v of variants) {
-    if (v && ICON_MAP[v]) return ICON_MAP[v];
-  }
+  // Try without Icon suffix
+  const withoutIcon = name.replace(/Icon$/i, "");
+  if (ICON_MAP[withoutIcon]) return ICON_MAP[withoutIcon];
 
-  const lower = name.toLowerCase().replace(/icon$/i, "");
+  // Try PascalCase versions
+  const pascalName = toPascalCase(name);
+  if (ICON_MAP[pascalName]) return ICON_MAP[pascalName];
+
+  const pascalWithoutIcon = toPascalCase(withoutIcon);
+  if (ICON_MAP[pascalWithoutIcon]) return ICON_MAP[pascalWithoutIcon];
+
+  // Try lowercase lookup
+  const lower = name.toLowerCase().replace(/icon$/i, "").replace(/\s+/g, "");
   for (const key of Object.keys(ICON_MAP)) {
-    if (key.toLowerCase().replace(/icon$/i, "") === lower) return ICON_MAP[key];
+    const keyLower = key.toLowerCase().replace(/icon$/i, "").replace(/\s+/g, "");
+    if (keyLower === lower) return ICON_MAP[key];
   }
 
   return CalculatorIcon;

@@ -16,67 +16,37 @@ import {
   query,
   where,
 } from "firebase/firestore";
-import {
+import * as HeroiconsOutline from "@heroicons/react/24/outline";
+import { AppIcon, getIconColor } from "@/components/icon-map";
+
+// UI icons used directly in this component
+const {
   PlusIcon,
   PencilIcon,
   TrashIcon,
   CheckIcon,
   XMarkIcon,
   PowerIcon,
-  CubeIcon,
-  SparklesIcon,
-  BoltIcon,
-  RocketLaunchIcon,
-  ChartBarIcon,
-  GlobeAltIcon,
-  BuildingOfficeIcon,
-  CalculatorIcon,
-  CreditCardIcon,
-  CurrencyDollarIcon,
-  HomeIcon,
-  UserGroupIcon,
-  DocumentTextIcon,
-  ChatBubbleLeftIcon,
-  ShoppingCartIcon,
-  HeartIcon,
-  BellIcon,
-  ChartPieIcon,
-  CalendarIcon,
-  BookmarkIcon,
   CheckCircleIcon,
-  ClipboardDocumentIcon,
-  CodeBracketIcon,
-  Cog6ToothIcon,
-} from "@heroicons/react/24/outline";
-import { AppIcon, getIconColor } from "@/components/icon-map";
+} = HeroiconsOutline;
 
-// Available HeroIcons for app selection
-const AVAILABLE_ICONS = [
-  { name: "Calculator", component: CalculatorIcon },
-  { name: "Chart Bar", component: ChartBarIcon },
-  { name: "Currency Dollar", component: CurrencyDollarIcon },
-  { name: "Credit Card", component: CreditCardIcon },
-  { name: "Globe", component: GlobeAltIcon },
-  { name: "Rocket", component: RocketLaunchIcon },
-  { name: "Building", component: BuildingOfficeIcon },
-  { name: "Home", component: HomeIcon },
-  { name: "User Group", component: UserGroupIcon },
-  { name: "Document", component: DocumentTextIcon },
-  { name: "Chat", component: ChatBubbleLeftIcon },
-  { name: "Shopping", component: ShoppingCartIcon },
-  { name: "Cube", component: CubeIcon },
-  { name: "Sparkles", component: SparklesIcon },
-  { name: "Bolt", component: BoltIcon },
-  { name: "Heart", component: HeartIcon },
-  { name: "Bell", component: BellIcon },
-  { name: "Chart Pie", component: ChartPieIcon },
-  { name: "Calendar", component: CalendarIcon },
-  { name: "Bookmark", component: BookmarkIcon },
-  { name: "Check Circle", component: CheckCircleIcon },
-  { name: "Clipboard", component: ClipboardDocumentIcon },
-  { name: "Code", component: CodeBracketIcon },
-  { name: "Cog", component: Cog6ToothIcon },
-];
+// Build the full list of available Heroicons for app selection
+// Format icon names for display (e.g., "AcademicCapIcon" -> "Academic Cap")
+function formatIconName(name: string): string {
+  return name
+    .replace(/Icon$/, '')
+    .replace(/([A-Z])/g, ' $1')
+    .trim();
+}
+
+// Get all outline icons and create the AVAILABLE_ICONS array
+const AVAILABLE_ICONS = Object.entries(HeroiconsOutline)
+  .filter(([name]) => name.endsWith('Icon'))
+  .map(([name, component]) => ({
+    name: formatIconName(name),
+    component: component as React.ComponentType<React.SVGProps<SVGSVGElement>>,
+  }))
+  .sort((a, b) => a.name.localeCompare(b.name));
 
 interface App {
   id: string;
@@ -157,6 +127,18 @@ export default function AdminAppsPage() {
   // Dev mode state
   const [devSettings, setDevSettings] = useState<DevSettings>({});
   const [showDevPopover, setShowDevPopover] = useState<string | null>(null);
+
+  // Icon search state
+  const [iconSearch, setIconSearch] = useState("");
+  const [editIconSearch, setEditIconSearch] = useState("");
+
+  // Filter icons based on search
+  const filteredIcons = AVAILABLE_ICONS.filter(icon =>
+    icon.name.toLowerCase().includes(iconSearch.toLowerCase())
+  );
+  const filteredEditIcons = AVAILABLE_ICONS.filter(icon =>
+    icon.name.toLowerCase().includes(editIconSearch.toLowerCase())
+  );
 
   useEffect(() => {
     setMounted(true);
@@ -536,8 +518,15 @@ export default function AdminAppsPage() {
                 <label className="block text-sm font-medium text-gray-700 mb-2">
                   Icon
                 </label>
-                <div className="flex gap-2 flex-wrap">
-                  {AVAILABLE_ICONS.map((iconOption) => {
+                <input
+                  type="text"
+                  value={iconSearch}
+                  onChange={(e) => setIconSearch(e.target.value)}
+                  placeholder="Search icons..."
+                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-indigo-500 focus:border-indigo-500 mb-2"
+                />
+                <div className="flex gap-2 flex-wrap max-h-48 overflow-y-auto p-2 border border-gray-200 rounded-md bg-gray-50">
+                  {filteredIcons.slice(0, 100).map((iconOption) => {
                     const IconComponent = iconOption.component;
                     return (
                       <button
@@ -547,7 +536,7 @@ export default function AdminAppsPage() {
                         className={`p-2 rounded border-2 transition-all ${
                           newApp.icon === iconOption.name
                             ? "border-blue-600 bg-blue-50"
-                            : "border-gray-200 hover:border-gray-300"
+                            : "border-gray-200 hover:border-gray-300 bg-white"
                         }`}
                         title={iconOption.name}
                         style={{
@@ -559,7 +548,16 @@ export default function AdminAppsPage() {
                       </button>
                     );
                   })}
+                  {filteredIcons.length === 0 && (
+                    <p className="text-sm text-gray-500 p-2">No icons found matching "{iconSearch}"</p>
+                  )}
+                  {filteredIcons.length > 100 && (
+                    <p className="text-xs text-gray-400 w-full text-center pt-2">Showing first 100 of {filteredIcons.length} icons. Refine your search.</p>
+                  )}
                 </div>
+                {newApp.icon && (
+                  <p className="text-xs text-gray-500 mt-1">Selected: {newApp.icon}</p>
+                )}
               </div>
             </div>
 
@@ -726,8 +724,15 @@ export default function AdminAppsPage() {
                       <label className="block text-sm font-medium text-gray-700 mb-2">
                         Icon
                       </label>
-                        <div className="flex gap-2 flex-wrap">
-                        {AVAILABLE_ICONS.map((iconOption) => {
+                      <input
+                        type="text"
+                        value={editIconSearch}
+                        onChange={(e) => setEditIconSearch(e.target.value)}
+                        placeholder="Search icons..."
+                        className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-indigo-500 focus:border-indigo-500 mb-2"
+                      />
+                      <div className="flex gap-2 flex-wrap max-h-48 overflow-y-auto p-2 border border-gray-200 rounded-md bg-gray-50">
+                        {filteredEditIcons.slice(0, 100).map((iconOption) => {
                           const IconComponent = iconOption.component;
                           return (
                             <button
@@ -737,7 +742,7 @@ export default function AdminAppsPage() {
                               className={`p-2 rounded border-2 transition-all ${
                                 editForm.icon === iconOption.name
                                   ? "border-blue-600 bg-blue-50"
-                                  : "border-gray-200 hover:border-gray-300"
+                                  : "border-gray-200 hover:border-gray-300 bg-white"
                               }`}
                               title={iconOption.name}
                               style={{
@@ -749,7 +754,16 @@ export default function AdminAppsPage() {
                             </button>
                           );
                         })}
+                        {filteredEditIcons.length === 0 && (
+                          <p className="text-sm text-gray-500 p-2">No icons found matching "{editIconSearch}"</p>
+                        )}
+                        {filteredEditIcons.length > 100 && (
+                          <p className="text-xs text-gray-400 w-full text-center pt-2">Showing first 100 of {filteredEditIcons.length} icons. Refine your search.</p>
+                        )}
                       </div>
+                      {editForm.icon && (
+                        <p className="text-xs text-gray-500 mt-1">Selected: {editForm.icon}</p>
+                      )}
                     </div>
                   </div>
 
