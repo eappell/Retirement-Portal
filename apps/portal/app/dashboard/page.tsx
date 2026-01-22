@@ -445,13 +445,10 @@ export default function DashboardPage() {
                       </div>
 
                       <div className="flex flex-col">
-                        <h3 className="text-2xl text-white" style={{ fontWeight: 800 }}>
+                        <h3 className="text-xl text-white" style={{ fontWeight: 800 }}>
                           {app.name}
                         </h3>
                         <p className="mt-2 app-description">{app.description}</p>
-                        {appStyle.badge && (
-                          <span className="app-tile-badge mt-3">{appStyle.badge}</span>
-                        )}
                       </div>
                     </div>
 

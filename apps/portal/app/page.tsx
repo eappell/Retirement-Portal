@@ -143,7 +143,7 @@ export default function Home() {
               alt="RetireWise" 
               className="h-16 w-auto mx-auto mb-2"
             />
-            <p className="text-gray-600">Plan with Clarity. Live with Confidence.</p>
+            <p className="text-gray-600" style={{ fontFamily: 'Segoe UI, -apple-system, system-ui, sans-serif' }}>Plan with Clarity. Live with Confidence.</p>
           </div>
 
           <div className="space-y-4">
