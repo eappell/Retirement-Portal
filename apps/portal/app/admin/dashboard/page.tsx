@@ -1123,7 +1123,7 @@ export default function AdminDashboard() {
               {appsLoading ? (
                 <p>Loading apps...</p>
               ) : (
-                <div className="space-y-4">
+                <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
                   {appsList.map((app) => {
                     const port = (devSettings[app.id]?.port) || '3000';
                     const openLocalHref = 'http://localhost:' + port;
@@ -1168,7 +1168,6 @@ export default function AdminDashboard() {
                                 </h3>
                                 <p className="text-sm text-gray-600 dark:text-gray-300 mt-1">{app.description || 'No description'}</p>
                                 <p className="text-xs text-gray-500 mt-2">URL: <a href={app.url} target="_blank" rel="noreferrer" className="underline">{app.url}</a></p>
-                                {app.badge && <p className="text-xs inline-block mt-2 px-2 py-1 bg-slate-100 text-sm rounded force-dark-text" style={{color: '#6b5e62'}}>{app.badge}</p>}
                               </div>
 
                               <div className="flex items-center gap-2">
