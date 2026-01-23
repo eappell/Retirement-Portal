@@ -3,8 +3,8 @@
 import React, { useEffect, useRef, useState } from "react";
 import Image from "next/image";
 import { useTheme } from "@/lib/theme";
-import logoBlack from "../public/images/RetireWise-Logo-80h-black-tag.png";
-import logoWhite from "../public/images/RetireWise-Logo-80h-white-tag.png";
+import logoBlack from "../public/images/RetireWise-Logo-black-tagline-240.png";
+import logoWhite from "../public/images/RetireWise-Logo-white-tagline-240.png";
 
 export default function Footer() {
   const { theme } = useTheme();
