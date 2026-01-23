@@ -243,7 +243,7 @@ export function Header() {
             {/* Tier Badge */}
             {!tierLoading && (
               <span
-                className={`hidden sm:inline-block px-3 py-1 rounded-full text-sm font-semibold ${getTierBadgeColor()}`}
+                className={`header-tooltip hidden sm:inline-block px-3 py-1 rounded-full text-sm font-semibold ${getTierBadgeColor()}`}
               >
                 {getTierLabel()}
               </span>
@@ -252,23 +252,20 @@ export function Header() {
             {/* Theme Toggle Button */}
             <button
               onClick={toggleTheme}
-              onPointerMove={() => { setSuppressHoverTooltips(false); setHoveredTheme(true); }}
-              onPointerLeave={() => setHoveredTheme(false)}
-              className={`hidden sm:inline-flex items-center justify-center p-2 rounded-lg ${theme === 'light' ? 'text-gray-700 hover:bg-gray-100' : 'text-gray-300 hover:bg-gray-800'} transition-colors relative cursor-pointer`}
-              title={`Switch to ${theme === "light" ? "dark" : "light"} mode`}
+              className={`group hidden sm:inline-flex items-center justify-center p-2 rounded-lg ${theme === 'light' ? 'text-gray-700 hover:bg-gray-100' : 'text-gray-300 hover:bg-gray-800'} transition-colors relative cursor-pointer`}
+              aria-label={`Switch to ${theme === "light" ? "dark" : "light"} mode`}
             >
               {theme === "light" ? (
                 <SunIcon className="h-5 w-5" />
               ) : (
                 <MoonIcon className="h-5 w-5" />
               )}
-              <div
+              <span
                 role="tooltip"
-                aria-hidden={!hoveredTheme || suppressHoverTooltips}
-                className={`header-tooltip absolute top-full left-1/2 transform -translate-x-1/2 mt-2 px-2 py-1 bg-gray-900 text-white text-xs rounded transition-all whitespace-nowrap z-50 dark:bg-gray-700 ${hoveredTheme && !suppressHoverTooltips ? 'opacity-100 visible' : 'opacity-0 invisible'}`}
+                className="header-tooltip absolute top-full left-1/2 -translate-x-1/2 mt-2"
               >
                 {theme === "light" ? "Dark mode" : "Light mode"}
-              </div>
+              </span>
             </button>
 
             {/* Mobile Menu Button */}

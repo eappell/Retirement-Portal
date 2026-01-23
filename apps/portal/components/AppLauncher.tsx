@@ -13,6 +13,7 @@ interface App {
   icon: string;
   description?: string;
   disabled?: boolean;
+  sortOrder?: number;
 }
 
 // Grid icon with 9 colorful squares (3x3)
@@ -64,12 +65,18 @@ export function AppLauncher() {
               icon: data.icon || "Cube",
               description: data.description,
               disabled: data.disabled,
+              sortOrder: data.sortOrder || 0,
             });
           }
         });
 
-        // Sort alphabetically by name
-        loadedApps.sort((a, b) => a.name.localeCompare(b.name));
+        // Sort by sortOrder first, then alphabetically by name
+        loadedApps.sort((a, b) => {
+          const orderA = a.sortOrder || 0;
+          const orderB = b.sortOrder || 0;
+          if (orderA !== orderB) return orderA - orderB;
+          return a.name.localeCompare(b.name);
+        });
         setApps(loadedApps);
       } catch (error) {
         console.error("Error loading apps:", error);

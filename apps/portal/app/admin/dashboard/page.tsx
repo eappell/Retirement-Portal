@@ -885,7 +885,7 @@ export default function AdminDashboard() {
                         <span className="text-gray-700 dark:text-gray-300">
                           {index + 1}. {app.name}
                         </span>
-                        <span className="px-3 py-1 rounded-full text-sm font-semibold" style={{backgroundColor: '#BFCDE0', color: '#6b5e62'}}>
+                        <span className="px-3 py-1 rounded-full text-sm font-semibold force-dark-text" style={{backgroundColor: '#BFCDE0', color: '#6b5e62'}}>
                           {app.count} launches
                         </span>
                       </div>
@@ -1127,8 +1127,9 @@ export default function AdminDashboard() {
                   {appsList.map((app) => {
                     const port = (devSettings[app.id]?.port) || '3000';
                     const openLocalHref = 'http://localhost:' + port;
+                    const isDevMode = devSettings[app.id]?.enabled;
                     return (
-                      <div key={app.firestoreId} className="border border-gray-100 dark:border-slate-700 rounded-lg p-4">
+                      <div key={app.firestoreId} className={`border rounded-lg p-4 ${isDevMode ? 'bg-red-50 dark:bg-red-900/20 border-red-200 dark:border-red-800' : 'border-gray-100 dark:border-slate-700'}`}>
                         <div className="md:flex md:items-start md:gap-6">
                           <div className="flex-shrink-0">
                             <div className="w-16 h-16 rounded-lg flex items-center justify-center" style={{ background: app.gradient || '#0B5394' }}>

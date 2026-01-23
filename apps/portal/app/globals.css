@@ -200,20 +200,24 @@ body {
 } 
 
 
-/* Tools grid similar to sample: 2 columns on wide screens, 1 column on narrow screens */
+/* Tools grid: 3 columns -> 2 columns -> 1 column responsive */
 .tools-grid-custom {
   display: grid;
-  grid-template-columns: repeat(2, minmax(0, 1fr));
+  grid-template-columns: repeat(3, 1fr);
   column-gap: 24px;
   row-gap: 24px;
   align-items: stretch; /* Equal height tiles */
 }
 
-@media (max-width: 1080px) {
+@media (max-width: 1024px) {
+  .tools-grid-custom {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+@media (max-width: 640px) {
   .tools-grid-custom {
     grid-template-columns: 1fr;
-    column-gap: 24px;
-    row-gap: 24px;
   }
 }
 
@@ -745,7 +749,9 @@ button:disabled, button[disabled], input[disabled], [disabled], .disabled, .disa
 h1{ font-size:3rem; font-weight:800; margin-bottom:16px; background:var(--title-gradient); -webkit-background-clip:text; background-clip:text; letter-spacing:-0.02em }
 .subtitle{ font-size:1.25rem; color:var(--muted); font-weight:500 }
 .tools-grid{ display:grid; grid-template-columns: repeat(3, minmax(300px,1fr)); gap:24px; margin-bottom:48px }
-.tools-grid-custom{ display:grid; grid-template-columns: repeat(3, minmax(300px,1fr)); gap:24px; margin-bottom:48px }
+.tools-grid-custom{ display:grid; grid-template-columns: repeat(3, 1fr); gap:24px; margin-bottom:48px }
+@media (max-width: 1024px) { .tools-grid-custom { grid-template-columns: repeat(2, 1fr); } }
+@media (max-width: 640px) { .tools-grid-custom { grid-template-columns: 1fr; } }
 .tool-card{ background: var(--card-bg); -webkit-backdrop-filter: blur(10px); backdrop-filter: blur(10px); border:1px solid var(--card-border); border-radius:24px; padding:28px; min-height:150px; position:relative; overflow:hidden; cursor:pointer; transition: transform .28s cubic-bezier(.4,0,.2,1), box-shadow .28s }
 .tool-card:hover{ transform: translateY(-6px) scale(1.03); border-color: rgba(0,0,0,0.08); box-shadow:0 18px 40px rgba(0,0,0,0.12) }
 .tool-card.income{ background: linear-gradient(135deg, rgba(16,185,129,0.06) 0%, rgba(5,150,105,0.04) 100%) }
