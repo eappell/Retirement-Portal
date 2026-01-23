@@ -283,7 +283,7 @@ export default function DashboardPage() {
   
 
   return (
-    <div className="h-full bg-background portal-dashboard dashboard-redesign pb-8">
+    <div className="h-full bg-background portal-dashboard dashboard-redesign pb-0">
       <Header />
 
       {/* Background particles (static, no animation) */}
@@ -299,7 +299,7 @@ export default function DashboardPage() {
 
 
 
-      <main className="max-w-[1400px] mx-auto px-4 py-12 sm:px-6 lg:px-8">
+      <main className="max-w-[1400px] mx-auto px-4 pt-10 pb-4 sm:px-6 lg:px-8">
         {/* User info card removed: information is available in the header */}
 
         {/* Apps Grid */}
@@ -461,7 +461,7 @@ export default function DashboardPage() {
         </div>
 
         {/* Stats Section */}
-        <div className="stats-section mt-12">
+        <div className="stats-section mt-6">
           <div className="stat-card">
             <div className="stat-value">{apps.length}</div>
             <div className="stat-label">Planning Tools</div>
@@ -471,8 +471,8 @@ export default function DashboardPage() {
             <div className="stat-label">Powered Insights</div>
           </div>
           <div className="stat-card">
-            <div className="stat-value">100%</div>
-            <div className="stat-label">Free to Use</div>
+            <div className="stat-value">No Sales</div>
+            <div className="stat-label">No Fiancial Product Sales</div>
           </div>
           <div className="stat-card">
             <div className="stat-value">∞</div>
