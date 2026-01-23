@@ -283,7 +283,7 @@ export default function DashboardPage() {
   
 
   return (
-    <div className="h-full bg-background portal-dashboard dashboard-redesign pb-0">
+    <div className="flex-1 bg-background portal-dashboard dashboard-redesign pb-0">
       <Header />
 
       {/* Background particles (static, no animation) */}
