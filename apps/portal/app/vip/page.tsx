@@ -2,6 +2,8 @@
 
 import React, { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
+import { signInWithCustomToken } from 'firebase/auth';
+import { auth } from '@/lib/firebase';
 
 const VipPage: React.FC = () => {
   const router = useRouter();
@@ -19,19 +21,29 @@ const VipPage: React.FC = () => {
           return;
         }
 
-        const user = data.user;
-
-        // Persist portalUser and userRole for same-origin access
-        try {
-          localStorage.setItem('portalUser', JSON.stringify(user));
-          localStorage.setItem('userRole', user.tier || 'paid');
-        } catch (err) {
-          console.warn('Failed to write VIP localStorage', err);
+        const tokenStr = data.token;
+        if (!tokenStr) {
+          setStatus('VIP endpoint did not return a token');
+          return;
         }
 
-        setStatus('VIP access granted — redirecting to dashboard...');
-        // Slight delay so UI updates before redirect
-        setTimeout(() => router.push('/dashboard'), 600);
+        // Sign in with the custom token to create a real Firebase auth session
+        try {
+          const cred = await signInWithCustomToken(auth, tokenStr);
+          const u = cred.user;
+          const portalUser = { userId: u.uid, email: u.email || null, tier: 'paid', name: 'VIP User' };
+          try {
+            localStorage.setItem('portalUser', JSON.stringify(portalUser));
+            localStorage.setItem('userRole', 'paid');
+          } catch (err) {
+            console.warn('Failed to write VIP localStorage after sign-in', err);
+          }
+          setStatus('VIP access granted — redirecting to dashboard...');
+          setTimeout(() => router.push('/dashboard'), 600);
+        } catch (err) {
+          console.error('Failed to sign in with custom token', err);
+          setStatus('Failed to sign in with VIP token');
+        }
       } catch (err) {
         console.error('VIP error', err);
         setStatus('VIP failed: ' + String(err));
