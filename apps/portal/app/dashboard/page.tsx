@@ -472,7 +472,7 @@ export default function DashboardPage() {
           </div>
           <div className="stat-card">
             <div className="stat-value">No Sales</div>
-            <div className="stat-label">No Fiancial Product Sales</div>
+            <div className="stat-label">No Financial Product Sales</div>
           </div>
           <div className="stat-card">
             <div className="stat-value">∞</div>
