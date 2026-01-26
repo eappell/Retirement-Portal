@@ -445,7 +445,7 @@ export default function DashboardPage() {
                       </div>
 
                       <div className="flex flex-col">
-                        <h3 className="text-xl text-white" style={{ fontWeight: 800 }}>
+                        <h3 className="text-xl text-white" style={{ fontWeight: 700 }}>
                           {app.name}
                         </h3>
                         <p className="mt-2 app-description">{app.description}</p>
