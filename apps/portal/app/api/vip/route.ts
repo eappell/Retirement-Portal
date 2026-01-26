@@ -74,7 +74,54 @@ export async function GET(request: Request) {
     const additionalClaims = { tier: 'paid', vip: true };
     const customToken = await admin.auth().createCustomToken(uid, additionalClaims);
 
-    // Audit log to Firestore if available
+    // Attempt to exchange the custom token for an ID token and create a session cookie
+    let sessionCreated = false;
+    try {
+      const apiKey = process.env.NEXT_PUBLIC_FIREBASE_API_KEY || process.env.FIREBASE_API_KEY || '';
+      if (apiKey) {
+        const resp = await fetch(`https://identitytoolkit.googleapis.com/v1/accounts:signInWithCustomToken?key=${encodeURIComponent(apiKey)}`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ token: customToken, returnSecureToken: true }),
+        });
+        if (resp.ok) {
+          const body = await resp.json();
+          const idToken = body.idToken;
+          const expiresInSeconds = parseInt(body.expiresIn || '3600', 10);
+          // session cookie expiry capped at 14 days per Firebase recommendations
+          const maxSessionMs = 14 * 24 * 60 * 60 * 1000;
+          const sessionExpiryMs = Math.min(expiresInSeconds * 1000, maxSessionMs);
+          const sessionCookie = await admin.auth().createSessionCookie(idToken, { expiresIn: sessionExpiryMs });
+
+          // Set HttpOnly Secure cookie
+          const maxAge = Math.floor(sessionExpiryMs / 1000);
+          const cookie = `session=${sessionCookie}; Path=/; HttpOnly; Secure; SameSite=Strict; Max-Age=${maxAge}`;
+
+          // Audit log to Firestore if available (include cookie flag)
+          try {
+            const db = admin.firestore();
+            const ip = request.headers.get('x-forwarded-for') || request.headers.get('x-real-ip') || 'unknown';
+            await db.collection('vip_audit').add({
+              uid,
+              issuedAt: admin.firestore.FieldValue.serverTimestamp(),
+              requesterIp: ip,
+              via: 'vip_endpoint',
+              sessionCookie: true,
+            });
+          } catch (err) {
+            console.warn('Failed to write VIP audit log:', err);
+          }
+
+          const res = NextResponse.json({ ok: true, cookieSet: true });
+          res.headers.set('Set-Cookie', cookie);
+          return res;
+        }
+      }
+    } catch (err) {
+      console.warn('Failed to create session cookie for VIP:', err);
+    }
+
+    // Audit log to Firestore if available (no cookie)
     try {
       const db = admin.firestore();
       const ip = request.headers.get('x-forwarded-for') || request.headers.get('x-real-ip') || 'unknown';
@@ -88,6 +135,7 @@ export async function GET(request: Request) {
       console.warn('Failed to write VIP audit log:', err);
     }
 
+    // Fallback: return the custom token so JS-capable agents can sign in
     return NextResponse.json({ ok: true, token: customToken });
   } catch (err) {
     console.error('VIP route error:', err);
