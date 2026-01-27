@@ -1,6 +1,7 @@
 import { NextResponse } from 'next/server';
 import fs from 'fs';
 import path from 'path';
+import { importPKCS8, SignJWT } from 'jose';
 
 // VIP route: mints a short-lived Firebase custom token for automated VIP access
 // Requires environment vars:
@@ -100,6 +101,32 @@ function initAdminIfNeeded() {
   }
 }
 
+async function tryFallbackSignCustomToken(serviceAccount: any, uid: string, additionalClaims: any) {
+  try {
+    if (!serviceAccount || !serviceAccount.private_key || !serviceAccount.client_email) return null;
+    const privateKeyPem = serviceAccount.private_key as string;
+    const clientEmail = serviceAccount.client_email as string;
+    const now = Math.floor(Date.now() / 1000);
+    const key = await importPKCS8(privateKeyPem, 'RS256');
+    const payload: any = {
+      iss: clientEmail,
+      sub: clientEmail,
+      aud: 'https://identitytoolkit.googleapis.com/google.identity.identitytoolkit.v1.IdentityToolkit',
+      uid,
+      claims: additionalClaims || {},
+    };
+    const jwt = await new SignJWT(payload)
+      .setProtectedHeader({ alg: 'RS256', typ: 'JWT' })
+      .setIssuedAt(now)
+      .setExpirationTime(now + 60 * 60) // 1h
+      .sign(key as any);
+    return jwt;
+  } catch (err) {
+    console.warn('Fallback custom token signing failed:', err);
+    return null;
+  }
+}
+
 export async function GET(request: Request) {
   try {
     const url = new URL(request.url);
@@ -181,6 +208,51 @@ export async function GET(request: Request) {
           },
         }, { status: 501 });
       }
+      // Attempt a lightweight fallback: sign a Firebase custom token directly with the
+      // service account private key (avoids requiring `firebase-admin` and its transitive deps).
+      try {
+        // Re-parse service account env here (same heuristics as initAdminIfNeeded)
+        let serviceAccount: any = null;
+        const saJson = process.env.FIREBASE_SERVICE_ACCOUNT_JSON;
+        const saPath = process.env.FIREBASE_SERVICE_ACCOUNT_PATH;
+        try {
+          if (saJson) {
+            try { serviceAccount = JSON.parse(saJson); } catch (e1) {
+              try { serviceAccount = JSON.parse(saJson.replace(/\\n/g, '\n')); } catch (e2) {
+                try { serviceAccount = JSON.parse(Buffer.from(saJson, 'base64').toString('utf8')); } catch (e3) { /* ignore */ }
+              }
+            }
+          } else if (saPath && fs.existsSync(saPath)) {
+            serviceAccount = JSON.parse(fs.readFileSync(saPath, 'utf8'));
+          }
+        } catch (e) { /* ignore */ }
+
+        if (serviceAccount && serviceAccount.private_key && serviceAccount.client_email) {
+          const requestedUid = url.searchParams.get('uid');
+          const uid = requestedUid || `vip-${Date.now()}`;
+          const additionalClaims = { tier: 'paid', vip: true };
+          const fallbackToken = await tryFallbackSignCustomToken(serviceAccount, uid, additionalClaims);
+          // If we created a token, try to exchange it for an ID token so JS-less clients can still use it
+          let idToken: string | null = null;
+          try {
+            const apiKey = process.env.NEXT_PUBLIC_FIREBASE_API_KEY || process.env.FIREBASE_API_KEY || '';
+            if (fallbackToken && apiKey) {
+              const resp = await fetch(`https://identitytoolkit.googleapis.com/v1/accounts:signInWithCustomToken?key=${encodeURIComponent(apiKey)}`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ token: fallbackToken, returnSecureToken: true }),
+              });
+              if (resp.ok) {
+                const body = await resp.json();
+                idToken = body.idToken || null;
+              }
+            }
+          } catch (e) { /* ignore */ }
+
+          return NextResponse.json({ ok: true, token: fallbackToken, idToken, fallback: true });
+        }
+      } catch (e) { /* ignore */ }
+
       return NextResponse.json({ ok: false, error: 'FIREBASE service account not configured on server' }, { status: 501 });
     }
 
