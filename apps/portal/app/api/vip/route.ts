@@ -18,7 +18,8 @@ function initAdminIfNeeded() {
     // eslint-disable-next-line no-eval
     admin = eval("require('firebase-admin')");
   } catch (err) {
-    adminRequireError = String(err && err.stack ? err.stack : err);
+    const _err: any = err;
+    adminRequireError = String(_err && _err.stack ? _err.stack : _err);
     console.warn('firebase-admin not available:', err);
     return;
   }
