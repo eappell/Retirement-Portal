@@ -101,6 +101,42 @@ function initAdminIfNeeded() {
   }
 }
 
+function parseServiceAccountEnv() {
+  let serviceAccount: any = null;
+  let parseError: string | null = null;
+  try {
+    const saJson = process.env.FIREBASE_SERVICE_ACCOUNT_JSON;
+    const saPath = process.env.FIREBASE_SERVICE_ACCOUNT_PATH;
+    if (saJson) {
+      try {
+        serviceAccount = JSON.parse(saJson);
+      } catch (err1) {
+        try {
+          serviceAccount = JSON.parse(saJson.replace(/\\n/g, '\n'));
+          parseError = null;
+        } catch (err2) {
+          try {
+            const decoded = Buffer.from(saJson, 'base64').toString('utf8');
+            serviceAccount = JSON.parse(decoded);
+            parseError = null;
+          } catch (err3) {
+            parseError = String(err1 && err1.stack ? err1.stack : err1) + '\n' + String(err2 && err2.stack ? err2.stack : err2) + '\n' + String(err3 && err3.stack ? err3.stack : err3);
+          }
+        }
+      }
+    } else if (process.env.FIREBASE_SERVICE_ACCOUNT_PATH && fs.existsSync(process.env.FIREBASE_SERVICE_ACCOUNT_PATH)) {
+      try {
+        serviceAccount = JSON.parse(fs.readFileSync(process.env.FIREBASE_SERVICE_ACCOUNT_PATH, 'utf8'));
+      } catch (e) {
+        parseError = String(e && e.stack ? e.stack : e);
+      }
+    }
+  } catch (e) {
+    parseError = String(e && e.stack ? e.stack : e);
+  }
+  return { serviceAccount, parseError };
+}
+
 function base64UrlEncode(input: Buffer | string) {
   const buf = typeof input === 'string' ? Buffer.from(input, 'utf8') : input;
   return buf.toString('base64').replace(/\+/g, '-').replace(/\//g, '_').replace(/=+$/, '');
@@ -162,6 +198,19 @@ export async function GET(request: Request) {
         initAdminIfNeeded();
       } catch (e) {
         /* ignore - diagnostics will capture require/init errors */
+      }
+      // Also try parsing the service account env so debug output shows parse results even
+      // when `firebase-admin` failed to require due to missing transitive deps.
+      try {
+        const parsed = parseServiceAccountEnv();
+        serviceAccountParsed = !!parsed.serviceAccount;
+        serviceAccountParseError = parsed.parseError;
+        serviceAccountInfo = parsed.serviceAccount ? {
+          project_id: parsed.serviceAccount.project_id,
+          client_email: parsed.serviceAccount.client_email,
+        } : null;
+      } catch (e) {
+        /* ignore */
       }
       const saJson = process.env.FIREBASE_SERVICE_ACCOUNT_JSON;
       const saPath = process.env.FIREBASE_SERVICE_ACCOUNT_PATH;
