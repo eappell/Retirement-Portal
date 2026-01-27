@@ -10,6 +10,10 @@ import path from 'path';
 let adminInitialized = false;
 let admin: any = null;
 let adminRequireError: any = null;
+let serviceAccountParsed = false;
+let serviceAccountInfo: any = null;
+let serviceAccountParseError: any = null;
+let adminInitError: any = null;
 
 function initAdminIfNeeded() {
   if (adminInitialized) return;
@@ -37,16 +41,21 @@ function initAdminIfNeeded() {
       try {
         serviceAccount = JSON.parse(saJson);
       } catch (err1) {
+        serviceAccountParseError = String(err1 || err1?.stack || err1);
         try {
           // Try replacing escaped newlines
           const replaced = saJson.replace(/\\n/g, '\n');
           serviceAccount = JSON.parse(replaced);
+          serviceAccountParseError = null;
         } catch (err2) {
+          serviceAccountParseError = serviceAccountParseError + '\n' + String(err2 || err2?.stack || err2);
           try {
             // Try base64 decode
             const decoded = Buffer.from(saJson, 'base64').toString('utf8');
             serviceAccount = JSON.parse(decoded);
+            serviceAccountParseError = null;
           } catch (err3) {
+            serviceAccountParseError = serviceAccountParseError + '\n' + String(err3 || err3?.stack || err3);
             console.warn('Failed to parse FIREBASE_SERVICE_ACCOUNT_JSON using JSON, escaped-newlines, or base64 methods');
           }
         }
@@ -64,7 +73,17 @@ function initAdminIfNeeded() {
         admin.initializeApp({ credential: admin.credential.cert(serviceAccount) });
       }
       adminInitialized = true;
+      serviceAccountParsed = true;
+      try {
+        serviceAccountInfo = {
+          project_id: serviceAccount.project_id,
+          client_email: serviceAccount.client_email,
+        };
+      } catch (e) {
+        serviceAccountInfo = null;
+      }
     } catch (err) {
+      adminInitError = String(err && err.stack ? err.stack : err);
       console.warn('Failed to initialize firebase-admin:', err);
     }
   }
