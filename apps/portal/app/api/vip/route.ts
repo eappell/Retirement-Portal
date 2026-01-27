@@ -184,6 +184,25 @@ function tryFallbackSignCustomToken(serviceAccount: any, uid: string, additional
   }
 }
 
+function createVipSessionCookie(uid: string, maxAgeSeconds = 14 * 24 * 60 * 60) {
+  try {
+    const secret = process.env.VIP_HMAC_SECRET;
+    if (!secret) return null;
+    const now = Math.floor(Date.now() / 1000);
+    const payload = { uid, iat: now, exp: now + maxAgeSeconds };
+    const payloadB64 = base64UrlEncode(JSON.stringify(payload));
+    const hmac = crypto.createHmac('sha256', secret).update(payloadB64).digest();
+    const sig = base64UrlEncode(hmac);
+    const cookieVal = `${payloadB64}.${sig}`;
+    const secureFlag = process.env.NODE_ENV === 'production' ? 'Secure; ' : '';
+    const cookie = `vip_session=${cookieVal}; Path=/; HttpOnly; ${secureFlag}SameSite=Strict; Max-Age=${maxAgeSeconds}`;
+    return cookie;
+  } catch (e) {
+    console.warn('Failed to create VIP session cookie:', e);
+    return null;
+  }
+}
+
 export async function GET(request: Request) {
   try {
     const url = new URL(request.url);
@@ -319,7 +338,21 @@ export async function GET(request: Request) {
             }
           } catch (e) { /* ignore */ }
 
-          return NextResponse.json({ ok: true, token: fallbackToken, idToken, fallback: true });
+          const body = { ok: true, token: fallbackToken, idToken, fallback: true };
+          const res = NextResponse.json(body);
+          try {
+            const cookie = createVipSessionCookie(uid, Math.floor((14 * 24 * 60 * 60)));
+            if (cookie) {
+              res.headers.set('Set-Cookie', cookie);
+              (body as any).cookieSet = true;
+            } else {
+              (body as any).cookieSet = false;
+            }
+          } catch (e) {
+            /* ignore */
+          }
+          // Return the response (body may have cookieSet)
+          return res;
         }
       } catch (e) { /* ignore */ }
 
