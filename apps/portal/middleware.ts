@@ -46,7 +46,15 @@ export function middleware(req: NextRequest) {
     const requestHeaders = new Headers(req.headers);
     requestHeaders.set('x-vip-uid', uid);
 
-    return NextResponse.next({ request: { headers: requestHeaders } });
+    const res = NextResponse.next({ request: { headers: requestHeaders } });
+    try {
+      // Also put the uid on the response for easier verification in tests
+      res.headers.set('x-vip-uid', uid);
+      res.headers.set('x-vip-auth', '1');
+    } catch (e) {
+      /* ignore */
+    }
+    return res;
   } catch (err) {
     return NextResponse.next();
   }
