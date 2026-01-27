@@ -113,9 +113,10 @@ export async function GET(request: Request) {
           const sessionExpiryMs = Math.min(expiresInSeconds * 1000, maxSessionMs);
           const sessionCookie = await admin.auth().createSessionCookie(idToken, { expiresIn: sessionExpiryMs });
 
-          // Set HttpOnly Secure cookie
+          // Set HttpOnly cookie. Only include `Secure` in production so local http dev works.
           const maxAge = Math.floor(sessionExpiryMs / 1000);
-          const cookie = `session=${sessionCookie}; Path=/; HttpOnly; Secure; SameSite=Strict; Max-Age=${maxAge}`;
+          const secureFlag = process.env.NODE_ENV === 'production' ? 'Secure; ' : '';
+          const cookie = `session=${sessionCookie}; Path=/; HttpOnly; ${secureFlag}SameSite=Strict; Max-Age=${maxAge}`;
 
           // Audit log to Firestore if available (include cookie flag)
           try {
