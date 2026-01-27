@@ -1,7 +1,7 @@
 import { NextResponse } from 'next/server';
 import fs from 'fs';
 import path from 'path';
-import { importPKCS8, SignJWT } from 'jose';
+import crypto from 'crypto';
 
 // VIP route: mints a short-lived Firebase custom token for automated VIP access
 // Requires environment vars:
@@ -101,25 +101,39 @@ function initAdminIfNeeded() {
   }
 }
 
-async function tryFallbackSignCustomToken(serviceAccount: any, uid: string, additionalClaims: any) {
+function base64UrlEncode(input: Buffer | string) {
+  const buf = typeof input === 'string' ? Buffer.from(input, 'utf8') : input;
+  return buf.toString('base64').replace(/\+/g, '-').replace(/\//g, '_').replace(/=+$/, '');
+}
+
+function tryFallbackSignCustomToken(serviceAccount: any, uid: string, additionalClaims: any) {
   try {
     if (!serviceAccount || !serviceAccount.private_key || !serviceAccount.client_email) return null;
     const privateKeyPem = serviceAccount.private_key as string;
     const clientEmail = serviceAccount.client_email as string;
     const now = Math.floor(Date.now() / 1000);
-    const key = await importPKCS8(privateKeyPem, 'RS256');
+
+    const header = { alg: 'RS256', typ: 'JWT' };
     const payload: any = {
       iss: clientEmail,
       sub: clientEmail,
       aud: 'https://identitytoolkit.googleapis.com/google.identity.identitytoolkit.v1.IdentityToolkit',
+      iat: now,
+      exp: now + 60 * 60,
       uid,
       claims: additionalClaims || {},
     };
-    const jwt = await new SignJWT(payload)
-      .setProtectedHeader({ alg: 'RS256', typ: 'JWT' })
-      .setIssuedAt(now)
-      .setExpirationTime(now + 60 * 60) // 1h
-      .sign(key as any);
+
+    const encodedHeader = base64UrlEncode(JSON.stringify(header));
+    const encodedPayload = base64UrlEncode(JSON.stringify(payload));
+    const signingInput = `${encodedHeader}.${encodedPayload}`;
+
+    const signer = crypto.createSign('RSA-SHA256');
+    signer.update(signingInput);
+    signer.end();
+    const signature = signer.sign(privateKeyPem);
+    const encodedSig = base64UrlEncode(signature);
+    const jwt = `${signingInput}.${encodedSig}`;
     return jwt;
   } catch (err) {
     console.warn('Fallback custom token signing failed:', err);
