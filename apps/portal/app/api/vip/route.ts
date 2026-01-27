@@ -235,6 +235,20 @@ export async function GET(request: Request) {
           project_id: parsed.serviceAccount.project_id,
           client_email: parsed.serviceAccount.client_email,
         } : null;
+        // If VIP_HMAC_SECRET is present, include a debug cookie so callers can see exact Set-Cookie
+        // string that would be set by the fallback path. This is only included in debug mode
+        // and when the token matches the VIP token.
+        try {
+          const secretPresent = !!process.env.VIP_HMAC_SECRET;
+          if (secretPresent) {
+            const debugUid = `vip-debug-${Date.now()}`;
+            const debugCookie = createVipSessionCookie(debugUid, 14 * 24 * 60 * 60);
+            // attach to diagnostics for debug visibility
+            (serviceAccountInfo as any)._debugCookie = debugCookie || null;
+          }
+        } catch (e) {
+          /* ignore */
+        }
       } catch (e) {
         /* ignore */
       }
