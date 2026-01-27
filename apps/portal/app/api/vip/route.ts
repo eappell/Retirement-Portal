@@ -9,6 +9,7 @@ import path from 'path';
 
 let adminInitialized = false;
 let admin: any = null;
+let adminRequireError: any = null;
 
 function initAdminIfNeeded() {
   if (adminInitialized) return;
@@ -17,6 +18,7 @@ function initAdminIfNeeded() {
     // eslint-disable-next-line no-eval
     admin = eval("require('firebase-admin')");
   } catch (err) {
+    adminRequireError = String(err && err.stack ? err.stack : err);
     console.warn('firebase-admin not available:', err);
     return;
   }
@@ -91,6 +93,8 @@ export async function GET(request: Request) {
         const saPath = process.env.FIREBASE_SERVICE_ACCOUNT_PATH;
         const resolved = saPath ? path.resolve(saPath) : null;
         const exists = saPath ? fs.existsSync(saPath) : false;
+        const nmExists = fs.existsSync(path.resolve(process.cwd(), 'node_modules', 'firebase-admin'));
+        const requireErr = adminRequireError || null;
         return NextResponse.json({
           ok: false,
           error: 'FIREBASE service account not configured on server',
@@ -100,6 +104,8 @@ export async function GET(request: Request) {
             resolvedPath: resolved,
             pathExists: exists,
             hasSaJsonEnv: !!saJson,
+            nodeModuleFirebaseAdminExists: nmExists,
+            adminRequireError: requireErr,
           },
         }, { status: 501 });
       }
