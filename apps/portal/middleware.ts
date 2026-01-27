@@ -45,12 +45,24 @@ export function middleware(req: NextRequest) {
 
     const requestHeaders = new Headers(req.headers);
     requestHeaders.set('x-vip-uid', uid);
+    // Forward a portal-friendly user id and tier so server APIs can treat
+    // VIP traffic as a paid user without depending on firebase-admin.
+    requestHeaders.set('x-portal-user-id', uid);
+    requestHeaders.set('x-portal-user-tier', 'paid');
+    // Also include a compact JSON user blob for convenience in backend handlers
+    try {
+      requestHeaders.set('x-portal-user', JSON.stringify({ uid, tier: 'paid' }));
+    } catch (e) {
+      // ignore JSON errors
+    }
 
     const res = NextResponse.next({ request: { headers: requestHeaders } });
     try {
       // Also put the uid on the response for easier verification in tests
       res.headers.set('x-vip-uid', uid);
       res.headers.set('x-vip-auth', '1');
+      res.headers.set('x-portal-user-id', uid);
+      res.headers.set('x-portal-user-tier', 'paid');
     } catch (e) {
       /* ignore */
     }
