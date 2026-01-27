@@ -133,6 +133,10 @@ export async function GET(request: Request) {
           nodeModuleFirebaseAdminExists: nmExists,
           firebaseAdminVersion: nmVersion,
           adminRequireError: adminRequireError || null,
+          serviceAccountParsed: serviceAccountParsed || false,
+          serviceAccountParseError: serviceAccountParseError || null,
+          serviceAccountInfo: serviceAccountInfo || null,
+          adminInitError: adminInitError || null,
         },
       });
     }
