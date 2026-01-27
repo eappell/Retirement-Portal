@@ -109,6 +109,12 @@ export async function GET(request: Request) {
     // Production-only debug: allow returning environment diagnostics when explicitly requested
     // Usage: /api/vip?token=...&debug=1
     if (token === vipToken && url.searchParams.get('debug') === '1') {
+      // Ensure we attempt initialization so diagnostics reflect parsing/init results
+      try {
+        initAdminIfNeeded();
+      } catch (e) {
+        /* ignore - diagnostics will capture require/init errors */
+      }
       const saJson = process.env.FIREBASE_SERVICE_ACCOUNT_JSON;
       const saPath = process.env.FIREBASE_SERVICE_ACCOUNT_PATH;
       const resolved = saPath ? path.resolve(saPath) : null;
