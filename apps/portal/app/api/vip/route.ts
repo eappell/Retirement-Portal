@@ -27,7 +27,27 @@ function initAdminIfNeeded() {
   let serviceAccount: any = null;
   try {
     if (saJson) {
-      serviceAccount = JSON.parse(saJson);
+      // Support three common ways the JSON may be provided in environment vars:
+      // 1) Raw JSON string
+      // 2) Newline-escaped JSON (contains literal "\\n")
+      // 3) Base64-encoded JSON
+      try {
+        serviceAccount = JSON.parse(saJson);
+      } catch (err1) {
+        try {
+          // Try replacing escaped newlines
+          const replaced = saJson.replace(/\\n/g, '\n');
+          serviceAccount = JSON.parse(replaced);
+        } catch (err2) {
+          try {
+            // Try base64 decode
+            const decoded = Buffer.from(saJson, 'base64').toString('utf8');
+            serviceAccount = JSON.parse(decoded);
+          } catch (err3) {
+            console.warn('Failed to parse FIREBASE_SERVICE_ACCOUNT_JSON using JSON, escaped-newlines, or base64 methods');
+          }
+        }
+      }
     } else if (saPath && fs.existsSync(saPath)) {
       serviceAccount = JSON.parse(fs.readFileSync(saPath, 'utf8'));
     }
