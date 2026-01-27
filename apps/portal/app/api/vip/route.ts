@@ -41,21 +41,24 @@ function initAdminIfNeeded() {
       try {
         serviceAccount = JSON.parse(saJson);
       } catch (err1) {
-        serviceAccountParseError = String(err1 || err1?.stack || err1);
+        const _e1: any = err1;
+        serviceAccountParseError = String(_e1 && _e1.stack ? _e1.stack : _e1);
         try {
           // Try replacing escaped newlines
           const replaced = saJson.replace(/\\n/g, '\n');
           serviceAccount = JSON.parse(replaced);
           serviceAccountParseError = null;
         } catch (err2) {
-          serviceAccountParseError = serviceAccountParseError + '\n' + String(err2 || err2?.stack || err2);
+          const _e2: any = err2;
+          serviceAccountParseError = serviceAccountParseError + '\n' + String(_e2 && _e2.stack ? _e2.stack : _e2);
           try {
             // Try base64 decode
             const decoded = Buffer.from(saJson, 'base64').toString('utf8');
             serviceAccount = JSON.parse(decoded);
             serviceAccountParseError = null;
           } catch (err3) {
-            serviceAccountParseError = serviceAccountParseError + '\n' + String(err3 || err3?.stack || err3);
+            const _e3: any = err3;
+            serviceAccountParseError = serviceAccountParseError + '\n' + String(_e3 && _e3.stack ? _e3.stack : _e3);
             console.warn('Failed to parse FIREBASE_SERVICE_ACCOUNT_JSON using JSON, escaped-newlines, or base64 methods');
           }
         }
@@ -67,7 +70,7 @@ function initAdminIfNeeded() {
     console.warn('Failed to parse service account JSON for VIP route:', err);
   }
 
-  if (serviceAccount) {
+    if (serviceAccount) {
     try {
       if (!admin.apps?.length) {
         admin.initializeApp({ credential: admin.credential.cert(serviceAccount) });
@@ -83,7 +86,8 @@ function initAdminIfNeeded() {
         serviceAccountInfo = null;
       }
     } catch (err) {
-      adminInitError = String(err && err.stack ? err.stack : err);
+      const _errAny: any = err;
+      adminInitError = String(_errAny && _errAny.stack ? _errAny.stack : _errAny);
       console.warn('Failed to initialize firebase-admin:', err);
     }
   }
