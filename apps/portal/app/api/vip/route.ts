@@ -104,6 +104,13 @@ function initAdminIfNeeded() {
 function parseServiceAccountEnv() {
   let serviceAccount: any = null;
   let parseError: string | null = null;
+  function errStack(e: any) {
+    try {
+      return e && (e.stack ? e.stack : String(e));
+    } catch (_) {
+      return String(e);
+    }
+  }
   try {
     const saJson = process.env.FIREBASE_SERVICE_ACCOUNT_JSON;
     const saPath = process.env.FIREBASE_SERVICE_ACCOUNT_PATH;
@@ -120,7 +127,7 @@ function parseServiceAccountEnv() {
             serviceAccount = JSON.parse(decoded);
             parseError = null;
           } catch (err3) {
-            parseError = String(err1 && err1.stack ? err1.stack : err1) + '\n' + String(err2 && err2.stack ? err2.stack : err2) + '\n' + String(err3 && err3.stack ? err3.stack : err3);
+            parseError = errStack(err1) + '\n' + errStack(err2) + '\n' + errStack(err3);
           }
         }
       }
@@ -128,11 +135,11 @@ function parseServiceAccountEnv() {
       try {
         serviceAccount = JSON.parse(fs.readFileSync(process.env.FIREBASE_SERVICE_ACCOUNT_PATH, 'utf8'));
       } catch (e) {
-        parseError = String(e && e.stack ? e.stack : e);
+        parseError = errStack(e);
       }
     }
   } catch (e) {
-    parseError = String(e && e.stack ? e.stack : e);
+    parseError = errStack(e);
   }
   return { serviceAccount, parseError };
 }
