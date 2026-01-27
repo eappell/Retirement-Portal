@@ -18,6 +18,13 @@ let adminInitError: any = null;
 function initAdminIfNeeded() {
   if (adminInitialized) return;
   try {
+    // Ensure google-auth-library is included in the server bundle before loading firebase-admin
+    try {
+      // eslint-disable-next-line no-eval
+      eval("require('google-auth-library')");
+    } catch (e) {
+      // ignore — presence will be validated later
+    }
     // Use eval to avoid bundlers statically resolving firebase-admin at build time
     // eslint-disable-next-line no-eval
     admin = eval("require('firebase-admin')");
