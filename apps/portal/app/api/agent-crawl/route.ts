@@ -8,7 +8,9 @@ function allowedHostnamesFromEnv() {
 export async function POST(request: Request) {
   try {
     const secretHeader = request.headers.get('x-agent-secret') || (request.headers.get('authorization') || '').replace(/^Bearer\s+/i, '');
-    const allowedSecret = process.env.AGENT_SECRET || process.env.VERCEL_PROTECTION_BYPASS || process.env.VERCEL_BYPASS_TOKEN;
+    // Accept existing secrets: prefer explicit AGENT_SECRET, then VIP_HMAC_SECRET
+    // (already present for VIP cookie signing), then Vercel bypass tokens.
+    const allowedSecret = process.env.AGENT_SECRET || process.env.VIP_HMAC_SECRET || process.env.VERCEL_PROTECTION_BYPASS || process.env.VERCEL_BYPASS_TOKEN;
     if (!allowedSecret || !secretHeader || secretHeader !== allowedSecret) {
       return NextResponse.json({ ok: false, error: 'Unauthorized' }, { status: 401 });
     }
