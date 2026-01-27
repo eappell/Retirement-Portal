@@ -1,5 +1,6 @@
 import { NextResponse } from 'next/server';
 import fs from 'fs';
+import path from 'path';
 
 // VIP route: mints a short-lived Firebase custom token for automated VIP access
 // Requires environment vars:
@@ -63,6 +64,25 @@ export async function GET(request: Request) {
     initAdminIfNeeded();
 
     if (!adminInitialized) {
+      // Provide safe diagnostics in non-production to help local debugging
+      const nodeEnv = process.env.NODE_ENV || 'development';
+      if (nodeEnv !== 'production') {
+        const saJson = process.env.FIREBASE_SERVICE_ACCOUNT_JSON;
+        const saPath = process.env.FIREBASE_SERVICE_ACCOUNT_PATH;
+        const resolved = saPath ? path.resolve(saPath) : null;
+        const exists = saPath ? fs.existsSync(saPath) : false;
+        return NextResponse.json({
+          ok: false,
+          error: 'FIREBASE service account not configured on server',
+          diagnostic: {
+            cwd: process.cwd(),
+            triedPath: saPath || null,
+            resolvedPath: resolved,
+            pathExists: exists,
+            hasSaJsonEnv: !!saJson,
+          },
+        }, { status: 501 });
+      }
       return NextResponse.json({ ok: false, error: 'FIREBASE service account not configured on server' }, { status: 501 });
     }
 
