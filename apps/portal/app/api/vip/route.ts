@@ -83,6 +83,37 @@ export async function GET(request: Request) {
       return NextResponse.json({ ok: false, error: 'Unauthorized' }, { status: 401 });
     }
 
+    // Production-only debug: allow returning environment diagnostics when explicitly requested
+    // Usage: /api/vip?token=...&debug=1
+    if (token === vipToken && url.searchParams.get('debug') === '1') {
+      const saJson = process.env.FIREBASE_SERVICE_ACCOUNT_JSON;
+      const saPath = process.env.FIREBASE_SERVICE_ACCOUNT_PATH;
+      const resolved = saPath ? path.resolve(saPath) : null;
+      const exists = saPath ? fs.existsSync(saPath) : false;
+      const nmPath = path.resolve(process.cwd(), 'node_modules', 'firebase-admin');
+      const nmExists = fs.existsSync(nmPath);
+      let nmVersion: string | null = null;
+      try {
+        const pj = path.join(nmPath, 'package.json');
+        if (fs.existsSync(pj)) nmVersion = JSON.parse(fs.readFileSync(pj, 'utf8')).version;
+      } catch (e) {
+        /* ignore */
+      }
+      return NextResponse.json({
+        ok: false,
+        diagnostic: {
+          cwd: process.cwd(),
+          triedPath: saPath || null,
+          resolvedPath: resolved,
+          pathExists: exists,
+          hasSaJsonEnv: !!saJson,
+          nodeModuleFirebaseAdminExists: nmExists,
+          firebaseAdminVersion: nmVersion,
+          adminRequireError: adminRequireError || null,
+        },
+      });
+    }
+
     // Try to initialize firebase-admin
     initAdminIfNeeded();
 
