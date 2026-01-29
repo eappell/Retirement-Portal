@@ -8,7 +8,9 @@ function findDataPath(filename: string) {
     const candidate = path.join(dir, 'api', 'data', filename)
     try {
       if (fs.existsSync(candidate)) return candidate
-    } catch (e) {}
+    } catch {
+      // Path doesn't exist, continue searching
+    }
     dir = path.join(dir, '..')
   }
   return path.join(process.cwd(), 'api', 'data', filename)

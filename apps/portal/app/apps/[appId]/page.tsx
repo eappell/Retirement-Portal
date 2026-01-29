@@ -89,6 +89,7 @@ export default function AppPage() {
   const [appDescription, setAppDescription] = useState<string>("");
   const [appConfig, setAppConfig] = useState<any>(null);
   const [loadingApp, setLoadingApp] = useState(true);
+  const [devSettings, setDevSettings] = useState<any>({});
 
   const appId = (params.appId as string) || "";
   const appName = searchParams.get("name") || "";
@@ -96,6 +97,26 @@ export default function AppPage() {
 
   useEffect(() => {
     setMounted(true);
+    
+    // Load dev settings from localStorage
+    try {
+      const stored = localStorage.getItem('portal-dev-settings');
+      if (stored) {
+        setDevSettings(JSON.parse(stored));
+      }
+    } catch (e) {
+      console.error('Error loading dev settings:', e);
+    }
+    
+    // Listen for dev settings changes
+    const handleDevSettingsChange = (e: CustomEvent) => {
+      setDevSettings(e.detail || {});
+    };
+    
+    window.addEventListener('dev-settings-changed', handleDevSettingsChange as EventListener);
+    return () => {
+      window.removeEventListener('dev-settings-changed', handleDevSettingsChange as EventListener);
+    };
   }, []);
 
   // Reset state when appId changes (e.g., when switching apps via dropdown)
@@ -237,7 +258,13 @@ export default function AppPage() {
   }
 
   // Use app URL from query params if provided, otherwise use config
-  const baseAppUrl = appUrl || appConfig.url;
+  // If dev mode is enabled for this app, use localhost URL
+  let baseAppUrl = appUrl || appConfig.url;
+  if (devSettings[appId]?.enabled) {
+    const port = devSettings[appId]?.port || '3000';
+    baseAppUrl = `http://localhost:${port}/`;
+    console.log(`[Portal] Dev mode active for ${appId}: loading from ${baseAppUrl}`);
+  }
   const finalAppUrl = `${baseAppUrl}${baseAppUrl.includes('?') ? '&' : '?'}embedded=true`;
   const finalAppName = appName || appConfig.name;
 
@@ -275,7 +302,7 @@ export default function AppPage() {
 
       {/* iFrame Container */}
       <IFrameWrapper
-        key={appId}
+        key={`${appId}-${finalAppUrl}`}
         appId={appId}
         appName={finalAppName}
         appUrl={finalAppUrl}

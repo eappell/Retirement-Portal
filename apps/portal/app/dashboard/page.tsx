@@ -10,6 +10,10 @@ import Link from "next/link";
 import {Header} from "@/components/Header";
 import { AppIcon } from "@/components/icon-map";
 import { useTheme } from '@/lib/theme';
+import { AICoach } from "@/components/AICoach";
+import { FloatingInsight } from "@/components/FloatingInsight";
+import { useRetirementData } from "@/lib/retirementContext";
+import { analyzeUserData, hasNewInsights } from "@/lib/proactiveInsights";
 
 // Use shared icon resolver so Firestore icon names (e.g. "Heart") resolve correctly
 
@@ -119,12 +123,16 @@ export default function DashboardPage() {
   const router = useRouter();
   const {user, loading: authLoading} = useAuth();
   const { theme } = useTheme();
+  const { userData, loading: dataLoading } = useRetirementData();
   
   const {trackEvent} = useAnalytics();
   const [mounted, setMounted] = useState(false);
   const [apps, setApps] = useState<App[]>(DEFAULT_APPS);
   const [loadingApps, setLoadingApps] = useState(true);
   const [devSettings, setDevSettings] = useState<DevSettings>({});
+  const [isAICoachOpen, setIsAICoachOpen] = useState(false);
+  const [hasAIInsight, setHasAIInsight] = useState(false);
+  const [previousInsights, setPreviousInsights] = useState<any[]>([]);
 
 
  
@@ -140,12 +148,36 @@ export default function DashboardPage() {
     };
     window.addEventListener('dev-settings-changed', handleDevSettingsChange as EventListener);
     
+    // Keyboard shortcut for AI Coach (Cmd/Ctrl + K)
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if ((e.metaKey || e.ctrlKey) && e.key === 'k') {
+        e.preventDefault();
+        setIsAICoachOpen(prev => !prev);
+      }
+    };
+    window.addEventListener('keydown', handleKeyDown);
+    
     return () => {
       window.removeEventListener('dev-settings-changed', handleDevSettingsChange as EventListener);
+      window.removeEventListener('keydown', handleKeyDown);
     };
   }, []);
 
   // Allow bypassing auth redirect in tests by appending ?testMode=1 to the URL
+  // Proactive insights analysis
+  useEffect(() => {
+    if (userData && !dataLoading) {
+      const insights = analyzeUserData(userData);
+      
+      // Check if there are new insights
+      if (hasNewInsights(previousInsights, insights)) {
+        setHasAIInsight(true);
+      }
+      
+      setPreviousInsights(insights);
+    }
+  }, [userData, dataLoading]);
+
   const testMode = (typeof window !== 'undefined') && new URLSearchParams(window.location.search).get('testMode') === '1';
 
   useEffect(() => {
@@ -284,7 +316,16 @@ export default function DashboardPage() {
 
   return (
     <div className="flex-1 bg-background portal-dashboard dashboard-redesign pb-0">
-      <Header />
+      <Header onAICoachOpen={() => setIsAICoachOpen(true)} />
+
+      {/* AI Coach Panel */}
+      <AICoach isOpen={isAICoachOpen} onClose={() => setIsAICoachOpen(false)} />
+
+      {/* Floating Insight Button */}
+      <FloatingInsight 
+        onClick={() => setIsAICoachOpen(true)} 
+        hasInsight={hasAIInsight}
+      />
 
       {/* Background particles (static, no animation) */}
       <div className="background-particles" aria-hidden="true">

@@ -15,9 +15,13 @@ import logo80White from "../public/images/RetireWise-Logo-80h-white-tag.png";
 import nesteggLight from "../public/images/Nestegg-light.png";
 import nesteggDark from "../public/images/NesteggOnly-dark.png";
 import { AppLauncher } from "./AppLauncher";
-import { SunIcon, MoonIcon } from "@heroicons/react/24/outline";
+import { SunIcon, MoonIcon, SparklesIcon } from "@heroicons/react/24/outline";
 
-export function Header() {
+interface HeaderProps {
+  onAICoachOpen?: () => void;
+}
+
+export function Header({ onAICoachOpen }: HeaderProps = {}) {
   const router = useRouter();
   const { user, logout } = useAuth();
   const { tier, loading: tierLoading } = useUserTier();
@@ -218,6 +222,18 @@ export function Header() {
 
           {/* Right Side Navigation */}
           <nav className="hidden md:flex items-center gap-4">
+            {/* AI Coach Button */}
+            {onAICoachOpen && (
+              <button
+                onClick={onAICoachOpen}
+                className="inline-flex items-center gap-2 px-3 py-1.5 bg-gradient-to-r from-purple-500 to-blue-500 text-white rounded-md text-sm font-medium hover:from-purple-600 hover:to-blue-600 focus:outline-none focus:ring-2 focus:ring-purple-300 transition-all mr-2"
+                aria-label="Open AI Coach"
+              >
+                <SparklesIcon className="w-4 h-4" />
+                <span>AI Coach</span>
+              </button>
+            )}
+
             {!user?.isAnonymous && !tierLoading && tier !== "paid" && tier !== "admin" && (
               <div
                 className="relative"

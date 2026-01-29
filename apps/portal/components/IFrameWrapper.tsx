@@ -5,7 +5,7 @@ import { useRouter } from 'next/navigation';
 import { useAuth } from "@/lib/auth";
 import { useUserTier } from "@/lib/useUserTier";
 import { useTheme } from "@/lib/theme";
-import { auth } from "@/lib/firebase";
+import { auth, firebaseConfig } from "@/lib/firebase";
 import { ToolbarButton } from "./SecondaryToolbar";
 
 interface IFrameWrapperProps {
@@ -260,6 +260,14 @@ export function IFrameWrapper({
                   lifeExpectancy: user.lifeExpectancy || null,
                   currentState: user.currentState || null,
                   retirementState: user.retirementState || null,
+                },
+                "*"
+              );
+              // Send Firebase config for tool data integration
+              iframeRef.current?.contentWindow?.postMessage(
+                {
+                  type: "FIREBASE_CONFIG",
+                  config: firebaseConfig,
                 },
                 "*"
               );
@@ -520,7 +528,7 @@ export function IFrameWrapper({
               // if more than 30 messages in 5s, mute for 10s
               if (heightRateRef.current.count > 30) {
                 heightRateRef.current.mutedUntil = now + 10000;
-                console.warn('[IFrameWrapper] Muting frequent height messages for 10s');
+                // console.warn('[IFrameWrapper] Muting frequent height messages for 10s');
                 // Ask the iframe to pause sending height updates for a short interval as well
                 try { iframeRef.current?.contentWindow?.postMessage({ type: 'STABILIZE_STOP', duration: 10000 }, '*'); } catch (e) {}
                 return;
@@ -838,6 +846,14 @@ export function IFrameWrapper({
             },
             "*"
           );
+          // Also send Firebase config
+          iframeRef.current.contentWindow?.postMessage(
+            {
+              type: "FIREBASE_CONFIG",
+              config: firebaseConfig,
+            },
+            "*"
+          );
         }
         return;
       }
@@ -929,10 +945,10 @@ export function IFrameWrapper({
               iframeRef.current.style.minHeight = `${desired}px`;
               iframeRef.current.contentWindow?.postMessage({ type: 'IFRAME_HEIGHT_APPLIED', height: desired }, '*');
               lastAppliedRefGlobal.current = desired;
-              console.log('[IFrameWrapper] Updated iframe to measured height:', desired, 'measured:', measured, 'current:', current);
+              // console.log('[IFrameWrapper] Updated iframe to measured height:', desired, 'measured:', measured, 'current:', current);
             } else {
               if (Math.abs(desired - current) > 0) {
-                console.log('[IFrameWrapper] Measured content height within tolerance; no update:', measured, 'current:', current);
+                // console.log('[IFrameWrapper] Measured content height within tolerance; no update:', measured, 'current:', current);
               }
             }
           }
@@ -1151,7 +1167,7 @@ export function IFrameWrapper({
       }
 
       if (event.data?.type === "TOOLBAR_BUTTONS") {
-        console.log("Received TOOLBAR_BUTTONS, count:", event.data.buttons?.length);
+        // console.log("Received TOOLBAR_BUTTONS, count:", event.data.buttons?.length);
         // Allow all buttons including print
         const filteredButtons = event.data.buttons || [];
         setToolbarButtons(filteredButtons);
