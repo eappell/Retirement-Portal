@@ -56,12 +56,30 @@ Each includes:
 **4. Dependencies Installed**
 - Firebase 11.0.0 added to all 3 projects
 
-### ⚠️ Current Problem
+### ✅ Problem FIXED (January 29, 2026)
 
-**Firebase saves are working** but **data does not load on page refresh**. The issue appears to be:
-- Default scenarios are being saved to Firebase before saved data can load
-- Timing conflict between initial state and Firebase data loading
-- Added `hasLoadedInitialDataRef` flag to prevent premature saves, but still not working
+**Issue:** Firebase saves were working but data did not load on page refresh.
+
+**Root Cause:** Race condition in message handling. The portal's IFrameWrapper sends both FIREBASE_CONFIG and AUTH_TOKEN messages on iframe load, but AUTH_TOKEN was being received and processed before Firebase initialization completed. When AUTH_TOKEN handler tried to load data, `isFirebaseReady()` returned false and the load was skipped.
+
+**Solution:** Added `pendingAuthLoad` flag that tracks when AUTH_TOKEN is received before Firebase is ready. When FIREBASE_CONFIG completes initialization, it checks for pending auth loads and executes them. This ensures data always loads regardless of message arrival order.
+
+**Files Fixed:**
+- `Retirement-Planner-AI/services/firebaseToolData.ts` (commits 630fdd7, e5b63ec)
+- `Social-Security-Optimizer/lib/firebaseToolData.ts` (commits 58a4ce0, 69a9fcc)
+- `Tax-Impact-Analyzer/src/lib/firebaseToolData.ts` (commits 4f0e861, 923cc3f)
+- `Retire-Portal/firestore.rules` (commit c3d74a0) - Added security rules for `userToolData` collection
+
+**Additional Fix (January 29, 2026):** Added `removeUndefined()` helper function to all three tools to strip undefined values before saving to Firestore. Firestore rejects documents with undefined field values, causing "Unsupported field value: undefined" errors. The helper recursively cleans objects before calling `addDoc()`.
+
+**Security Rules Added:**
+```
+match /userToolData/{documentId} {
+  allow read: if isAuthenticated() && resource.data.userId == request.auth.uid;
+  allow create: if isAuthenticated() && request.resource.data.userId == request.auth.uid;
+  allow update, delete: if isAuthenticated() && resource.data.userId == request.auth.uid;
+}
+```
 
 ### Console Logs You'll See
 
