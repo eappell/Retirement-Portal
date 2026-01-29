@@ -51,8 +51,8 @@ export function IFrameWrapper({
     'REQUEST_THEME', 'THEME_CHANGE', 'AUTH_TOKEN', 'USER_ROLE_UPDATE', 'USER_PROFILE_UPDATE', 'REQUEST_AUTH', 'REQUEST_ROLE',
     'REQUEST_APP_STATE', 'APP_STATE_UPDATE', 'APP_STATE_RESTORE', 'TOOLBAR_BUTTONS', 'TOOLBAR_BUTTON_ACTION', 'TOOLBAR_BUTTON_STATE', 'NAVIGATE',
     'REQUEST_INSIGHTS', 'REQUEST_INSIGHTS_RESPONSE', 'GET_SCENARIOS', 'GET_SCENARIOS_RESPONSE', 'INSIGHTS_RESPONSE', 'APP_DATA_TRANSFER',
-    'REQUEST_HEALTHCARE_DATA', 'HEALTHCARE_DATA_RESPONSE', 'SCROLL_TO_TOP', 'APP_TOAST',
-    'REQUEST_POCKETBASE_CONFIG', 'POCKETBASE_CONFIG', 'FIREBASE_CONFIG'
+    'REQUEST_HEALTHCARE_DATA', 'HEALTHCARE_DATA_RESPONSE', 'SCROLL_TO_TOP'
+    , 'APP_TOAST'
   ] as const);
 
   // Lightweight portal toast renderer (deduplicates repeated messages)
@@ -866,22 +866,6 @@ export function IFrameWrapper({
         return;
       }
 
-      // Allow iframe to request PocketBase config
-      if (event.data?.type === "REQUEST_POCKETBASE_CONFIG") {
-        if (iframeRef.current) {
-          iframeRef.current.contentWindow?.postMessage(
-            {
-              type: "POCKETBASE_CONFIG",
-              config: {
-                url: "https://api.retirewise.now"
-              },
-            },
-            "*"
-          );
-        }
-        return;
-      }
-
       // Allow iframe to explicitly request the current role only
       if (event.data?.type === "REQUEST_ROLE") {
         if (iframeRef.current) {
@@ -904,6 +888,20 @@ export function IFrameWrapper({
               dob: user?.dob || null,
               retirementAge: user?.retirementAge || null,
               currentAnnualIncome: user?.currentAnnualIncome || null,
+            },
+            "*"
+          );
+        }
+        return;
+      }
+
+      // Allow iframe to request PocketBase configuration
+      if (event.data?.type === "REQUEST_POCKETBASE_CONFIG") {
+        if (iframeRef.current) {
+          iframeRef.current.contentWindow?.postMessage(
+            {
+              type: "POCKETBASE_CONFIG",
+              url: "https://api.retirewise.now",
             },
             "*"
           );
