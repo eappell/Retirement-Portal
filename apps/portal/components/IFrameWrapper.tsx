@@ -836,24 +836,32 @@ export function IFrameWrapper({
       // Allow iframe to explicitly request current auth/token/role after it has attached listeners
       if (event.data?.type === "REQUEST_AUTH") {
         if (iframeRef.current) {
-          iframeRef.current.contentWindow?.postMessage(
-            {
-              type: "AUTH_TOKEN",
-              token: authToken,
-              userId: user?.uid,
-              email: user?.email,
-              tier: tier || user?.tier || "free",
-            },
-            "*"
-          );
-          // Also send Firebase config
-          iframeRef.current.contentWindow?.postMessage(
-            {
-              type: "FIREBASE_CONFIG",
-              config: firebaseConfig,
-            },
-            "*"
-          );
+          // Fetch fresh token instead of using potentially stale state
+          (async () => {
+            try {
+              const token = auth.currentUser ? await auth.currentUser.getIdToken(true) : "";
+              iframeRef.current?.contentWindow?.postMessage(
+                {
+                  type: "AUTH_TOKEN",
+                  token,
+                  userId: user?.uid,
+                  email: user?.email,
+                  tier: tier || user?.tier || "free",
+                },
+                "*"
+              );
+              // Also send Firebase config
+              iframeRef.current.contentWindow?.postMessage(
+                {
+                  type: "FIREBASE_CONFIG",
+                  config: firebaseConfig,
+                },
+                "*"
+              );
+            } catch (error) {
+              console.error('[IFrameWrapper] Error fetching token for REQUEST_AUTH:', error);
+            }
+          })();
         }
         return;
       }
