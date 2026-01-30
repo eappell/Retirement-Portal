@@ -51,8 +51,8 @@ export function IFrameWrapper({
     'REQUEST_THEME', 'THEME_CHANGE', 'AUTH_TOKEN', 'USER_ROLE_UPDATE', 'USER_PROFILE_UPDATE', 'REQUEST_AUTH', 'REQUEST_ROLE',
     'REQUEST_APP_STATE', 'APP_STATE_UPDATE', 'APP_STATE_RESTORE', 'TOOLBAR_BUTTONS', 'TOOLBAR_BUTTON_ACTION', 'TOOLBAR_BUTTON_STATE', 'NAVIGATE',
     'REQUEST_INSIGHTS', 'REQUEST_INSIGHTS_RESPONSE', 'GET_SCENARIOS', 'GET_SCENARIOS_RESPONSE', 'INSIGHTS_RESPONSE', 'APP_DATA_TRANSFER',
-    'REQUEST_HEALTHCARE_DATA', 'HEALTHCARE_DATA_RESPONSE', 'SCROLL_TO_TOP'
-    , 'APP_TOAST'
+    'REQUEST_HEALTHCARE_DATA', 'HEALTHCARE_DATA_RESPONSE', 'SCROLL_TO_TOP', 'APP_TOAST',
+    'REQUEST_POCKETBASE_CONFIG', 'POCKETBASE_CONFIG'
   ] as const);
 
   // Lightweight portal toast renderer (deduplicates repeated messages)
@@ -897,6 +897,7 @@ export function IFrameWrapper({
 
       // Allow iframe to request PocketBase configuration
       if (event.data?.type === "REQUEST_POCKETBASE_CONFIG") {
+        console.log('[IFrameWrapper] Received REQUEST_POCKETBASE_CONFIG, responding...');
         if (iframeRef.current) {
           iframeRef.current.contentWindow?.postMessage(
             {
@@ -905,6 +906,7 @@ export function IFrameWrapper({
             },
             "*"
           );
+          console.log('[IFrameWrapper] Sent POCKETBASE_CONFIG response');
         }
         return;
       }
