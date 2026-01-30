@@ -851,7 +851,7 @@ export function IFrameWrapper({
                 "*"
               );
               // Also send Firebase config
-              iframeRef.current.contentWindow?.postMessage(
+              iframeRef.current?.contentWindow?.postMessage(
                 {
                   type: "FIREBASE_CONFIG",
                   config: firebaseConfig,
