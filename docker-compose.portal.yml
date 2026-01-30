@@ -1,15 +1,20 @@
 version: '3.8'
+
 services:
   portal:
     build:
-      context: .
-      dockerfile: apps/portal/Dockerfile
+      context: ./apps/portal
+      dockerfile: Dockerfile
     image: retire-portal:latest
     container_name: retire-portal
-    ports:
-      - "8020:8020"
     restart: unless-stopped
-    environment:
-      - NODE_ENV=production
-      - PORT=8020
-    volumes: []
+    ports:
+      - "3000:3000"
+    env_file:
+      - ./apps/portal/.env.production
+    networks:
+      - nginx-proxy-manager_default
+
+networks:
+  nginx-proxy-manager_default:
+    external: true

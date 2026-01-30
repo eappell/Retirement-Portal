@@ -1,21 +1,39 @@
-# Build and run Next.js app for production
-FROM node:20-alpine AS deps
-WORKDIR /app
-COPY apps/portal/package.json apps/portal/package-lock.json* ./
-RUN npm ci --silent
+# Build and run Next.js app for production (standalone mode)
+FROM node:20-alpine AS base
 
-FROM node:20-alpine AS builder
+# Install dependencies only when needed
+FROM base AS deps
 WORKDIR /app
-COPY apps/portal/package.json apps/portal/package-lock.json* ./
-RUN npm install --silent
-COPY apps/portal ./
+COPY package.json package-lock.json* ./
+RUN npm ci
+
+# Rebuild source code only when needed
+FROM base AS builder
+WORKDIR /app
+COPY --from=deps /app/node_modules ./node_modules
+COPY . .
+
+# Build Next.js app (standalone output)
 RUN npm run build
 
-FROM node:20-alpine AS runner
+# Production image - minimal footprint
+FROM base AS runner
 WORKDIR /app
+
 ENV NODE_ENV=production
-ENV PORT=8020
-COPY --from=builder /app .
-EXPOSE 8020
-# next start will respect PORT env var
-CMD ["npm", "run", "start"]
+
+RUN addgroup --system --gid 1001 nodejs
+RUN adduser --system --uid 1001 nextjs
+
+COPY --from=builder /app/public ./public
+COPY --from=builder --chown=nextjs:nodejs /app/.next/standalone ./
+COPY --from=builder --chown=nextjs:nodejs /app/.next/static ./.next/static
+
+USER nextjs
+
+EXPOSE 3000
+
+ENV PORT=3000
+ENV HOSTNAME="0.0.0.0"
+
+CMD ["node", "server.js"]
