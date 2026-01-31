@@ -6,6 +6,7 @@ import { useAuth } from "@/lib/auth";
 import { useUserTier } from "@/lib/useUserTier";
 import { useTheme } from "@/lib/theme";
 import { auth, firebaseConfig } from "@/lib/firebase";
+import { saveToolData, loadToolData } from "@/lib/pocketbaseDataService";
 import { ToolbarButton } from "./SecondaryToolbar";
 
 interface IFrameWrapperProps {
@@ -52,7 +53,8 @@ export function IFrameWrapper({
     'REQUEST_APP_STATE', 'APP_STATE_UPDATE', 'APP_STATE_RESTORE', 'TOOLBAR_BUTTONS', 'TOOLBAR_BUTTON_ACTION', 'TOOLBAR_BUTTON_STATE', 'NAVIGATE',
     'REQUEST_INSIGHTS', 'REQUEST_INSIGHTS_RESPONSE', 'GET_SCENARIOS', 'GET_SCENARIOS_RESPONSE', 'INSIGHTS_RESPONSE', 'APP_DATA_TRANSFER',
     'REQUEST_HEALTHCARE_DATA', 'HEALTHCARE_DATA_RESPONSE', 'SCROLL_TO_TOP', 'APP_TOAST',
-    'REQUEST_POCKETBASE_CONFIG', 'POCKETBASE_CONFIG'
+    'REQUEST_POCKETBASE_CONFIG', 'POCKETBASE_CONFIG',
+    'SAVE_TOOL_DATA', 'TOOL_DATA_SAVED', 'LOAD_TOOL_DATA', 'TOOL_DATA_LOADED'
   ] as const);
 
   // Lightweight portal toast renderer (deduplicates repeated messages)
@@ -908,6 +910,90 @@ export function IFrameWrapper({
           );
           console.log('[IFrameWrapper] Sent POCKETBASE_CONFIG response');
         }
+        return;
+      }
+
+      // Handle SAVE_TOOL_DATA - tool requests portal to save data to PocketBase
+      if (event.data?.type === "SAVE_TOOL_DATA") {
+        const { toolId, data, requestId } = event.data;
+        console.log(`[IFrameWrapper] Received SAVE_TOOL_DATA for ${toolId}`);
+
+        (async () => {
+          try {
+            const token = auth.currentUser ? await auth.currentUser.getIdToken(true) : "";
+            if (!token) {
+              console.warn('[IFrameWrapper] No auth token for SAVE_TOOL_DATA');
+              iframeRef.current?.contentWindow?.postMessage({
+                type: "TOOL_DATA_SAVED",
+                success: false,
+                error: "Not authenticated",
+                requestId,
+              }, "*");
+              return;
+            }
+
+            const result = await saveToolData(token, toolId, data);
+            iframeRef.current?.contentWindow?.postMessage({
+              type: "TOOL_DATA_SAVED",
+              success: !!result,
+              id: result?.id || null,
+              requestId,
+            }, "*");
+            console.log(`[IFrameWrapper] SAVE_TOOL_DATA response sent for ${toolId}`);
+          } catch (error) {
+            console.error('[IFrameWrapper] Error in SAVE_TOOL_DATA:', error);
+            iframeRef.current?.contentWindow?.postMessage({
+              type: "TOOL_DATA_SAVED",
+              success: false,
+              error: error instanceof Error ? error.message : "Unknown error",
+              requestId,
+            }, "*");
+          }
+        })();
+        return;
+      }
+
+      // Handle LOAD_TOOL_DATA - tool requests portal to load data from PocketBase
+      if (event.data?.type === "LOAD_TOOL_DATA") {
+        const { toolId, requestId } = event.data;
+        console.log(`[IFrameWrapper] Received LOAD_TOOL_DATA for ${toolId}`);
+
+        (async () => {
+          try {
+            const token = auth.currentUser ? await auth.currentUser.getIdToken(true) : "";
+            if (!token) {
+              console.warn('[IFrameWrapper] No auth token for LOAD_TOOL_DATA');
+              iframeRef.current?.contentWindow?.postMessage({
+                type: "TOOL_DATA_LOADED",
+                success: false,
+                data: null,
+                error: "Not authenticated",
+                requestId,
+              }, "*");
+              return;
+            }
+
+            const result = await loadToolData(token, toolId);
+            iframeRef.current?.contentWindow?.postMessage({
+              type: "TOOL_DATA_LOADED",
+              success: true,
+              data: result?.data || null,
+              created: result?.created || null,
+              id: result?.id || null,
+              requestId,
+            }, "*");
+            console.log(`[IFrameWrapper] LOAD_TOOL_DATA response sent for ${toolId}`);
+          } catch (error) {
+            console.error('[IFrameWrapper] Error in LOAD_TOOL_DATA:', error);
+            iframeRef.current?.contentWindow?.postMessage({
+              type: "TOOL_DATA_LOADED",
+              success: false,
+              data: null,
+              error: error instanceof Error ? error.message : "Unknown error",
+              requestId,
+            }, "*");
+          }
+        })();
         return;
       }
 
