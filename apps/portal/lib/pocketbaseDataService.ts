@@ -71,6 +71,7 @@ export async function saveToolData(
     }
 
     const result = await response.json();
+    console.log(`[PocketBase Service] ✓ Saved ${toolId} data, full result:`, result);
     console.log(`[PocketBase Service] ✓ Saved ${toolId} data, id:`, result.id);
     return { id: result.id };
   } catch (error) {
