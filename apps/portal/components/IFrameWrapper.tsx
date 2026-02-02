@@ -641,6 +641,11 @@ export function IFrameWrapper({
             console.debug('[IFrameWrapper] Using suggestedBuffer from child:', sb, 'buffer used:', buffer);
           }
 
+          const measured = Number(event.data.height || 0);
+          if (!isFinite(measured) || measured <= 0) return;
+          const desired = Math.round(measured + buffer);
+          const currentApplied = stabilizer.applied || currentAppliedRef.current || 0;
+
           const allowShrink = event.data?.allowShrink === true || desired < currentApplied - 100;
 
           // If not currently stabilizing, allow CONTENT_HEIGHT to resize the iframe
