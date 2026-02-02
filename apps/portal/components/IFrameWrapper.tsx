@@ -836,6 +836,7 @@ export function IFrameWrapper({
           try {
             // Wait for auth if needed (up to 3 seconds)
           // ignore
+            let attempts = 0;
             while (!auth.currentUser && attempts < 15) {
               await new Promise(resolve => setTimeout(resolve, 200));
               attempts++;
