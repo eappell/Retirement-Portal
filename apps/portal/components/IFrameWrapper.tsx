@@ -9,6 +9,8 @@ import { auth, firebaseConfig } from "@/lib/firebase";
 import { saveToolData, loadToolData } from "@/lib/pocketbaseDataService";
 import { ToolbarButton } from "./SecondaryToolbar";
 
+const SAFETY_MAX = 20000;
+
 // Force rebuild - REQUEST_AUTH fix v2
 
 interface IFrameWrapperProps {
