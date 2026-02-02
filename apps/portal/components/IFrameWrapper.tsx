@@ -9,6 +9,8 @@ import { auth, firebaseConfig } from "@/lib/firebase";
 import { saveToolData, loadToolData } from "@/lib/pocketbaseDataService";
 import { ToolbarButton } from "./SecondaryToolbar";
 
+// Force rebuild - REQUEST_AUTH fix v2
+
 interface IFrameWrapperProps {
   appId: string;
   appName: string;
@@ -145,15 +147,12 @@ export function IFrameWrapper({
       iframeRef.current.style.removeProperty('height');
       iframeRef.current.style.removeProperty('min-height');
     }
-    
-    console.debug('[IFrameWrapper] Reset height tracking for new app:', appId);
   }, [appId]);
 
   // Request height from iframe on mount and after delays (handles direct URL and dropdown navigation)
   useEffect(() => {
     const requestHeight = () => {
       if (iframeRef.current?.contentWindow) {
-        console.debug('[IFrameWrapper] Requesting content height from iframe');
         iframeRef.current.contentWindow.postMessage({ type: 'REQUEST_CONTENT_HEIGHT' }, '*');
       }
     };
@@ -230,7 +229,6 @@ export function IFrameWrapper({
       currentAppliedRef.current = newFinal;
       // Inform child about the applied height so it can decide whether to request more
       iframeRef.current.contentWindow?.postMessage({ type: 'IFRAME_HEIGHT_APPLIED', height: newFinal }, '*');
-      console.debug('[IFrameWrapper] Reapplied height due to extraPadding change:', newFinal, 'extraPadding:', extraPaddingRef.current);
     } catch (e) {}
   }, [extraPadding]);
 
@@ -459,12 +457,12 @@ export function IFrameWrapper({
               parent.style.setProperty('overflow', 'visible', 'important');
               parent.style.setProperty('min-height', `${targetHeight}px`, 'important');
               console.debug('[IFrameWrapper] Relaxed ancestor overflow for iframe visibility:', parent.tagName, 'wasOverflow:', cs.overflow, 'wasHeight:', rectH);
+              return true;
             }
           } catch (e) {}
           el = parent;
         }
-        if (changedAncestors.length) console.debug('[IFrameWrapper] Updated ancestors to prevent clipping:', changedAncestors);
-        return changedAncestors.length > 0;
+        return false;
       } catch (e) { return false; }
     };
 
@@ -571,8 +569,8 @@ export function IFrameWrapper({
             return;
           }
 
-          const applied = clamped + buffer;
-          // store base/applied refs so padding control can reapply later
+          const applied = clamped;
+          // Store base/applied refs so padding control can reapply later
           baseAppliedRef.current = applied;
           const finalApplied = applied + (Number(extraPaddingRef.current) || 0);
 
@@ -590,7 +588,6 @@ export function IFrameWrapper({
 
           // Prefer applying the measured content height so the portal (parent) scrolls
           // rather than forcing the iframe to internally scroll. Cap to a safety max.
-          const SAFETY_MAX = 8000;
           const appliedHeight = Math.min(finalApplied, SAFETY_MAX);
 
           try {
@@ -627,8 +624,6 @@ export function IFrameWrapper({
         }
 
         if (event.data?.type === 'CONTENT_HEIGHT') {
-          const measured = Number(event.data.height || 0);
-          if (!isFinite(measured) || measured <= 0) return;
           const DEFAULT_BUFFER = 36;
           let buffer = DEFAULT_BUFFER;
           if (typeof event.data?.suggestedBuffer === 'number' || !isNaN(Number(event.data?.suggestedBuffer))) {
@@ -643,12 +638,7 @@ export function IFrameWrapper({
             buffer = Math.max(DEFAULT_BUFFER, Math.ceil(sb + 12));
             console.debug('[IFrameWrapper] Using suggestedBuffer from child:', sb, 'buffer used:', buffer);
           }
-          const desired = Math.round(measured + buffer);
 
-          // Determine the currently applied height (could have been applied earlier or via other UI action)
-          const currentApplied = currentAppliedRef.current || (iframeRef.current ? Math.round(parseFloat(getComputedStyle(iframeRef.current).height) || 0) : 0);
-
-          // Allow shrinking if the new desired height is meaningfully smaller (e.g., returning to a shorter view)
           const allowShrink = event.data?.allowShrink === true || desired < currentApplied - 100;
 
           // If not currently stabilizing, allow CONTENT_HEIGHT to resize the iframe
@@ -673,10 +663,6 @@ export function IFrameWrapper({
             return;
           }
 
-          // Track last measured
-          stabilizer.lastMeasured = measured;
-
-          // If content has grown meaningfully beyond current applied height, try once more
           if (desired > stabilizer.applied + MIN_DELTA && stabilizer.attempts < STABILIZE_MAX_ATTEMPTS) {
             // Oscillation detection: if we've already tried and the child's measured height hasn't changed,
             // request bottom-element diagnostics and attempt ancestor relaxation instead of blindly increasing.
@@ -705,11 +691,11 @@ export function IFrameWrapper({
                 // Nothing to relax; stop stabilizer to avoid runaway growth and request manual inspection
                 try { iframeRef.current?.contentWindow?.postMessage({ type: 'STABILIZE_STOP', duration: 15000 }, '*'); } catch (e) {}
                 stabilizer.stopped = true;
-                clearStabilizer();
                 console.warn('[IFrameWrapper] Measurement stagnant and no clipping ancestors found — stopping stabilizer and requesting manual inspection');
                 return;
               }
             }
+            stabilizer.lastMeasured = measured;
             stabilizer.attempts++;
             // increase and re-request after exponential backoff
             try {
@@ -734,7 +720,6 @@ export function IFrameWrapper({
             const final = Math.min(desired, FINAL_MAX);
             try {
               iframeRef.current!.style.setProperty('height', `${final}px`, 'important');
-              iframeRef.current!.style.minHeight = `${final}px`;
               iframeRef.current!.contentWindow?.postMessage({ type: 'IFRAME_HEIGHT_APPLIED', height: final }, '*');
               console.warn('[IFrameWrapper] Stabilizer gave up after repeated increases; capping to', final);
               // Ask the child to pause sending for a short interval to avoid continuous growth
@@ -764,6 +749,7 @@ export function IFrameWrapper({
   useEffect(() => {
     const handleMessage = (event: MessageEvent) => {
       const d = event?.data;
+      
       // Quietly ignore empty / non-object / devtools messages
       if (!d) return;
       if (typeof d === 'string') {
@@ -837,34 +823,46 @@ export function IFrameWrapper({
 
       // Allow iframe to explicitly request current auth/token/role after it has attached listeners
       if (event.data?.type === "REQUEST_AUTH") {
-        if (iframeRef.current) {
-          // Fetch fresh token instead of using potentially stale state
-          (async () => {
-            try {
-              const token = auth.currentUser ? await auth.currentUser.getIdToken(true) : "";
-              iframeRef.current?.contentWindow?.postMessage(
+        // ALWAYS respond to REQUEST_AUTH, even if auth is still loading
+        // The iframe needs AUTH_TOKEN to proceed with data loading
+        (async () => {
+          try {
+            // Wait for auth if needed (up to 3 seconds)
+          // ignore
+            while (!auth.currentUser && attempts < 15) {
+              await new Promise(resolve => setTimeout(resolve, 200));
+              attempts++;
+            }
+            
+            const token = auth.currentUser ? await auth.currentUser.getIdToken(true) : "";
+            const userId = user?.uid || auth.currentUser?.uid;
+            
+            const targetOrigin = "*"; // Use wildcard to ensure delivery regardless of origin match
+            
+            if (iframeRef.current?.contentWindow) {
+              iframeRef.current.contentWindow.postMessage(
                 {
                   type: "AUTH_TOKEN",
                   token,
-                  userId: user?.uid,
-                  email: user?.email,
+                  userId,
+                  email: user?.email || auth.currentUser?.email,
                   tier: tier || user?.tier || "free",
                 },
-                "*"
+                targetOrigin
               );
               // Also send Firebase config
-              iframeRef.current?.contentWindow?.postMessage(
+              iframeRef.current.contentWindow.postMessage(
                 {
                   type: "FIREBASE_CONFIG",
                   config: firebaseConfig,
                 },
-                "*"
+                targetOrigin
               );
-            } catch (error) {
-              console.error('[IFrameWrapper] Error fetching token for REQUEST_AUTH:', error);
             }
-          })();
-        }
+          } catch (error) {
+            console.error('[IFrameWrapper] Error in REQUEST_AUTH handler:', error);
+          }
+        })();
         return;
       }
 
@@ -908,7 +906,6 @@ export function IFrameWrapper({
             },
             "*"
           );
-          console.log('[IFrameWrapper] Sent POCKETBASE_CONFIG response');
         }
         return;
       }
@@ -916,7 +913,6 @@ export function IFrameWrapper({
       // Handle SAVE_TOOL_DATA - tool requests portal to save data to PocketBase
       if (event.data?.type === "SAVE_TOOL_DATA") {
         const { toolId, data, requestId } = event.data;
-        console.log(`[IFrameWrapper] Received SAVE_TOOL_DATA for ${toolId}`);
 
         (async () => {
           try {
@@ -939,7 +935,6 @@ export function IFrameWrapper({
               id: result?.id || null,
               requestId,
             }, "*");
-            console.log(`[IFrameWrapper] SAVE_TOOL_DATA response sent for ${toolId}`);
           } catch (error) {
             console.error('[IFrameWrapper] Error in SAVE_TOOL_DATA:', error);
             iframeRef.current?.contentWindow?.postMessage({
@@ -956,7 +951,6 @@ export function IFrameWrapper({
       // Handle LOAD_TOOL_DATA - tool requests portal to load data from PocketBase
       if (event.data?.type === "LOAD_TOOL_DATA") {
         const { toolId, requestId } = event.data;
-        console.log(`[IFrameWrapper] Received LOAD_TOOL_DATA for ${toolId}`);
 
         (async () => {
           try {
@@ -982,7 +976,6 @@ export function IFrameWrapper({
               id: result?.id || null,
               requestId,
             }, "*");
-            console.log(`[IFrameWrapper] LOAD_TOOL_DATA response sent for ${toolId}`);
           } catch (error) {
             console.error('[IFrameWrapper] Error in LOAD_TOOL_DATA:', error);
             iframeRef.current?.contentWindow?.postMessage({
@@ -1002,8 +995,8 @@ export function IFrameWrapper({
         try {
           const msg = String(d?.message || d?.text || d?.msg || '');
           if (msg) {
-                showPortalToast(msg, typeof d?.duration === 'number' ? d.duration : 3000);
-              }
+            showPortalToast(msg, typeof d?.duration === 'number' ? d.duration : 3000);
+          }
         } catch (e) {}
         return;
       }
@@ -1171,7 +1164,6 @@ export function IFrameWrapper({
 
         // Only whitelist healthcare cost transfers for now; other app data types should be filtered and approved
         if (data.dataType && data.dataType !== 'HEALTHCARE_COSTS') {
-          console.log('[Portal] APP_DATA_TRANSFER ignored - unsupported dataType', data.dataType);
           return;
         }
 
@@ -1182,22 +1174,12 @@ export function IFrameWrapper({
         return;
       }
       
-      // Handle GET_SCENARIOS request - forward to retirement planner iframe
-      if (event.data?.type === "GET_SCENARIOS") {
-        console.log("[Portal] Forwarding GET_SCENARIOS request");
-        if (iframeRef.current) {
-          iframeRef.current.contentWindow?.postMessage(event.data, "*");
-        }
-        return;
-      }
-
-      // Handle AI insights request from embedded app: proxy via portal server
-      if (event.data?.type === 'REQUEST_INSIGHTS') {
-        const { requestId, plan, result } = event.data;
+      // Handle REQUEST_INSIGHTS request
+      if (event.data?.type === "REQUEST_INSIGHTS") {
+        const { plan, result, requestId } = event.data;
         (async () => {
-            try {
-            // Call portal server proxy which enforces role and uses bypass token
-            const resp = await fetch('/api/insights-proxy', {
+          try {
+            const resp = await fetch('/api/insights', {
               method: 'POST',
               headers: { 'Content-Type': 'application/json' },
               body: JSON.stringify({ plan, result }),
@@ -1250,6 +1232,14 @@ export function IFrameWrapper({
         })();
         return;
       }
+
+      // Handle GET_SCENARIOS request - forward to retirement planner iframe
+      if (event.data?.type === "GET_SCENARIOS") {
+         if (iframeRef.current) {
+            iframeRef.current.contentWindow?.postMessage(event.data, "*");
+         }
+         return;
+      }
       
       // Handle GET_SCENARIOS_RESPONSE - forward back to requesting iframe
       if (event.data?.type === "GET_SCENARIOS_RESPONSE") {
@@ -1277,8 +1267,6 @@ export function IFrameWrapper({
       }
 
       if (event.data?.type === "TOOLBAR_BUTTONS") {
-        // console.log("Received TOOLBAR_BUTTONS, count:", event.data.buttons?.length);
-        // Allow all buttons including print
         const filteredButtons = event.data.buttons || [];
         setToolbarButtons(filteredButtons);
       } else if (event.data?.type === "TOOLBAR_BUTTON_ACTION") {
@@ -1483,8 +1471,57 @@ export function IFrameWrapper({
             ? 'calc(100vh - var(--portal-header-height, 100px) - 80px)' 
             : 'calc(100vh - var(--portal-header-height, 100px) - 130px)',
         }}
-        onLoad={() => {
-          console.log('[IFrameWrapper] iframe onLoad fired for:', appUrl);
+        onLoad={async () => {
+          // CRITICAL FIX: Send AUTH_TOKEN immediately on load (don't wait for REQUEST_AUTH)
+          // This ensures iframe always gets auth even if message listener has issues
+          const sendAuthToken = async () => {
+            try {
+              // Wait briefly for auth to initialize
+              let attempts = 0;
+              while (!auth.currentUser && attempts < 10) {
+                await new Promise(resolve => setTimeout(resolve, 200));
+                attempts++;
+              }
+              
+              const token = auth.currentUser ? await auth.currentUser.getIdToken(true) : "";
+              const userId = user?.uid || auth.currentUser?.uid;
+              
+              // Wait longer for iframe's JS bundle to load, parse, and execute
+              // especially for Vite dev server which may take longer to send initial bundle
+              await new Promise(resolve => setTimeout(resolve, 1500));
+              
+              if (iframeRef.current?.contentWindow) {
+                // Send multiple times with delays to ensure listener is ready
+                // Use "*" as targetOrigin to rule out origin mismatch issues during debugging
+                const targetOrigin = "*"; 
+                
+                for (let attempt = 0; attempt < 3; attempt++) {
+                  if (attempt > 0) {
+                    await new Promise(resolve => setTimeout(resolve, 500));
+                  }
+                  
+                  iframeRef.current.contentWindow.postMessage({
+                    type: "AUTH_TOKEN",
+                    token,
+                    userId,
+                    email: user?.email || auth.currentUser?.email,
+                    tier: tier || user?.tier || "free",
+                  }, targetOrigin);
+                  
+                  iframeRef.current.contentWindow.postMessage({
+                    type: "FIREBASE_CONFIG",
+                    config: firebaseConfig,
+                  }, targetOrigin);
+                }
+              }
+            } catch (error) {
+              console.error('[IFrameWrapper] Error auto-sending AUTH_TOKEN:', error);
+            }
+          };
+          
+          // Send auth token immediately
+          sendAuthToken();
+          
           // Request height immediately on load
           setTimeout(() => {
             iframeRef.current?.contentWindow?.postMessage({ type: 'REQUEST_CONTENT_HEIGHT' }, '*');

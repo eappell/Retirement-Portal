@@ -145,7 +145,7 @@ export function RetirementProvider({ children }: { children: ReactNode }) {
             };
           }
         } catch (error) {
-          console.log("No income data found");
+          // No data found or error
         }
 
         // Fetch Social Security optimization data
@@ -168,7 +168,7 @@ export function RetirementProvider({ children }: { children: ReactNode }) {
             };
           }
         } catch (error) {
-          console.log("No social security data found");
+          // No data found or error
         }
 
         // Fetch tax data
@@ -191,7 +191,7 @@ export function RetirementProvider({ children }: { children: ReactNode }) {
             };
           }
         } catch (error) {
-          console.log("No tax data found");
+          // No data found or error
         }
 
         // Fetch healthcare data
@@ -214,7 +214,7 @@ export function RetirementProvider({ children }: { children: ReactNode }) {
             };
           }
         } catch (error) {
-          console.log("No healthcare data found");
+          // No data found or error
         }
 
         // Calculate aggregated insights

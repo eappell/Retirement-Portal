@@ -50,8 +50,6 @@ export async function saveToolData(
   }
 
   try {
-    console.log(`[PocketBase Service] Saving data for tool: ${toolId}`);
-
     const response = await fetch(`${PROXY_URL}/api/tool-data/save`, {
       method: 'POST',
       headers: {
@@ -63,16 +61,14 @@ export async function saveToolData(
         data: removeUndefined(data),
       }),
     });
-
+    
+    const result = await response.json();
+    
     if (!response.ok) {
-      const errorText = await response.text();
-      console.error(`[PocketBase Service] Save error: ${response.status}`, errorText);
+      console.error(`[PocketBase Service] Save failed:`, result);
       return null;
     }
 
-    const result = await response.json();
-    console.log(`[PocketBase Service] ✓ Saved ${toolId} data, full result:`, result);
-    console.log(`[PocketBase Service] ✓ Saved ${toolId} data, id:`, result.id);
     return { id: result.id };
   } catch (error) {
     console.error(`[PocketBase Service] Error saving ${toolId}:`, error);
@@ -97,8 +93,6 @@ export async function loadToolData(
   }
 
   try {
-    console.log(`[PocketBase Service] Loading data for tool: ${toolId}`);
-
     const response = await fetch(`${PROXY_URL}/api/tool-data/load?toolId=${encodeURIComponent(toolId)}`, {
       method: 'GET',
       headers: {
@@ -115,11 +109,9 @@ export async function loadToolData(
     const result = await response.json();
 
     if (!result || !result.data) {
-      console.log(`[PocketBase Service] No data found for ${toolId}`);
       return null;
     }
 
-    console.log(`[PocketBase Service] ✓ Loaded ${toolId} data`);
     return {
       data: result.data,
       created: result.created,
@@ -146,8 +138,6 @@ export async function loadAllToolData(
   }
 
   try {
-    console.log('[PocketBase Service] Loading all tool data');
-
     const response = await fetch(`${PROXY_URL}/api/tool-data/load-all`, {
       method: 'GET',
       headers: {
@@ -162,7 +152,6 @@ export async function loadAllToolData(
     }
 
     const result = await response.json();
-    console.log(`[PocketBase Service] ✓ Loaded data for ${Object.keys(result).length} tools`);
     return result;
   } catch (error) {
     console.error('[PocketBase Service] Error loading all data:', error);
