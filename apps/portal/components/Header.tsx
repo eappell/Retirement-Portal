@@ -29,6 +29,7 @@ export function Header({ onAICoachOpen }: HeaderProps = {}) {
   const { theme, toggleTheme } = useTheme();
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [isProfileMenuOpen, setIsProfileMenuOpen] = useState(false);
+  const [isAdminSubmenuOpen, setIsAdminSubmenuOpen] = useState(false);
   const [hoveredTheme, setHoveredTheme] = useState(false);
   const [hoveredUserInfo, setHoveredUserInfo] = useState(false);
   const [hoveredUpgrade, setHoveredUpgrade] = useState(false);
@@ -341,7 +342,7 @@ export function Header({ onAICoachOpen }: HeaderProps = {}) {
                 onMouseEnter={() => setIsProfileMenuOpen(true)}
                 onMouseLeave={() => setIsProfileMenuOpen(false)}
               >
-                <button className="w-10 h-10 rounded-full flex items-center justify-center font-semibold transition-colors text-white" style={{backgroundColor: '#0B5394'}} onMouseEnter={(e) => e.currentTarget.style.backgroundColor = '#094170'} onMouseLeave={(e) => e.currentTarget.style.backgroundColor = '#0B5394'}>
+                <button className="w-10 h-10 rounded-full flex items-center justify-center font-semibold transition-colors" style={{backgroundColor: '#0B5394', color: '#ffffff'}} onMouseEnter={(e) => { e.currentTarget.style.backgroundColor = '#094170'; e.currentTarget.style.color = '#ffffff'; }} onMouseLeave={(e) => { e.currentTarget.style.backgroundColor = '#0B5394'; e.currentTarget.style.color = '#ffffff'; }}>
                   {user?.email ? user.email[0].toUpperCase() : "G"}
                 </button>
                 {isProfileMenuOpen && (
@@ -357,12 +358,31 @@ export function Header({ onAICoachOpen }: HeaderProps = {}) {
                         My Profile
                       </button>
                       {tier === "admin" && (
-                        <button
-                          onClick={() => handleNavClick("/admin/dashboard")}
-                          className={`block w-full text-left px-4 py-2 text-sm ${theme === 'light' ? 'text-gray-700 hover:bg-gray-100' : 'text-slate-200 hover:bg-slate-700'}`}
-                        >
-                          Admin Dashboard
-                        </button>
+                        <div className="w-full">
+                          <button
+                            onClick={() => setIsAdminSubmenuOpen((s) => !s)}
+                            className={`flex items-center justify-between w-full text-left px-4 py-2 text-sm ${theme === 'light' ? 'text-gray-700 hover:bg-gray-100' : 'text-slate-200 hover:bg-slate-700'}`}
+                          >
+                            <span>Admin Dashboard</span>
+                            <span className="ml-2 text-xs opacity-70">{isAdminSubmenuOpen ? '▾' : '▸'}</span>
+                          </button>
+                          {isAdminSubmenuOpen && (
+                            <div className="pl-4">
+                              <button
+                                onClick={() => handleNavClick('/admin/dashboard?tab=users')}
+                                className={`block w-full text-left px-4 py-2 text-sm ${theme === 'light' ? 'text-gray-700 hover:bg-gray-100' : 'text-slate-200 hover:bg-slate-700'}`}
+                              >
+                                Manage Users
+                              </button>
+                              <button
+                                onClick={() => handleNavClick('/admin/dashboard?tab=apps')}
+                                className={`block w-full text-left px-4 py-2 text-sm ${theme === 'light' ? 'text-gray-700 hover:bg-gray-100' : 'text-slate-200 hover:bg-slate-700'}`}
+                              >
+                                Manage Apps
+                              </button>
+                            </div>
+                          )}
+                        </div>
                       )}
                       <button
                         onClick={handleLogout}
