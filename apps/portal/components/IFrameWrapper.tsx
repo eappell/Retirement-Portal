@@ -6,7 +6,7 @@ import { useAuth } from "@/lib/auth";
 import { useUserTier } from "@/lib/useUserTier";
 import { useTheme } from "@/lib/theme";
 import { auth, firebaseConfig } from "@/lib/firebase";
-import { saveToolData, loadToolData } from "@/lib/pocketbaseDataService";
+import { saveToolData, loadToolData, deleteToolData } from "@/lib/pocketbaseDataService";
 import { ToolbarButton } from "./SecondaryToolbar";
 
 const SAFETY_MAX = 20000;
@@ -58,7 +58,8 @@ export function IFrameWrapper({
     'REQUEST_INSIGHTS', 'REQUEST_INSIGHTS_RESPONSE', 'GET_SCENARIOS', 'GET_SCENARIOS_RESPONSE', 'INSIGHTS_RESPONSE', 'APP_DATA_TRANSFER',
     'REQUEST_HEALTHCARE_DATA', 'HEALTHCARE_DATA_RESPONSE', 'SCROLL_TO_TOP', 'APP_TOAST',
     'REQUEST_POCKETBASE_CONFIG', 'POCKETBASE_CONFIG',
-    'SAVE_TOOL_DATA', 'TOOL_DATA_SAVED', 'LOAD_TOOL_DATA', 'TOOL_DATA_LOADED'
+    'SAVE_TOOL_DATA', 'TOOL_DATA_SAVED', 'LOAD_TOOL_DATA', 'TOOL_DATA_LOADED', 'CLEAR_TOOL_DATA', 'TOOL_DATA_CLEARED',
+    'EMBEDDED_LOADING'
   ] as const);
 
   // Lightweight portal toast renderer (deduplicates repeated messages)
@@ -113,6 +114,7 @@ export function IFrameWrapper({
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string>("");
   const [toolbarButtons, setToolbarButtons] = useState<ToolbarButton[]>([]);
+  const [embeddedLoading, setEmbeddedLoading] = useState<boolean>(false);
 
   // Per-iframe extra padding (px). Allows manual tuning when an app's footer or sticky controls are clipped.
   const [extraPadding, setExtraPadding] = useState<number>(0);
@@ -998,12 +1000,62 @@ export function IFrameWrapper({
         return;
       }
 
+      // Handle CLEAR_TOOL_DATA - tool requests portal to delete saved data for this tool
+      if (event.data?.type === "CLEAR_TOOL_DATA") {
+        const { toolId, requestId } = event.data;
+
+        (async () => {
+          try {
+            const token = auth.currentUser ? await auth.currentUser.getIdToken(true) : "";
+            if (!token) {
+              console.warn('[IFrameWrapper] No auth token for CLEAR_TOOL_DATA');
+              iframeRef.current?.contentWindow?.postMessage({
+                type: "TOOL_DATA_CLEARED",
+                success: false,
+                error: "Not authenticated",
+                requestId,
+              }, "*");
+              return;
+            }
+
+            const result = await deleteToolData(token, toolId);
+            iframeRef.current?.contentWindow?.postMessage({
+              type: "TOOL_DATA_CLEARED",
+              success: !!result,
+              requestId,
+            }, "*");
+          } catch (error) {
+            console.error('[IFrameWrapper] Error in CLEAR_TOOL_DATA:', error);
+            iframeRef.current?.contentWindow?.postMessage({
+              type: "TOOL_DATA_CLEARED",
+              success: false,
+              error: error instanceof Error ? error.message : "Unknown error",
+              requestId,
+            }, "*");
+          }
+        })();
+        return;
+      }
+
       // Allow embedded apps to request the portal to show a toast (APP_TOAST)
       if (d?.type === 'APP_TOAST') {
         try {
           const msg = String(d?.message || d?.text || d?.msg || '');
           if (msg) {
             showPortalToast(msg, typeof d?.duration === 'number' ? d.duration : 3000);
+          }
+        } catch (e) {}
+        return;
+      }
+
+      // Embedded app asks portal to show a top-level loading overlay so it's visible in the browser viewport
+      if (d?.type === 'EMBEDDED_LOADING') {
+        try {
+          const show = !!d.show;
+          setEmbeddedLoading(show);
+          // Auto-hide after 20s in case a message is missed
+          if (show) {
+            setTimeout(() => setEmbeddedLoading(false), 20000);
           }
         } catch (e) {}
         return;
@@ -1465,6 +1517,15 @@ export function IFrameWrapper({
 
   return (
     <div className="relative">
+      {embeddedLoading && (
+        <div className="fixed inset-0 z-[1000000] flex items-center justify-center pointer-events-auto">
+          <div className="absolute inset-0 bg-white/80 dark:bg-gray-900/80 backdrop-blur-sm"></div>
+          <div className="relative z-10 flex flex-col items-center space-y-4 p-6 rounded-lg bg-white dark:bg-gray-800 shadow-lg">
+            <div className="w-12 h-12 border-4 border-blue-600 border-t-transparent rounded-full animate-spin"></div>
+            <div className="text-lg font-medium text-gray-800 dark:text-gray-200">Loading saved data...</div>
+          </div>
+        </div>
+      )}
       <iframe
         key={appUrl}
         ref={iframeRef}
