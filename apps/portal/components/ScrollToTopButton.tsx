@@ -6,6 +6,7 @@ import { ArrowUpIcon } from "@heroicons/react/24/solid";
 export function ScrollToTopButton() {
   const [isVisible, setIsVisible] = useState(false);
   const [iframeScrolled, setIframeScrolled] = useState(false);
+  const lastMsgRef = { current: { sig: '', ts: 0 } } as any;
 
   useEffect(() => {
     const toggleVisibility = () => {
@@ -30,10 +31,19 @@ export function ScrollToTopButton() {
     const handleMessage = (e: MessageEvent) => {
       try {
         if (e?.data?.type === 'IFRAME_SCROLL') {
-          console.log('[ScrollToTopButton] received IFRAME_SCROLL, scrolled:', !!e.data.scrolled, 'from', e.origin || 'unknown');
           const userScrolled = !!e.data.userScrolled;
           const scrollable = !!e.data.scrolled;
-          console.log('[ScrollToTopButton] received IFRAME_SCROLL, scrollable:', scrollable, 'userScrolled:', userScrolled, 'from', e.origin || 'unknown');
+          const sig = `${e.origin || 'unknown'}::${scrollable}::${userScrolled}`;
+          const now = Date.now();
+          // Suppress repeated identical messages within 3s
+          if (lastMsgRef.current.sig === sig && now - lastMsgRef.current.ts < 3000) {
+            // update timestamp to extend suppression window
+            lastMsgRef.current.ts = now;
+          } else {
+            lastMsgRef.current.sig = sig;
+            lastMsgRef.current.ts = now;
+            console.debug('[ScrollToTopButton] IFRAME_SCROLL', { origin: e.origin || 'unknown', scrollable, userScrolled });
+          }
           // Only consider the iframe as "scrolled" when the user has scrolled inside it
           setIframeScrolled(userScrolled || scrollable);
         }
