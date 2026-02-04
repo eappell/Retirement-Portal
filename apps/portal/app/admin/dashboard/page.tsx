@@ -523,7 +523,7 @@ function AdminDashboardContent() {
   return (
     <div className={`min-h-screen admin-dashboard ${theme === 'dark' ? 'bg-[#0a1628]' : 'bg-[#f8f9fa]'}`}>
       <style jsx>{`
-        .admin-dashboard :where(*:not([role="tooltip"]):not(.app-tooltip-light):not(.app-tooltip-dark):not(.header-tooltip):not(.force-light-text)) {
+        .admin-dashboard :where(*:not([role="tooltip"]):not(.app-tooltip-light):not(.app-tooltip-dark):not(.header-tooltip):not(:global(.force-light-text))) {
           color: ${forcedTextColor} !important;
         }
         .admin-dashboard a {
