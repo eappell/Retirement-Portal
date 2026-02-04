@@ -523,16 +523,18 @@ function AdminDashboardContent() {
   return (
     <div className={`min-h-screen admin-dashboard ${theme === 'dark' ? 'bg-[#0a1628]' : 'bg-[#f8f9fa]'}`}>
       <style jsx>{`
-        .admin-dashboard :where(*:not([role="tooltip"]):not(.app-tooltip-light):not(.app-tooltip-dark):not(.header-tooltip):not(:global(.force-light-text))) {
+        .admin-dashboard :where(*:not([role="tooltip"]):not(.app-tooltip-light):not(.app-tooltip-dark):not(.header-tooltip)) {
           color: ${forcedTextColor} !important;
         }
         .admin-dashboard a {
           color: #0B5394 !important;
         }
-        .admin-dashboard :global(.force-light-text) {
+        /* Increased specificity to override the global rule */
+        div.admin-dashboard :global(.force-light-text),
+        div.admin-dashboard :global(button.force-light-text) {
           color: #ffffff !important;
         }
-        .admin-dashboard :global(.force-light-text svg) {
+        div.admin-dashboard :global(.force-light-text svg) {
           color: inherit !important;
         }
         .admin-dashboard .force-dark-text {
