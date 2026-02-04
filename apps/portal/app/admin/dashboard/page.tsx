@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { useRouter } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import { useAuth } from "@/lib/auth";
 import { useUserTier } from "@/lib/useUserTier";
 import { useTheme } from "@/lib/theme";
@@ -111,6 +111,7 @@ function CreateUserForm({ onSuccess, onError }: { onSuccess: (uid: string) => vo
 
 export default function AdminDashboard() {
   const router = useRouter();
+  const searchParams = useSearchParams();
   const { user } = useAuth();
   const { tier, loading: tierLoading } = useUserTier();
   const { theme } = useTheme();
@@ -192,6 +193,13 @@ export default function AdminDashboard() {
   useEffect(() => {
     setMounted(true);
   }, []);
+
+  useEffect(() => {
+    const tabParam = searchParams.get('tab');
+    if (tabParam === 'users') setCurrentTab('users');
+    else if (tabParam === 'apps') setCurrentTab('apps');
+    else if (tabParam === 'site') setCurrentTab('site');
+  }, [searchParams]);
 
   useEffect(() => {
     if (mounted && (!user || tierLoading)) {
@@ -515,16 +523,16 @@ export default function AdminDashboard() {
   return (
     <div className={`min-h-screen admin-dashboard ${theme === 'dark' ? 'bg-[#0a1628]' : 'bg-[#f8f9fa]'}`}>
       <style jsx>{`
-        .admin-dashboard :where(*:not([role="tooltip"]):not(.app-tooltip-light):not(.app-tooltip-dark):not(.header-tooltip)) {
+        .admin-dashboard :where(*:not([role="tooltip"]):not(.app-tooltip-light):not(.app-tooltip-dark):not(.header-tooltip):not(.force-light-text)) {
           color: ${forcedTextColor} !important;
         }
         .admin-dashboard a {
           color: #0B5394 !important;
         }
-        .admin-dashboard .force-light-text {
+        .admin-dashboard :global(.force-light-text) {
           color: #ffffff !important;
         }
-        .admin-dashboard .force-light-text svg {
+        .admin-dashboard :global(.force-light-text svg) {
           color: inherit !important;
         }
         .admin-dashboard .force-dark-text {
