@@ -32,6 +32,52 @@ export const TOOL_IDS = {
 export type ToolId = string; // Allow any string for flexibility
 
 /**
+ * Delete tool data via PocketBase proxy
+ * 
+ * @param authToken - Firebase auth token for validation
+ * @param toolId - Tool identifier
+ * @returns True if successful, false otherwise
+ */
+export async function deleteToolData(
+  authToken: string,
+  toolId: ToolId
+): Promise<boolean> {
+  if (!authToken) {
+    console.warn('[PocketBase Service] No auth token provided');
+    return false;
+  }
+
+  try {
+    // Note: Calling the save endpoint with null data *might* be interpreted as a delete 
+    // if the proxy supported it, but unrelated to that, we'll try to use a delete endpoint
+    // assuming it will be added to the proxy soon.
+    const response = await fetch(`${PROXY_URL}/api/tool-data/delete`, {
+      method: 'POST', // or DELETE, but standardizing on POST for RPC-style if needed
+      headers: {
+        'Authorization': `Bearer ${authToken}`,
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({ toolId }),
+    });
+
+    if (!response.ok) {
+       // If 404, maybe it means endpoint doesn't exist, or record doesn't exist.
+       // For now, let's log and return false.
+       if (response.status === 404) {
+         console.warn('[PocketBase Service] Delete endpoint not found or record missing');
+         return false;
+       }
+       return false;
+    }
+    
+    return true;
+  } catch (error) {
+    console.error(`[PocketBase Service] Error deleting ${toolId}:`, error);
+    return false;
+  }
+}
+
+/**
  * Save tool data via PocketBase proxy
  *
  * @param authToken - Firebase auth token for validation
