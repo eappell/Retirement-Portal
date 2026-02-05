@@ -6,6 +6,24 @@ Complete deployment instructions for all Retirement Planner applications with co
 
 ---
 
+## ⚠️ CRITICAL: Before You Begin
+
+**Common Library Missing on VPS!**  
+The `Retire-Common-Lib` directory is **NOT currently present** on your VPS but is **required** by all applications. You must deploy it first (see Section 2 below) before updating any apps.
+
+**All paths corrected**: This guide now reflects your actual VPS directory structure (apps are in `~/` not `~/retirement-planner/`).
+
+**Quick Pre-Deployment Check:**
+```bash
+ssh eappell@203.161.56.128
+cd ~
+ls -la | grep -E "Retire-Common-Lib|pocketbase-proxy|retire-portal"
+```
+
+If `Retire-Common-Lib` is missing, follow Section 2 immediately.
+
+---
+
 ## Table of Contents
 1. [Prerequisites](#prerequisites)
 2. [Architecture Overview](#architecture-overview)
@@ -35,6 +53,27 @@ Complete deployment instructions for all Retirement Planner applications with co
 ### Access Requirements
 ```bash
 ssh eappell@203.161.56.128
+```
+
+### Current VPS Directory Structure
+Your VPS has apps directly in the home directory (not in `retirement-planner/`):
+```
+~/
+├── pocketbase-proxy/
+├── retire-portal/
+├── Retire-Common-Lib/         ⚠️ MISSING - Deploy this first!
+├── tax-impact-analyzer/
+├── state-relocate/
+├── Social-Security-Optimizer/
+├── Retire-Abroad-AI/
+├── longevity-drawdown-planner/
+├── Retirement-Planner-AI/
+├── Retirement-Identity-Builder/
+├── Legacy-Flow-Visualizer/
+├── Gifting-Strategy-Planner/
+├── Volunteer-Purpose-Matchmaker/
+├── Digital-Estate-Manager/
+└── healthcare-cost/
 ```
 
 ---
@@ -97,13 +136,12 @@ The proxy validates Firebase auth tokens and forwards requests to PocketBase.
 ```bash
 ssh eappell@203.161.56.128
 
-# Create project directory
-mkdir -p ~/retirement-planner
-cd ~/retirement-planner
-
-# Clone repository
-git clone https://github.com/eappell/PocketBase-Proxy.git
-cd PocketBase-Proxy
+# Clone repository (if not already present)
+cd ~
+if [ ! -d "pocketbase-proxy" ]; then
+  git clone https://github.com/eappell/PocketBase-Proxy.git pocketbase-proxy
+fi
+cd pocketbase-proxy
 ```
 
 #### 1.2 Create Environment File
@@ -170,8 +208,13 @@ All apps depend on this library for LoadingOverlay and ToolDataManager.
 
 #### 2.1 Clone and Build
 ```bash
-cd ~/retirement-planner
-git clone https://github.com/eappell/Retire-Common-Lib.git
+cd ~
+
+# Clone if not present
+if [ ! -d "Retire-Common-Lib" ]; then
+  git clone https://github.com/eappell/Retire-Common-Lib.git
+fi
+
 cd Retire-Common-Lib
 
 # Install dependencies
@@ -197,9 +240,14 @@ The portal is the main application hub that embeds all tools.
 
 #### 3.1 Clone Repository
 ```bash
-cd ~/retirement-planner
-git clone https://github.com/eappell/Retire-Portal.git
-cd Retire-Portal
+cd ~
+
+# Clone if not present (directory is 'retire-portal' on VPS)
+if [ ! -d "retire-portal" ]; then
+  git clone https://github.com/eappell/Retire-Portal.git retire-portal
+fi
+
+cd retire-portal
 ```
 
 #### 3.2 Create Production Environment
@@ -275,13 +323,13 @@ Each app follows the same deployment pattern with different ports.
 Replace `[APP_NAME]`, `[REPO]`, `[PORT]`, and `[DOMAIN]` with values from the matrix above.
 
 ```bash
-cd ~/retirement-planner
+cd ~
 
-# Clone app repository
-git clone https://github.com/eappell/[REPO].git
-cd [REPO]
+# Clone app repository (if not present)
+git clone https://github.com/eappell/[REPO].git [APP_DIRECTORY_NAME]
+cd [APP_DIRECTORY_NAME]
 
-# Ensure common library is accessible (should already be cloned)
+# Ensure common library is accessible
 ls -la ../Retire-Common-Lib/dist
 ```
 
@@ -347,9 +395,10 @@ add_header Content-Security-Policy "frame-ancestors 'self' https://portal.retire
 ### 4.1 Tax-Impact-Analyzer
 
 ```bash
-cd ~/retirement-planner
-git clone https://github.com/eappell/Tax-Impact-Analyzer.git
-cd Tax-Impact-Analyzer
+cd ~
+
+# Use existing directory (tax-impact-analyzer)
+cd tax-impact-analyzer
 
 # Verify common library link
 ls -la ../Retire-Common-Lib/dist
@@ -386,9 +435,10 @@ docker logs tax-analyzer -f
 ### 4.2 State-Relocate
 
 ```bash
-cd ~/retirement-planner
-git clone https://github.com/eappell/State-Relocate.git
-cd State-Relocate
+cd ~
+
+# Use existing directory (state-relocate)
+cd state-relocate
 
 cat > docker-compose.yml << 'EOF'
 version: '3.8'
@@ -420,8 +470,9 @@ docker logs state-relocate -f
 ### 4.3 Social-Security-Optimizer
 
 ```bash
-cd ~/retirement-planner
-git clone https://github.com/eappell/Social-Security-Optimizer.git
+cd ~
+
+# Use existing directory (Social-Security-Optimizer)
 cd Social-Security-Optimizer
 
 cat > docker-compose.yml << 'EOF'
@@ -454,8 +505,9 @@ docker logs ss-optimizer -f
 ### 4.4 Retire-Abroad-AI
 
 ```bash
-cd ~/retirement-planner
-git clone https://github.com/eappell/Retire-Abroad-AI.git
+cd ~
+
+# Use existing directory (Retire-Abroad-AI)
 cd Retire-Abroad-AI
 
 cat > docker-compose.yml << 'EOF'
@@ -488,9 +540,10 @@ docker logs retire-abroad -f
 ### 4.5 Longevity and Drawdown Planner
 
 ```bash
-cd ~/retirement-planner
-git clone https://github.com/eappell/Longevity-Drawdown-Planner.git
-cd "Longevity and Drawdown Planner"
+cd ~
+
+# Use existing directory (longevity-drawdown-planner)
+cd longevity-drawdown-planner
 
 cat > docker-compose.yml << 'EOF'
 version: '3.8'
@@ -524,8 +577,9 @@ docker logs longevity -f
 **Note**: This app uses Vite instead of Next.js, so the Dockerfile may differ.
 
 ```bash
-cd ~/retirement-planner
-git clone https://github.com/eappell/Retirement-Planner-AI.git
+cd ~
+
+# Use existing directory (Retirement-Planner-AI)
 cd Retirement-Planner-AI
 
 cat > docker-compose.yml << 'EOF'
@@ -565,24 +619,24 @@ When the common library is updated, **all apps** must be rebuilt:
 ssh eappell@203.161.56.128
 
 # Update common library
-cd ~/retirement-planner/Retire-Common-Lib
+cd ~/Retire-Common-Lib
 git pull origin main
 npm install
 npm run build
 
-# Rebuild all apps
-cd ~/retirement-planner
+# Rebuild all apps that depend on common library
+cd ~
 
-for app in Tax-Impact-Analyzer State-Relocate Social-Security-Optimizer Retire-Abroad-AI "Longevity and Drawdown Planner" Retirement-Planner-AI; do
+for app in tax-impact-analyzer state-relocate Social-Security-Optimizer Retire-Abroad-AI longevity-drawdown-planner Retirement-Planner-AI; do
   echo "Rebuilding $app..."
-  cd ~/retirement-planner/"$app"
+  cd ~/$app
   docker-compose down
   docker-compose up -d --build --force-recreate
   echo "✓ $app rebuilt"
 done
 
 # Also rebuild portal
-cd ~/retirement-planner/Retire-Portal
+cd ~/retire-portal
 docker-compose -f docker-compose.portal.yml down
 docker-compose -f docker-compose.portal.yml up -d --build --force-recreate
 ```
@@ -590,7 +644,7 @@ docker-compose -f docker-compose.portal.yml up -d --build --force-recreate
 ### Updating Individual App
 
 ```bash
-cd ~/retirement-planner/[APP_NAME]
+cd ~/[APP_DIRECTORY_NAME]
 git pull origin main
 docker-compose down
 docker-compose up -d --build
@@ -600,7 +654,7 @@ docker logs [container-name] -f
 ### Updating Portal
 
 ```bash
-cd ~/retirement-planner/Retire-Portal
+cd ~/retire-portal
 git pull origin main
 docker-compose -f docker-compose.portal.yml down
 docker-compose -f docker-compose.portal.yml up -d --build
@@ -610,7 +664,7 @@ docker logs retire-portal -f
 ### Updating PocketBase Proxy
 
 ```bash
-cd ~/retirement-planner/PocketBase-Proxy
+cd ~/pocketbase-proxy
 git pull origin main
 docker-compose down
 docker-compose up -d --build
@@ -621,27 +675,32 @@ docker logs pocketbase-proxy -f
 
 ```bash
 #!/bin/bash
-cd ~/retirement-planner
+cd ~
+
+# List of all app directories on VPS (adjust as needed)
+APPS="Retire-Common-Lib pocketbase-proxy retire-portal tax-impact-analyzer state-relocate Social-Security-Optimizer Retire-Abroad-AI longevity-drawdown-planner Retirement-Planner-AI"
 
 # Update repos
-for repo in Retire-Common-Lib PocketBase-Proxy Retire-Portal Tax-Impact-Analyzer State-Relocate Social-Security-Optimizer Retire-Abroad-AI "Longevity and Drawdown Planner" Retirement-Planner-AI; do
-  echo "Updating $repo..."
-  cd ~/retirement-planner/"$repo"
-  git pull origin main
+for repo in $APPS; do
+  if [ -d "$repo" ]; then
+    echo "Updating $repo..."
+    cd ~/$repo
+    git pull origin main
+  fi
 done
 
 # Rebuild common library
-cd ~/retirement-planner/Retire-Common-Lib
+cd ~/Retire-Common-Lib
 npm install
 npm run build
 
 # Rebuild proxy
-cd ~/retirement-planner/PocketBase-Proxy
+cd ~/pocketbase-proxy
 docker-compose down
 docker-compose up -d --build
 
 # Rebuild portal
-cd ~/retirement-planner/Retire-Portal
+cd ~/retire-portal
 docker-compose -f docker-compose.portal.yml down
 docker-compose -f docker-compose.portal.yml up -d --build
 
