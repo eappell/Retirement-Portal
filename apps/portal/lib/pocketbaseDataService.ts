@@ -184,6 +184,7 @@ export async function loadAllToolData(
   }
 
   try {
+    console.log(`[PocketBase Service] Calling ${PROXY_URL}/api/tool-data/load-all`);
     const response = await fetch(`${PROXY_URL}/api/tool-data/load-all`, {
       method: 'GET',
       headers: {
@@ -198,6 +199,7 @@ export async function loadAllToolData(
     }
 
     const result = await response.json();
+    console.log('[PocketBase Service] Loaded data for tools:', Object.keys(result));
     return result;
   } catch (error) {
     console.error('[PocketBase Service] Error loading all data:', error);

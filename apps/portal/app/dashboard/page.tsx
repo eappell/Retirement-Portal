@@ -1,10 +1,10 @@
 "use client";
 
-import {useEffect, useState} from "react";
+import {useEffect, useState, useCallback} from "react";
 import {useRouter} from "next/navigation";
 import {useAuth} from "@/lib/auth";
 import {useAnalytics} from "@/lib/useAnalytics";
-import {db} from "@/lib/firebase";
+import {db, auth} from "@/lib/firebase";
 import {collection, getDocs} from "firebase/firestore";
 import Link from "next/link";
 import {Header} from "@/components/Header";
@@ -14,6 +14,9 @@ import { AICoach } from "@/components/AICoach";
 import { FloatingInsight } from "@/components/FloatingInsight";
 import { useRetirementData } from "@/lib/retirementContext";
 import { analyzeUserData, hasNewInsights } from "@/lib/proactiveInsights";
+import { aggregateAllToolData } from "@/lib/dataAggregationService";
+import { analyzeCrossToolPatterns } from "@/lib/crossToolAnalyzer";
+import type { CrossToolInsight } from "@/lib/types/aggregatedToolData";
 
 // Use shared icon resolver so Firestore icon names (e.g. "Heart") resolve correctly
 
@@ -133,6 +136,34 @@ export default function DashboardPage() {
   const [isAICoachOpen, setIsAICoachOpen] = useState(false);
   const [hasAIInsight, setHasAIInsight] = useState(false);
   const [previousInsights, setPreviousInsights] = useState<any[]>([]);
+  const [crossToolInsights, setCrossToolInsights] = useState<CrossToolInsight[]>([]);
+  const [insightsLastFetched, setInsightsLastFetched] = useState<Date | null>(null);
+
+  // Fetch cross-tool insights from PocketBase
+  const fetchCrossToolInsights = useCallback(async () => {
+    if (!user || !auth.currentUser) return;
+
+    try {
+      const token = await auth.currentUser.getIdToken();
+      const aggregatedData = await aggregateAllToolData(token);
+      const insights = analyzeCrossToolPatterns(aggregatedData);
+
+      // Check if new high-priority insights appeared
+      const newHighPriority = insights.filter(
+        i => (i.priority === 'critical' || i.priority === 'high') &&
+        !crossToolInsights.some(prev => prev.id === i.id)
+      );
+
+      if (newHighPriority.length > 0) {
+        setHasAIInsight(true);
+      }
+
+      setCrossToolInsights(insights);
+      setInsightsLastFetched(new Date());
+    } catch (error) {
+      console.error('Error fetching cross-tool insights:', error);
+    }
+  }, [user, crossToolInsights]);
 
 
  
@@ -163,17 +194,37 @@ export default function DashboardPage() {
     };
   }, []);
 
+  // Fetch cross-tool insights on mount and periodically
+  useEffect(() => {
+    if (mounted && user && !insightsLastFetched) {
+      fetchCrossToolInsights();
+    }
+  }, [mounted, user, insightsLastFetched, fetchCrossToolInsights]);
+
+  // Listen for tool data changes via postMessage
+  useEffect(() => {
+    const handleToolDataSaved = (event: MessageEvent) => {
+      if (event.data?.type === 'TOOL_DATA_SAVED') {
+        // Refresh insights when any tool saves data
+        fetchCrossToolInsights();
+      }
+    };
+
+    window.addEventListener('message', handleToolDataSaved);
+    return () => window.removeEventListener('message', handleToolDataSaved);
+  }, [fetchCrossToolInsights]);
+
   // Allow bypassing auth redirect in tests by appending ?testMode=1 to the URL
-  // Proactive insights analysis
+  // Legacy proactive insights analysis (keeping for backward compatibility)
   useEffect(() => {
     if (userData && !dataLoading) {
       const insights = analyzeUserData(userData);
-      
+
       // Check if there are new insights
       if (hasNewInsights(previousInsights, insights)) {
         setHasAIInsight(true);
       }
-      
+
       setPreviousInsights(insights);
     }
   }, [userData, dataLoading]);
@@ -319,11 +370,16 @@ export default function DashboardPage() {
       <Header onAICoachOpen={() => setIsAICoachOpen(true)} />
 
       {/* AI Coach Panel */}
-      <AICoach isOpen={isAICoachOpen} onClose={() => setIsAICoachOpen(false)} />
+      <AICoach
+        isOpen={isAICoachOpen}
+        onClose={() => setIsAICoachOpen(false)}
+        initialInsights={crossToolInsights}
+      />
 
       {/* Floating Insight Button */}
-      <FloatingInsight 
-        onClick={() => setIsAICoachOpen(true)} 
+      <FloatingInsight
+        onClick={() => setIsAICoachOpen(true)}
+        insights={crossToolInsights}
         hasInsight={hasAIInsight}
       />
 

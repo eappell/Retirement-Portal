@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useState, useCallback } from "react";
 import { useRouter, useSearchParams, useParams } from "next/navigation";
 import { useAuth } from "@/lib/auth";
 import { useUserTier } from "@/lib/useUserTier";
@@ -8,7 +8,12 @@ import { useAnalytics } from "@/lib/useAnalytics";
 import { useTheme } from "@/lib/theme";
 import { Header } from "@/components/Header";
 import { IFrameWrapper } from "@/components/IFrameWrapper";
-import { db } from "@/lib/firebase";
+import { AICoach } from "@/components/AICoach";
+import { FloatingInsight } from "@/components/FloatingInsight";
+import { db, auth } from "@/lib/firebase";
+import { aggregateAllToolData } from "@/lib/dataAggregationService";
+import { analyzeCrossToolPatterns } from "@/lib/crossToolAnalyzer";
+import type { CrossToolInsight } from "@/lib/types/aggregatedToolData";
 import { collection, getDocs, query, where } from "firebase/firestore";
 import {
   CubeIcon,
@@ -90,6 +95,9 @@ export default function AppPage() {
   const [appConfig, setAppConfig] = useState<any>(null);
   const [loadingApp, setLoadingApp] = useState(true);
   const [devSettings, setDevSettings] = useState<any>({});
+  const [isAICoachOpen, setIsAICoachOpen] = useState(false);
+  const [crossToolInsights, setCrossToolInsights] = useState<CrossToolInsight[]>([]);
+  const [hasAIInsight, setHasAIInsight] = useState(false);
 
   const appId = (params.appId as string) || "";
   const appName = searchParams.get("name") || "";
@@ -206,6 +214,63 @@ export default function AppPage() {
     }
   }, [mounted, user, tier, tierLoading, appId, appConfig, router, trackEvent]);
 
+  // Fetch cross-tool insights from PocketBase
+  const fetchCrossToolInsights = useCallback(async () => {
+    if (!user || !auth.currentUser) return;
+
+    try {
+      const token = await auth.currentUser.getIdToken();
+      const aggregatedData = await aggregateAllToolData(token);
+      const insights = analyzeCrossToolPatterns(aggregatedData);
+
+      // Check if new high-priority insights appeared
+      const newHighPriority = insights.filter(
+        i => (i.priority === 'critical' || i.priority === 'high') &&
+        !crossToolInsights.some(prev => prev.id === i.id)
+      );
+
+      if (newHighPriority.length > 0) {
+        setHasAIInsight(true);
+      }
+
+      setCrossToolInsights(insights);
+    } catch (error) {
+      console.error('Error fetching cross-tool insights:', error);
+    }
+  }, [user, crossToolInsights]);
+
+  // Fetch insights on mount
+  useEffect(() => {
+    if (mounted && user) {
+      fetchCrossToolInsights();
+    }
+  }, [mounted, user]);
+
+  // Listen for tool data changes via postMessage
+  useEffect(() => {
+    const handleToolDataSaved = (event: MessageEvent) => {
+      if (event.data?.type === 'TOOL_DATA_SAVED') {
+        // Refresh insights when any tool saves data
+        fetchCrossToolInsights();
+      }
+    };
+
+    window.addEventListener('message', handleToolDataSaved);
+    return () => window.removeEventListener('message', handleToolDataSaved);
+  }, [fetchCrossToolInsights]);
+
+  // Keyboard shortcut for AI Coach (Cmd/Ctrl + K)
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if ((e.metaKey || e.ctrlKey) && e.key === 'k') {
+        e.preventDefault();
+        setIsAICoachOpen(prev => !prev);
+      }
+    };
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, []);
+
   if (!mounted || !user || tierLoading || loadingApp) {
     return (
       <div className="flex min-h-screen items-center justify-center bg-gray-50">
@@ -270,7 +335,21 @@ export default function AppPage() {
 
   return (
     <div className={`min-h-screen ${theme === 'light' ? 'bg-[#F9F8F6]' : 'bg-[#0f172a]'}`}>
-      <Header />
+      <Header onAICoachOpen={() => setIsAICoachOpen(true)} />
+
+      {/* AI Coach Panel */}
+      <AICoach
+        isOpen={isAICoachOpen}
+        onClose={() => setIsAICoachOpen(false)}
+        initialInsights={crossToolInsights}
+      />
+
+      {/* Floating Insight Button */}
+      <FloatingInsight
+        onClick={() => setIsAICoachOpen(true)}
+        insights={crossToolInsights}
+        hasInsight={hasAIInsight}
+      />
 
       {/* App Info Bar - sticky below header */}
       <div 
