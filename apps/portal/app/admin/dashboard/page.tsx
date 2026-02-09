@@ -209,6 +209,21 @@ export default function AdminDashboard() {
     }
   }, [mounted, user, tier]);
 
+  // If a `tab` query parameter is present (e.g. ?tab=users), select that tab on mount
+  useEffect(() => {
+    try {
+      if (typeof window !== 'undefined') {
+        const params = new URLSearchParams(window.location.search);
+        const t = params.get('tab');
+        if (t === 'users' || t === 'apps' || t === 'site') {
+          setCurrentTab(t as any);
+        }
+      }
+    } catch (e) {
+      // ignore
+    }
+  }, []);
+
   useEffect(() => {
     if (currentTab === 'users' && usersList.length === 0) {
       loadUsers();

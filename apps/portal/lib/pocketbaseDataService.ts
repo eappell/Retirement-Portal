@@ -160,6 +160,43 @@ export async function loadAllToolData(
 }
 
 /**
+ * Delete tool data for the current user/tool via the proxy
+ * @param authToken - Firebase auth token
+ * @param toolId - Tool identifier
+ */
+export async function deleteToolData(
+  authToken: string,
+  toolId: ToolId
+): Promise<boolean> {
+  if (!authToken) {
+    console.warn('[PocketBase Service] No auth token provided for delete');
+    return false;
+  }
+
+  try {
+    const response = await fetch(`${PROXY_URL}/api/tool-data/delete`, {
+      method: 'POST',
+      headers: {
+        'Authorization': `Bearer ${authToken}`,
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({ toolId }),
+    });
+
+    if (!response.ok) {
+      const txt = await response.text();
+      console.error('[PocketBase Service] Delete failed:', response.status, txt);
+      return false;
+    }
+
+    return true;
+  } catch (error) {
+    console.error('[PocketBase Service] Error deleting tool data:', error);
+    return false;
+  }
+}
+
+/**
  * Recursively remove undefined values from an object
  * PocketBase doesn't allow undefined field values
  */
