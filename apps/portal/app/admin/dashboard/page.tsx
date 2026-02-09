@@ -1,7 +1,7 @@
 "use client";
 
-import { useEffect, useState } from "react";
-import { useRouter } from "next/navigation";
+import { useEffect, useState, Suspense } from "react";
+import { useRouter, useSearchParams } from "next/navigation";
 import { useAuth } from "@/lib/auth";
 import { useUserTier } from "@/lib/useUserTier";
 import { useTheme } from "@/lib/theme";
@@ -109,8 +109,9 @@ function CreateUserForm({ onSuccess, onError }: { onSuccess: (uid: string) => vo
   );
 }
 
-export default function AdminDashboard() {
+function AdminDashboardContent() {
   const router = useRouter();
+  const searchParams = useSearchParams();
   const { user } = useAuth();
   const { tier, loading: tierLoading } = useUserTier();
   const { theme } = useTheme();
@@ -192,6 +193,13 @@ export default function AdminDashboard() {
   useEffect(() => {
     setMounted(true);
   }, []);
+
+  useEffect(() => {
+    const tabParam = searchParams.get('tab');
+    if (tabParam === 'users') setCurrentTab('users');
+    else if (tabParam === 'apps') setCurrentTab('apps');
+    else if (tabParam === 'site') setCurrentTab('site');
+  }, [searchParams]);
 
   useEffect(() => {
     if (mounted && (!user || tierLoading)) {
@@ -536,10 +544,12 @@ export default function AdminDashboard() {
         .admin-dashboard a {
           color: #0B5394 !important;
         }
-        .admin-dashboard .force-light-text {
+        /* Increased specificity to override the global rule */
+        div.admin-dashboard :global(.force-light-text),
+        div.admin-dashboard :global(button.force-light-text) {
           color: #ffffff !important;
         }
-        .admin-dashboard .force-light-text svg {
+        div.admin-dashboard :global(.force-light-text svg) {
           color: inherit !important;
         }
         .admin-dashboard .force-dark-text {
@@ -1421,5 +1431,13 @@ export default function AdminDashboard() {
 
       </main>
     </div>
+  );
+}
+
+export default function AdminDashboard() {
+  return (
+    <Suspense fallback={<div className="flex min-h-screen items-center justify-center"><div className="animate-spin rounded-full h-12 w-12 border-b-2" style={{borderColor: '#0B5394'}}></div></div>}>
+      <AdminDashboardContent />
+    </Suspense>
   );
 }

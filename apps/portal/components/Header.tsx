@@ -342,7 +342,7 @@ export function Header({ onAICoachOpen }: HeaderProps = {}) {
                 onMouseEnter={() => setIsProfileMenuOpen(true)}
                 onMouseLeave={() => setIsProfileMenuOpen(false)}
               >
-                <button className="w-10 h-10 rounded-full flex items-center justify-center font-semibold transition-colors text-white" style={{backgroundColor: '#0B5394', color: '#ffffff'}} onMouseEnter={(e) => { e.currentTarget.style.backgroundColor = '#094170'; e.currentTarget.style.color = '#ffffff'; }} onMouseLeave={(e) => { e.currentTarget.style.backgroundColor = '#0B5394'; e.currentTarget.style.color = '#ffffff'; }}>
+                <button className="w-10 h-10 rounded-full flex items-center justify-center font-semibold transition-colors text-white force-light-text" style={{backgroundColor: '#0B5394', color: '#ffffff'}} onMouseEnter={(e) => { e.currentTarget.style.backgroundColor = '#094170'; e.currentTarget.style.color = '#ffffff'; }} onMouseLeave={(e) => { e.currentTarget.style.backgroundColor = '#0B5394'; e.currentTarget.style.color = '#ffffff'; }}>
                   {user?.email ? user.email[0].toUpperCase() : "G"}
                 </button>
                 {isProfileMenuOpen && (
