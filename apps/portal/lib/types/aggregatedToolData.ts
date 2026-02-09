@@ -14,11 +14,11 @@ export const TOOL_IDS = {
   RETIRE_ABROAD: 'retire-abroad',
   STATE_RELOCATE: 'state-relocator',
   LONGEVITY: 'longevity-planner',
-  IDENTITY_BUILDER: 'identity-builder',
+  IDENTITY_BUILDER: 'retirement-identity-builder', // Was 'identity-builder'
   VOLUNTEER: 'volunteer-matcher',
-  LEGACY: 'legacy-visualizer',
+  LEGACY: 'legacy-flow-visualizer', // Was 'legacy-visualizer'
   GIFTING: 'gifting-planner',
-  DIGITAL_ESTATE: 'estate-manager',
+  DIGITAL_ESTATE: 'digital-estate-manager', // Was 'estate-manager'
 } as const;
 
 export type ToolId = (typeof TOOL_IDS)[keyof typeof TOOL_IDS];

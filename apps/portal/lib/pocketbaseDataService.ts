@@ -8,8 +8,10 @@
  * uses this service to interact with PocketBase.
  */
 
-// Proxy URL - configured via environment variable
-const PROXY_URL = process.env.NEXT_PUBLIC_PROXY_URL || 'https://proxy.retirewise.now';
+// Proxy URL - configured via environment variable. When not set, use a
+// relative path so local dev (localhost) talks to the portal server's
+// API routes and avoids CORS issues.
+const PROXY_URL = process.env.NEXT_PUBLIC_PROXY_URL ?? '';
 
 /**
  * Standardized tool IDs for PocketBase
@@ -22,11 +24,11 @@ export const TOOL_IDS = {
   RETIRE_ABROAD: 'retire-abroad',
   STATE_RELOCATE: 'state-relocator',
   LONGEVITY: 'longevity-planner',
-  IDENTITY_BUILDER: 'identity-builder',
+  IDENTITY_BUILDER: 'retirement-identity-builder', // Was 'identity-builder'
   VOLUNTEER: 'volunteer-matcher',
-  LEGACY: 'legacy-visualizer',
+  LEGACY: 'legacy-flow-visualizer', // Was 'legacy-visualizer'
   GIFTING: 'gifting-planner',
-  DIGITAL_ESTATE: 'estate-manager',
+  DIGITAL_ESTATE: 'digital-estate-manager', // Was 'estate-manager'
 } as const;
 
 export type ToolId = string; // Allow any string for flexibility
@@ -204,43 +206,6 @@ export async function loadAllToolData(
   } catch (error) {
     console.error('[PocketBase Service] Error loading all data:', error);
     return {};
-  }
-}
-
-/**
- * Delete tool data for the current user/tool via the proxy
- * @param authToken - Firebase auth token
- * @param toolId - Tool identifier
- */
-export async function deleteToolData(
-  authToken: string,
-  toolId: ToolId
-): Promise<boolean> {
-  if (!authToken) {
-    console.warn('[PocketBase Service] No auth token provided for delete');
-    return false;
-  }
-
-  try {
-    const response = await fetch(`${PROXY_URL}/api/tool-data/delete`, {
-      method: 'POST',
-      headers: {
-        'Authorization': `Bearer ${authToken}`,
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify({ toolId }),
-    });
-
-    if (!response.ok) {
-      const txt = await response.text();
-      console.error('[PocketBase Service] Delete failed:', response.status, txt);
-      return false;
-    }
-
-    return true;
-  } catch (error) {
-    console.error('[PocketBase Service] Error deleting tool data:', error);
-    return false;
   }
 }
 

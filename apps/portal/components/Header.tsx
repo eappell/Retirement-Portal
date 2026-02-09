@@ -198,6 +198,7 @@ export function Header({ onAICoachOpen }: HeaderProps = {}) {
               width={logoWidthFor65}
               height={LOGO_DISPLAY_HEIGHT}
               className={`w-auto object-contain transform origin-left transition-all duration-300 ${isScrolled ? 'h-[40px] min-h-[40px]' : 'h-[65px] min-h-[65px]'}`}
+              style={{ width: 'auto' }}
               priority
             />
           </Link>
@@ -214,6 +215,7 @@ export function Header({ onAICoachOpen }: HeaderProps = {}) {
               width={32}
               height={32}
               className="w-8 h-8 object-contain hidden"
+              style={{ width: 'auto' }}
             />
             <span className={`text-lg font-medium ${textSecondary}`}>Live with Confidence.</span>
           </div>

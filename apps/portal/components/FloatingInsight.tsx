@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef, useCallback } from "react";
 import { SparklesIcon } from "@heroicons/react/24/solid";
 import { useTheme } from "@/lib/theme";
 import type { CrossToolInsight } from "@/lib/types/aggregatedToolData";
@@ -20,6 +20,31 @@ export function FloatingInsight({
   const [isVisible, setIsVisible] = useState(false);
   const [showPulse, setShowPulse] = useState(false);
   const [showPreview, setShowPreview] = useState(false);
+  const hideTimeoutRef = useRef<NodeJS.Timeout | null>(null);
+
+  // Hover handlers with delay to make it easier to reach the preview card
+  const handleMouseEnter = useCallback(() => {
+    if (hideTimeoutRef.current) {
+      clearTimeout(hideTimeoutRef.current);
+      hideTimeoutRef.current = null;
+    }
+    setShowPreview(true);
+  }, []);
+
+  const handleMouseLeave = useCallback(() => {
+    hideTimeoutRef.current = setTimeout(() => {
+      setShowPreview(false);
+    }, 400); // 400ms delay before hiding
+  }, []);
+
+  // Cleanup timeout on unmount
+  useEffect(() => {
+    return () => {
+      if (hideTimeoutRef.current) {
+        clearTimeout(hideTimeoutRef.current);
+      }
+    };
+  }, []);
 
   // Calculate counts
   const highPriorityCount = insights.filter(
@@ -60,14 +85,18 @@ export function FloatingInsight({
   return (
     <div
       className="fixed bottom-6 right-6 z-[99998]"
-      onMouseEnter={() => setShowPreview(true)}
-      onMouseLeave={() => setShowPreview(false)}
+      onMouseEnter={handleMouseEnter}
+      onMouseLeave={handleMouseLeave}
     >
       {/* Insight Preview Card */}
       {showPreview && topInsight && (
         <div
-          className={`absolute bottom-16 right-0 w-72 rounded-xl shadow-xl p-4 mb-2 transition-all duration-200 ${
-            theme === "dark" ? "bg-slate-800 border border-slate-700" : "bg-white border border-gray-200"
+          onClick={onClick}
+          role="button"
+          tabIndex={0}
+          onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') onClick(); }}
+          className={`absolute bottom-16 right-0 w-72 rounded-xl shadow-xl p-4 mb-2 transition-all duration-200 cursor-pointer hover:shadow-2xl ${
+            theme === "dark" ? "bg-slate-800 border border-slate-700 hover:border-slate-600" : "bg-white border border-gray-200 hover:border-gray-300"
           }`}
         >
           {/* Priority Badge */}
@@ -107,9 +136,9 @@ export function FloatingInsight({
           </p>
 
           {/* CTA */}
-          <p className="text-xs text-purple-500 font-medium">
+          <span className="text-xs text-purple-500 font-medium hover:text-purple-600 hover:underline">
             Click to learn more →
-          </p>
+          </span>
 
           {/* Arrow pointing down */}
           <div
