@@ -8,10 +8,10 @@
  * uses this service to interact with PocketBase.
  */
 
-// Proxy URL - configured via environment variable. When not set, use a
-// relative path so local dev (localhost) talks to the portal server's
-// API routes and avoids CORS issues.
-const PROXY_URL = process.env.NEXT_PUBLIC_PROXY_URL ?? '';
+// Proxy URL - configured via environment variable. 
+// Defaults to localhost:3001 for local dev (where pocketbase-proxy runs).
+// In production, set NEXT_PUBLIC_PROXY_URL to the deployed proxy server URL.
+const PROXY_URL = process.env.NEXT_PUBLIC_PROXY_URL ?? 'http://localhost:3001';
 
 /**
  * Standardized tool IDs for PocketBase
