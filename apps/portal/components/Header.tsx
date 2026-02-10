@@ -16,13 +16,21 @@ import nesteggLight from "../public/images/Nestegg-light.png";
 import nesteggDark from "../public/images/NesteggOnly-dark.png";
 import { AppLauncher } from "./AppLauncher";
 import { SunIcon, MoonIcon, SparklesIcon } from "@heroicons/react/24/outline";
+import type { CrossToolInsight } from "@/lib/types/aggregatedToolData";
 
 interface HeaderProps {
   onAICoachOpen?: () => void;
   insightCount?: number;
+  topInsight?: CrossToolInsight | null;
 }
 
-export function Header({ onAICoachOpen, insightCount = 0 }: HeaderProps) {
+function formatImpact(num: number): string {
+  if (num >= 1000000) return (num / 1000000).toFixed(1) + "M";
+  if (num >= 1000) return (num / 1000).toFixed(0) + "K";
+  return num.toLocaleString();
+}
+
+export function Header({ onAICoachOpen, insightCount = 0, topInsight = null }: HeaderProps) {
   const router = useRouter();
   const { user, logout } = useAuth();
   const { tier, loading: tierLoading } = useUserTier();
@@ -35,6 +43,8 @@ export function Header({ onAICoachOpen, insightCount = 0 }: HeaderProps) {
   const [hoveredUserInfo, setHoveredUserInfo] = useState(false);
   const [hoveredUpgrade, setHoveredUpgrade] = useState(false);
   const [suppressHoverTooltips, setSuppressHoverTooltips] = useState(false);
+  const [showInsightPreview, setShowInsightPreview] = useState(false);
+  const insightHideTimeout = useState<ReturnType<typeof setTimeout> | null>(null);
 
   const headerBgClass = theme === "dark" ? "bg-[#1A2A40] shadow" : "bg-white shadow";
   const headerBorderClass = theme === "dark" ? "border-b border-[#1A2A40]" : "border-b border-white";
@@ -228,19 +238,77 @@ export function Header({ onAICoachOpen, insightCount = 0 }: HeaderProps) {
           <nav className="hidden md:flex items-center gap-4">
             {/* AI Coach Button */}
             {onAICoachOpen && (
-              <button
-                onClick={onAICoachOpen}
-                className="relative inline-flex items-center gap-2 px-3 py-1.5 bg-gradient-to-r from-purple-500 to-blue-500 text-white rounded-md text-sm font-medium hover:from-purple-600 hover:to-blue-600 focus:outline-none focus:ring-2 focus:ring-purple-300 transition-all mr-2"
-                aria-label="Open AI Coach"
+              <div
+                className="relative mr-2"
+                onMouseEnter={() => {
+                  if (insightHideTimeout[0]) { clearTimeout(insightHideTimeout[0]); insightHideTimeout[1](null); }
+                  if (insightCount > 0 && topInsight) setShowInsightPreview(true);
+                }}
+                onMouseLeave={() => {
+                  const t = setTimeout(() => setShowInsightPreview(false), 400);
+                  insightHideTimeout[1](t);
+                }}
               >
-                <SparklesIcon className="w-4 h-4" />
-                <span>AI Coach</span>
-                {insightCount > 0 && (
-                  <span className="absolute -top-1.5 -right-1.5 flex items-center justify-center min-w-[18px] h-[18px] px-1 bg-red-500 text-white text-[10px] font-bold rounded-full ring-2 ring-white dark:ring-[#1A2A40]">
-                    {insightCount > 9 ? "9+" : insightCount}
-                  </span>
+                {/* Insight Preview Card */}
+                {showInsightPreview && topInsight && (
+                  <div
+                    onClick={onAICoachOpen}
+                    role="button"
+                    tabIndex={0}
+                    onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') onAICoachOpen(); }}
+                    className={`absolute top-full left-1/2 -translate-x-1/2 w-72 rounded-xl shadow-xl p-4 mt-2 transition-all duration-200 cursor-pointer hover:shadow-2xl z-[9999] ${
+                      theme === "dark" ? "bg-slate-800 border border-slate-700 hover:border-slate-600" : "bg-white border border-gray-200 hover:border-gray-300"
+                    }`}
+                  >
+                    {/* Arrow pointing up */}
+                    <div
+                      className={`absolute -top-2 left-1/2 -translate-x-1/2 w-4 h-4 rotate-45 ${
+                        theme === "dark" ? "bg-slate-800 border-l border-t border-slate-700" : "bg-white border-l border-t border-gray-200"
+                      }`}
+                    />
+                    {/* Priority Badge */}
+                    <div className="flex items-center gap-2 mb-2">
+                      <span
+                        className={`text-xs font-bold px-2 py-0.5 rounded text-white ${
+                          topInsight.priority === "critical" ? "bg-red-500" :
+                          topInsight.priority === "high" ? "bg-orange-500" :
+                          topInsight.priority === "medium" ? "bg-yellow-500" : "bg-blue-500"
+                        }`}
+                      >
+                        {topInsight.priority.toUpperCase()}
+                      </span>
+                      <span className={`text-xs ${theme === "dark" ? "text-slate-400" : "text-gray-500"}`}>
+                        ${formatImpact(topInsight.potentialImpact)} impact
+                      </span>
+                    </div>
+                    {/* Title */}
+                    <h4 className={`text-sm font-semibold mb-1 ${theme === "dark" ? "text-slate-100" : "text-gray-900"}`}>
+                      {topInsight.title}
+                    </h4>
+                    {/* Description */}
+                    <p className={`text-xs line-clamp-2 mb-3 ${theme === "dark" ? "text-slate-400" : "text-gray-600"}`}>
+                      {topInsight.description}
+                    </p>
+                    {/* CTA */}
+                    <span className="text-xs text-purple-500 font-medium hover:text-purple-600 hover:underline">
+                      Click to learn more →
+                    </span>
+                  </div>
                 )}
-              </button>
+                <button
+                  onClick={onAICoachOpen}
+                  className="relative inline-flex items-center gap-2 px-3 py-1.5 bg-gradient-to-r from-purple-500 to-blue-500 text-white rounded-md text-sm font-medium hover:from-purple-600 hover:to-blue-600 focus:outline-none focus:ring-2 focus:ring-purple-300 transition-all"
+                  aria-label="Open AI Coach"
+                >
+                  <SparklesIcon className="w-4 h-4" />
+                  <span>AI Coach</span>
+                  {insightCount > 0 && (
+                    <span className="absolute -top-1.5 -right-1.5 flex items-center justify-center min-w-[18px] h-[18px] px-1 bg-red-500 text-white text-[10px] font-bold rounded-full ring-2 ring-white dark:ring-[#1A2A40]">
+                      {insightCount > 9 ? "9+" : insightCount}
+                    </span>
+                  )}
+                </button>
+              </div>
             )}
 
             {!user?.isAnonymous && !tierLoading && tier !== "paid" && tier !== "admin" && (

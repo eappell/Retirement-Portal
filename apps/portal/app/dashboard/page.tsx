@@ -367,7 +367,7 @@ export default function DashboardPage() {
 
   return (
     <div className="flex-1 bg-background portal-dashboard dashboard-redesign pb-0">
-      <Header onAICoachOpen={() => setIsAICoachOpen(true)} insightCount={crossToolInsights.filter(i => i.priority === 'critical' || i.priority === 'high').length} />
+      <Header onAICoachOpen={() => setIsAICoachOpen(true)} insightCount={crossToolInsights.filter(i => i.priority === 'critical' || i.priority === 'high').length} topInsight={crossToolInsights[0] || null} />
 
       {/* AI Coach Panel */}
       <AICoach

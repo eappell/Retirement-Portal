@@ -335,7 +335,7 @@ export default function AppPage() {
 
   return (
     <div className={`min-h-screen ${theme === 'light' ? 'bg-[#F9F8F6]' : 'bg-[#0f172a]'}`}>
-      <Header onAICoachOpen={() => setIsAICoachOpen(true)} insightCount={crossToolInsights.filter(i => i.priority === 'critical' || i.priority === 'high').length} />
+      <Header onAICoachOpen={() => setIsAICoachOpen(true)} insightCount={crossToolInsights.filter(i => i.priority === 'critical' || i.priority === 'high').length} topInsight={crossToolInsights[0] || null} />
 
       {/* AI Coach Panel */}
       <AICoach
