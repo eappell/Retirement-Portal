@@ -25,7 +25,13 @@ interface ToolDataContextType {
 const ToolDataContext = createContext<ToolDataContextType | undefined>(undefined);
 
 export function ToolDataProvider({ children }: { children: ReactNode }) {
-  const { user, getToken } = useAuth();
+  const { user } = useAuth();
+  
+  const getToken = useCallback(async () => {
+    if (!user) return "";
+    return user.getIdToken(true);
+  }, [user]);
+
   const [toolData, setToolData] = useState<ToolDataState>({});
   const [isLoading, setIsLoading] = useState(false);
   const [isInitialized, setIsInitialized] = useState(false);
