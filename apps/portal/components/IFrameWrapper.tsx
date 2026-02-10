@@ -5,8 +5,8 @@ import { useRouter } from 'next/navigation';
 import { useAuth } from "@/lib/auth";
 import { useUserTier } from "@/lib/useUserTier";
 import { useTheme } from "@/lib/theme";
+import { useToolData } from "@/contexts/ToolDataContext";
 import { auth, firebaseConfig } from "@/lib/firebase";
-import { saveToolData, loadToolData, deleteToolData } from "@/lib/pocketbaseDataService";
 import { ToolbarButton } from "./SecondaryToolbar";
 
 const SAFETY_MAX = 20000;
@@ -29,6 +29,14 @@ export function IFrameWrapper({
   const { user } = useAuth();
   const { tier } = useUserTier();
   const { theme } = useTheme();
+  const { loadDataForTool, saveDataForTool, clearDataForTool } = useToolData();
+  
+  // Ref pattern to allow event listener to access fresh context functions without re-binding
+  const toolDataUtilsRef = useRef({ loadDataForTool, saveDataForTool, clearDataForTool });
+  useEffect(() => {
+    toolDataUtilsRef.current = { loadDataForTool, saveDataForTool, clearDataForTool };
+  }, [loadDataForTool, saveDataForTool, clearDataForTool]);
+
   const iframeRef = useRef<HTMLIFrameElement>(null);
   const messageLogRef = useRef<{ last: string | null; count: number; ts: number; suppressed?: boolean }>({ last: null, count: 0, ts: 0 });
   const lastAppliedRefGlobal = useRef<number>(0);
@@ -920,29 +928,20 @@ export function IFrameWrapper({
         return;
       }
 
-      // Handle SAVE_TOOL_DATA - tool requests portal to save data to PocketBase
+      // Handle SAVE_TOOL_DATA - tool requests portal to save data to PocketBase (via ToolDataContext)
       if (event.data?.type === "SAVE_TOOL_DATA") {
         const { toolId, data, requestId } = event.data;
 
         (async () => {
           try {
-            const token = auth.currentUser ? await auth.currentUser.getIdToken(true) : "";
-            if (!token) {
-              console.warn('[IFrameWrapper] No auth token for SAVE_TOOL_DATA');
-              iframeRef.current?.contentWindow?.postMessage({
-                type: "TOOL_DATA_SAVED",
-                success: false,
-                error: "Not authenticated",
-                requestId,
-              }, "*");
-              return;
-            }
-
-            const result = await saveToolData(token, toolId, data);
+            // No need to manually check token; Provider handles it
+            // Use ref to access fresh context function
+            const result = await toolDataUtilsRef.current.saveDataForTool(toolId, data);
+            
             iframeRef.current?.contentWindow?.postMessage({
               type: "TOOL_DATA_SAVED",
-              success: !!result,
-              id: result?.id || null,
+              success: result.success,
+              id: result.id || null,
               requestId,
             }, "*");
           } catch (error) {
@@ -958,33 +957,23 @@ export function IFrameWrapper({
         return;
       }
 
-      // Handle LOAD_TOOL_DATA - tool requests portal to load data from PocketBase
+      // Handle LOAD_TOOL_DATA - tool requests data from Portal (via ToolDataContext)
       if (event.data?.type === "LOAD_TOOL_DATA") {
         const { toolId, requestId } = event.data;
 
         (async () => {
           try {
-            const token = auth.currentUser ? await auth.currentUser.getIdToken(true) : "";
-            if (!token) {
-              console.warn('[IFrameWrapper] No auth token for LOAD_TOOL_DATA');
-              iframeRef.current?.contentWindow?.postMessage({
-                type: "TOOL_DATA_LOADED",
-                success: false,
-                data: null,
-                error: "Not authenticated",
-                requestId,
-              }, "*");
-              return;
-            }
-
-            const result = await loadToolData(token, toolId);
+            // Context handles caching and token management
+            // Use ref to access fresh context function
+            const result = await toolDataUtilsRef.current.loadDataForTool(toolId);
+            
             iframeRef.current?.contentWindow?.postMessage({
               type: "TOOL_DATA_LOADED",
               success: true,
               data: result?.data || null,
               created: result?.created || null,
               id: result?.id || null,
-              requestId,
+              requestId
             }, "*");
           } catch (error) {
             console.error('[IFrameWrapper] Error in LOAD_TOOL_DATA:', error);
@@ -1000,28 +989,17 @@ export function IFrameWrapper({
         return;
       }
 
-      // Handle CLEAR_TOOL_DATA - tool requests portal to delete saved data for this tool
+      // Handle CLEAR_TOOL_DATA - tool requests portal to delete saved data for this tool (via ToolDataContext)
       if (event.data?.type === "CLEAR_TOOL_DATA") {
         const { toolId, requestId } = event.data;
 
         (async () => {
           try {
-            const token = auth.currentUser ? await auth.currentUser.getIdToken(true) : "";
-            if (!token) {
-              console.warn('[IFrameWrapper] No auth token for CLEAR_TOOL_DATA');
-              iframeRef.current?.contentWindow?.postMessage({
-                type: "TOOL_DATA_CLEARED",
-                success: false,
-                error: "Not authenticated",
-                requestId,
-              }, "*");
-              return;
-            }
-
-            const result = await deleteToolData(token, toolId);
+            const success = await toolDataUtilsRef.current.clearDataForTool(toolId);
+            
             iframeRef.current?.contentWindow?.postMessage({
               type: "TOOL_DATA_CLEARED",
-              success: !!result,
+              success,
               requestId,
             }, "*");
           } catch (error) {
