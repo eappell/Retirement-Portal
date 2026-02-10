@@ -19,9 +19,10 @@ import { SunIcon, MoonIcon, SparklesIcon } from "@heroicons/react/24/outline";
 
 interface HeaderProps {
   onAICoachOpen?: () => void;
+  insightCount?: number;
 }
 
-export function Header({ onAICoachOpen }: HeaderProps = {}) {
+export function Header({ onAICoachOpen, insightCount = 0 }: HeaderProps) {
   const router = useRouter();
   const { user, logout } = useAuth();
   const { tier, loading: tierLoading } = useUserTier();
@@ -229,11 +230,16 @@ export function Header({ onAICoachOpen }: HeaderProps = {}) {
             {onAICoachOpen && (
               <button
                 onClick={onAICoachOpen}
-                className="inline-flex items-center gap-2 px-3 py-1.5 bg-gradient-to-r from-purple-500 to-blue-500 text-white rounded-md text-sm font-medium hover:from-purple-600 hover:to-blue-600 focus:outline-none focus:ring-2 focus:ring-purple-300 transition-all mr-2"
+                className="relative inline-flex items-center gap-2 px-3 py-1.5 bg-gradient-to-r from-purple-500 to-blue-500 text-white rounded-md text-sm font-medium hover:from-purple-600 hover:to-blue-600 focus:outline-none focus:ring-2 focus:ring-purple-300 transition-all mr-2"
                 aria-label="Open AI Coach"
               >
                 <SparklesIcon className="w-4 h-4" />
                 <span>AI Coach</span>
+                {insightCount > 0 && (
+                  <span className="absolute -top-1.5 -right-1.5 flex items-center justify-center min-w-[18px] h-[18px] px-1 bg-red-500 text-white text-[10px] font-bold rounded-full ring-2 ring-white dark:ring-[#1A2A40]">
+                    {insightCount > 9 ? "9+" : insightCount}
+                  </span>
+                )}
               </button>
             )}
 

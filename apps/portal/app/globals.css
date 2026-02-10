@@ -132,7 +132,7 @@ body {
   @apply shadow-2xl;
 }
 
-.dark .bg-gradient-to-r {
+.dark .bg-gradient-to-r:not([class*="from-purple"]) {
   @apply bg-gradient-to-r from-slate-700 to-slate-800;
 }
 

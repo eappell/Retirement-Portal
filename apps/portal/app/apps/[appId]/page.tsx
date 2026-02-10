@@ -9,7 +9,7 @@ import { useTheme } from "@/lib/theme";
 import { Header } from "@/components/Header";
 import { IFrameWrapper } from "@/components/IFrameWrapper";
 import { AICoach } from "@/components/AICoach";
-import { FloatingInsight } from "@/components/FloatingInsight";
+
 import { db, auth } from "@/lib/firebase";
 import { aggregateAllToolData } from "@/lib/dataAggregationService";
 import { analyzeCrossToolPatterns } from "@/lib/crossToolAnalyzer";
@@ -335,7 +335,7 @@ export default function AppPage() {
 
   return (
     <div className={`min-h-screen ${theme === 'light' ? 'bg-[#F9F8F6]' : 'bg-[#0f172a]'}`}>
-      <Header onAICoachOpen={() => setIsAICoachOpen(true)} />
+      <Header onAICoachOpen={() => setIsAICoachOpen(true)} insightCount={crossToolInsights.filter(i => i.priority === 'critical' || i.priority === 'high').length} />
 
       {/* AI Coach Panel */}
       <AICoach
@@ -344,12 +344,7 @@ export default function AppPage() {
         initialInsights={crossToolInsights}
       />
 
-      {/* Floating Insight Button */}
-      <FloatingInsight
-        onClick={() => setIsAICoachOpen(true)}
-        insights={crossToolInsights}
-        hasInsight={hasAIInsight}
-      />
+
 
       {/* App Info Bar - sticky below header */}
       <div 

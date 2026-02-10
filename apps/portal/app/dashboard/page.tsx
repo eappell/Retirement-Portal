@@ -11,7 +11,7 @@ import {Header} from "@/components/Header";
 import { AppIcon } from "@/components/icon-map";
 import { useTheme } from '@/lib/theme';
 import { AICoach } from "@/components/AICoach";
-import { FloatingInsight } from "@/components/FloatingInsight";
+
 import { useRetirementData } from "@/lib/retirementContext";
 import { analyzeUserData, hasNewInsights } from "@/lib/proactiveInsights";
 import { aggregateAllToolData } from "@/lib/dataAggregationService";
@@ -367,7 +367,7 @@ export default function DashboardPage() {
 
   return (
     <div className="flex-1 bg-background portal-dashboard dashboard-redesign pb-0">
-      <Header onAICoachOpen={() => setIsAICoachOpen(true)} />
+      <Header onAICoachOpen={() => setIsAICoachOpen(true)} insightCount={crossToolInsights.filter(i => i.priority === 'critical' || i.priority === 'high').length} />
 
       {/* AI Coach Panel */}
       <AICoach
@@ -376,12 +376,7 @@ export default function DashboardPage() {
         initialInsights={crossToolInsights}
       />
 
-      {/* Floating Insight Button */}
-      <FloatingInsight
-        onClick={() => setIsAICoachOpen(true)}
-        insights={crossToolInsights}
-        hasInsight={hasAIInsight}
-      />
+
 
       {/* Background particles (static, no animation) */}
       <div className="background-particles" aria-hidden="true">
