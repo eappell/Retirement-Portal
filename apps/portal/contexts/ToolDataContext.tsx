@@ -29,8 +29,14 @@ export function ToolDataProvider({ children }: { children: ReactNode }) {
   const { user } = useAuth();
   
   const getToken = useCallback(async () => {
-    if (!auth.currentUser) return "";
-    return auth.currentUser.getIdToken(true);
+    // Try reliable auth object first
+    if (auth.currentUser) {
+      if (typeof auth.currentUser.getIdToken === 'function') {
+        return auth.currentUser.getIdToken(true);
+      }
+    }
+    // Fallback? user object from context is a spread copy, so no methods there.
+    return "";
   }, []);
 
   const [toolData, setToolData] = useState<ToolDataState>({});
