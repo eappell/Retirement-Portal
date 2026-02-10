@@ -2,6 +2,7 @@
 
 import React, { createContext, useContext, useState, useEffect, ReactNode, useCallback } from 'react';
 import { useAuth } from '@/lib/auth';
+import { auth } from '@/lib/firebase';
 import { loadAllToolData, saveToolData, loadToolData as fetchToolData, deleteToolData as removeToolData } from '@/lib/pocketbaseDataService';
 
 // Define the shape of our data
@@ -28,9 +29,9 @@ export function ToolDataProvider({ children }: { children: ReactNode }) {
   const { user } = useAuth();
   
   const getToken = useCallback(async () => {
-    if (!user) return "";
-    return user.getIdToken(true);
-  }, [user]);
+    if (!auth.currentUser) return "";
+    return auth.currentUser.getIdToken(true);
+  }, []);
 
   const [toolData, setToolData] = useState<ToolDataState>({});
   const [isLoading, setIsLoading] = useState(false);
