@@ -1,58 +1,74 @@
-// Portal will forward requests to Planner when `RETIREMENT_APP_URL` is configured.
-// If Planner is not configured, we return a helpful fallback rather than attempting local AI generation in the portal.
+// Portal /api/insights — Forwards retirement plan analysis requests to the
+// centralised PocketBase Proxy which now hosts the AI insights endpoint.
+
+const PROXY_URL = process.env.NEXT_PUBLIC_PROXY_URL || 'http://localhost:3001';
 
 export async function POST(req) {
   try {
     const body = await req.json();
     const { plan, result } = body || {};
     if (!plan || !result || !plan.person1) {
-      return new Response(JSON.stringify({ error: 'Missing required plan or result data (need plan.person1 and result)' }), { status: 400 });
+      return new Response(
+        JSON.stringify({ error: 'Missing required plan or result data (need plan.person1 and result)' }),
+        { status: 400, headers: { 'Content-Type': 'application/json' } }
+      );
     }
 
-    const provider = (body && body.aiProvider) || new URL(req.url).searchParams.get('ai_provider') || process.env.AI_PROVIDER || 'google';
-    const providerLower = String(provider).toLowerCase();
+    // Forward auth token from the request so the proxy can validate the user
+    const authToken = body.authToken || body._authToken || req.headers.get('authorization')?.replace('Bearer ', '');
 
-    const formatCurrency = (value) => new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD', minimumFractionDigits: 0, maximumFractionDigits: 0 }).format(value);
+    if (!authToken) {
+      return new Response(
+        JSON.stringify({ error: 'Missing auth token — include authToken in body or Authorization header' }),
+        { status: 401, headers: { 'Content-Type': 'application/json' } }
+      );
+    }
 
-    const totalInvestments = ([...(plan.retirementAccounts || []), ...(plan.investmentAccounts || [])]).reduce((s, a) => s + (a.balance || 0), 0);
-    const planType = plan.planType || 'Unknown';
-    const state = plan.state || 'Unknown';
-    const inflationRate = plan.inflationRate ?? 'Unknown';
-    const avgReturn = plan.avgReturn ?? 'Unknown';
-    const p1 = plan.person1 || {};
-    const p2 = plan.person2 || {};
+    const targetUrl = `${PROXY_URL.replace(/\/$/, '')}/api/insights`;
 
-    const planSummary = `A user is planning for retirement with the following details:\n- Planning for: ${planType}\n- State: ${state}\n- Inflation: ${inflationRate}%\n- Avg return: ${avgReturn}%\n\nPeople:\n- ${p1.name || 'Person 1'}: age ${p1.currentAge ?? 'Unknown'}, retires ${p1.retirementAge ?? 'Unknown'}\n${planType === 'Couple' ? `- ${p2.name || 'Person 2'}: age ${p2.currentAge ?? 'Unknown'}, retires ${p2.retirementAge ?? 'Unknown'}\n` : ''}\nFinancials:\n- Total investments: ${formatCurrency(totalInvestments)}\n- Avg monthly net income (today): ${formatCurrency(result.avgMonthlyNetIncomeToday || 0)}\n- Net worth at end: ${formatCurrency(result.netWorthAtEnd || 0)}\n`;
+    const resp = await fetch(targetUrl, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${authToken}`,
+      },
+      body: JSON.stringify({ plan, result, aiProvider: body.aiProvider }),
+    });
 
-    const prompt = `You are a friendly financial advisor. Read the plan summary and give a short Overview and three Actionable Tips in Markdown.\n\n${planSummary}`;
+    const text = await resp.text();
+    const contentType = resp.headers.get('content-type') || '';
 
-    // If the Planner app is configured, prefer forwarding to it so AI calls are centralized.
-    const targetApp = process.env.RETIREMENT_APP_URL || process.env.VERCEL_RETIREMENT_URL;
-    if (targetApp) {
-      const bypass = process.env.VERCEL_BYPASS_TOKEN || process.env.VERCEL_PROTECTION_BYPASS;
-      const base = targetApp.replace(/\/$/, '');
-      const targetUrl = bypass ? `${base}/api/insights?x-vercel-set-bypass-cookie=true&x-vercel-protection-bypass=${bypass}` : `${base}/api/insights`;
-      const upstreamResp = await fetch(targetUrl, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(body) });
-      const ttext = await upstreamResp.text();
-      const contentType = upstreamResp.headers.get('content-type') || '';
-      if (!upstreamResp.ok) {
-        console.error('[insights route] upstream error', upstreamResp.status, contentType, ttext.slice(0, 200));
-        try { return new Response(ttext, { status: upstreamResp.status, headers: { 'Content-Type': contentType || 'application/json' } }); } catch (e) { return new Response(JSON.stringify({ error: 'Upstream error' }), { status: 502 }); }
+    if (!resp.ok) {
+      console.error('[insights] proxy error', resp.status, contentType, text.slice(0, 200));
+      if (contentType.includes('text/html')) {
+        return new Response(
+          JSON.stringify({ error: 'Proxy returned HTML — check NEXT_PUBLIC_PROXY_URL config' }),
+          { status: 502, headers: { 'Content-Type': 'application/json' } }
+        );
       }
-      try { return new Response(JSON.stringify(JSON.parse(ttext)), { status: 200, headers: { 'Content-Type': 'application/json', 'X-AI-Provider': providerLower } }); } catch (e) { return new Response(ttext, { status: 200 }); }
+      return new Response(text, { status: resp.status, headers: { 'Content-Type': 'application/json' } });
     }
 
-    // If Planner is not configured, return a helpful fallback text instructing configuration.
-    const fallback = `Overview:\nThis is a fallback response summarizing the plan. The portal is not configured with a Planner backend (RETIREMENT_APP_URL).\n\nTips:\n1. Configure the Planner by setting RETIREMENT_APP_URL in your Portal environment variables.\n2. If you want the portal to perform AI generation, install and configure @google/genai and @anthropic-ai/sdk within the Portal project.`;
-    return new Response(JSON.stringify({ text: fallback, _fallback: true, _fallbackReason: 'Planner not configured' }), { status: 200, headers: { 'Content-Type': 'application/json', 'X-AI-Provider': (process.env.AI_PROVIDER || 'google') } });
-
-    if (typeof text !== 'string') text = String(text);
-    try { text = text.replace(/\n---\n/g, '\n<hr />\n'); } catch (e) { /* ignore */ }
-
-    return new Response(JSON.stringify({ text }), { status: 200, headers: { 'Content-Type': 'application/json', 'X-AI-Provider': providerLower, 'Access-Control-Expose-Headers': 'X-AI-Provider' } });
+    try {
+      const parsed = JSON.parse(text);
+      const providerHeader = resp.headers.get('x-ai-provider') || '';
+      return new Response(JSON.stringify(parsed), {
+        status: 200,
+        headers: {
+          'Content-Type': 'application/json',
+          'X-AI-Provider': providerHeader,
+          'Access-Control-Expose-Headers': 'X-AI-Provider',
+        },
+      });
+    } catch {
+      return new Response(text, { status: 200 });
+    }
   } catch (err) {
-    console.error('insights route error', err);
-    const fallback = `Overview:\nThis is a fallback response summarizing the plan.\n\nTips:\n1. Review asset allocation.\n2. Increase retirement savings by 1-3%.\n3. Revisit retirement age and Social Security timing.`;
-    return new Response(JSON.stringify({ text: fallback, _fallback: true }), { status: 200, headers: { 'Content-Type': 'application/json', 'X-AI-Provider': (process.env.AI_PROVIDER || 'google') } });
+    console.error('[insights] route error', err);
+    const fallback = `Overview:\nFallback response — the proxy may be unavailable.\n\nTips:\n1. Review asset allocation.\n2. Increase retirement savings by 1-3%.\n3. Revisit retirement age and Social Security timing.`;
+    return new Response(
+      JSON.stringify({ text: fallback, _fallback: true }),
+      { status: 200, headers: { 'Content-Type': 'application/json' } }
+    );
   }
 }
