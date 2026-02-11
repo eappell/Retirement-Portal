@@ -474,6 +474,54 @@ export function buildDataSnapshotForAI(data: AggregatedToolData): string {
     if (data.legacyVisualizer.charitableGivingPlanned > 0) {
       lines.push(`- Charitable Giving Planned: $${formatNumber(data.legacyVisualizer.charitableGivingPlanned)}`);
     }
+    lines.push(`- Estate Plan Complete: ${data.legacyVisualizer.estatePlanComplete ? 'Yes' : 'No'}`);
+    lines.push('');
+  }
+
+  if (data.identityBuilder) {
+    lines.push('### Retirement Identity');
+    lines.push(`- Purpose Score: ${data.identityBuilder.purposeScore}/100`);
+    if (data.identityBuilder.retirementGoals.length > 0) {
+      lines.push(`- Retirement Goals: ${data.identityBuilder.retirementGoals.join(', ')}`);
+    }
+    if (data.identityBuilder.activityPreferences.length > 0) {
+      lines.push(`- Activity Preferences: ${data.identityBuilder.activityPreferences.join(', ')}`);
+    }
+    if (data.identityBuilder.topPriorities && data.identityBuilder.topPriorities.length > 0) {
+      lines.push(`- Top Priorities: ${data.identityBuilder.topPriorities.join(', ')}`);
+    }
+    lines.push('');
+  }
+
+  if (data.volunteerMatcher) {
+    lines.push('### Volunteering');
+    lines.push(`- Matched Opportunities: ${data.volunteerMatcher.matchedOpportunities}`);
+    lines.push(`- Weekly Hours Committed: ${data.volunteerMatcher.weeklyHoursCommitted}`);
+    if (data.volunteerMatcher.skillsToShare.length > 0) {
+      lines.push(`- Skills to Share: ${data.volunteerMatcher.skillsToShare.join(', ')}`);
+    }
+    if (data.volunteerMatcher.interestAreas && data.volunteerMatcher.interestAreas.length > 0) {
+      lines.push(`- Interest Areas: ${data.volunteerMatcher.interestAreas.join(', ')}`);
+    }
+    lines.push('');
+  }
+
+  if (data.giftingPlanner) {
+    lines.push('### Gifting Strategy');
+    lines.push(`- Annual Gift Budget: $${formatNumber(data.giftingPlanner.annualGiftBudget)}`);
+    lines.push(`- Tax-Advantaged Gifts: $${formatNumber(data.giftingPlanner.taxAdvantagedGifts)}`);
+    if (data.giftingPlanner.educationFunds529 > 0) {
+      lines.push(`- 529 Education Funds: $${formatNumber(data.giftingPlanner.educationFunds529)}`);
+    }
+    lines.push(`- Recipient Count: ${data.giftingPlanner.recipientCount}`);
+    lines.push('');
+  }
+
+  if (data.estateManager) {
+    lines.push('### Digital Estate');
+    lines.push(`- Digital Assets Documented: ${data.estateManager.digitalAssetsCount}`);
+    lines.push(`- Documents Uploaded: ${data.estateManager.documentsUploaded}`);
+    lines.push(`- Passwords Stored: ${data.estateManager.passwordsStored}`);
     lines.push('');
   }
 

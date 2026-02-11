@@ -178,7 +178,18 @@ export type InsightType =
   | 'estate-gifting'
   | 'longevity-healthcare'
   | 'lifestyle-budget'
-  | 'general-planning';
+  | 'general-planning'
+  | 'income-abroad'
+  | 'tax-abroad'
+  | 'income-longevity'
+  | 'ss-tax'
+  | 'identity-volunteer'
+  | 'digital-legacy'
+  | 'healthcare-abroad'
+  | 'holistic-income'
+  | 'location-lifestyle'
+  | 'gifting-income'
+  | 'estate-tax';
 
 export type InsightPriority = 'critical' | 'high' | 'medium' | 'low';
 

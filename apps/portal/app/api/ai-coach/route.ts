@@ -54,11 +54,11 @@ async function fetchEnhancedUserContext(authToken: string): Promise<EnhancedCont
         'retire-abroad': 'Retire Abroad',
         'state-relocator': 'State Relocator',
         'longevity-planner': 'Longevity Planner',
-        'identity-builder': 'Identity Builder',
+        'retirement-identity-builder': 'Identity Builder',
         'volunteer-matcher': 'Volunteer Matcher',
-        'legacy-visualizer': 'Legacy Visualizer',
+        'legacy-flow-visualizer': 'Legacy Visualizer',
         'gifting-planner': 'Gifting Planner',
-        'estate-manager': 'Estate Manager',
+        'digital-estate-manager': 'Digital Estate Manager',
       };
       return toolNames[toolId] || toolId;
     });

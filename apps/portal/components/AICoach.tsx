@@ -519,11 +519,11 @@ function formatToolName(toolId: string): string {
     "retire-abroad": "Retire Abroad",
     "state-relocator": "State Relocator",
     "longevity-planner": "Longevity",
-    "identity-builder": "Identity",
+    "retirement-identity-builder": "Identity",
     "volunteer-matcher": "Volunteer",
-    "legacy-visualizer": "Legacy",
+    "legacy-flow-visualizer": "Legacy",
     "gifting-planner": "Gifting",
-    "estate-manager": "Estate",
+    "digital-estate-manager": "Digital Estate",
   };
   return names[toolId] || toolId;
 }

@@ -54,6 +54,36 @@ export function analyzeCrossToolPatterns(data: AggregatedToolData): CrossToolIns
   // Longevity + Healthcare Cost Projection
   insights.push(...analyzeLongevityHealthcareCosts(data));
 
+  // Income + Retire Abroad (cost-of-living impact)
+  insights.push(...analyzeIncomeAbroadImpact(data));
+
+  // Tax + Retire Abroad (international tax implications)
+  insights.push(...analyzeTaxAbroadImplications(data));
+
+  // Income + Longevity (drawdown sustainability)
+  insights.push(...analyzeIncomeDrawdownSustainability(data));
+
+  // Social Security + Tax (Roth conversion & bracket management)
+  insights.push(...analyzeSSTaxStrategy(data));
+
+  // Identity + Volunteer (lifestyle alignment)
+  insights.push(...analyzeIdentityVolunteerAlignment(data));
+
+  // Digital Estate + Legacy (estate plan completeness)
+  insights.push(...analyzeDigitalLegacyReadiness(data));
+
+  // Income + Healthcare + Longevity (holistic retirement funding)
+  insights.push(...analyzeHolisticRetirementFunding(data));
+
+  // Location + Identity + Lifestyle (relocation lifestyle fit)
+  insights.push(...analyzeLocationLifestyleFit(data));
+
+  // Gifting + Income (charitable giving capacity)
+  insights.push(...analyzeGiftingIncomeCapacity(data));
+
+  // Estate + Tax (estate tax optimization)
+  insights.push(...analyzeEstateTaxOptimization(data));
+
   // General planning insights
   insights.push(...analyzeGeneralPlanning(data));
 
@@ -391,6 +421,725 @@ function analyzeGeneralPlanning(data: AggregatedToolData): CrossToolInsight[] {
 }
 
 // ============================================
+// NEW: Income + Retire Abroad (cost-of-living impact)
+// ============================================
+
+function analyzeIncomeAbroadImpact(data: AggregatedToolData): CrossToolInsight[] {
+  const insights: CrossToolInsight[] = [];
+
+  if (!data.incomeEstimator || !data.retireAbroad) return insights;
+
+  const totalIncome = data.incomeEstimator.totalAnnualIncome;
+  const topCountry = data.retireAbroad.topCountry;
+  const monthlyCostOfLiving = data.retireAbroad.monthlyCostOfLiving;
+  const annualSavings = data.retireAbroad.annualSavingsVsCurrent;
+  const qualityOfLife = data.retireAbroad.qualityOfLifeScore;
+
+  if (topCountry && monthlyCostOfLiving > 0) {
+    const annualCostAbroad = monthlyCostOfLiving * 12;
+    const incomeAfterExpenses = totalIncome - annualCostAbroad;
+    const surplusOrDeficit = incomeAfterExpenses > 0 ? 'surplus' : 'deficit';
+
+    if (annualSavings > 5000) {
+      const priority = determinePriority(annualSavings, 25000, 15000, 5000);
+
+      insights.push({
+        id: 'income-abroad-cost-of-living',
+        type: 'income-abroad',
+        priority,
+        title: `Moving to ${topCountry} could free up $${formatNumber(annualSavings)}/year`,
+        description: `Your retirement income of $${formatNumber(totalIncome)}/year goes much further in ${topCountry}, where the estimated cost of living is $${formatNumber(annualCostAbroad)}/year. This creates a $${formatNumber(Math.abs(incomeAfterExpenses))}/year ${surplusOrDeficit}${qualityOfLife >= 70 ? ` with a quality of life score of ${qualityOfLife}/100` : ''}.`,
+        potentialImpact: annualSavings * 20,
+        confidenceScore: 70,
+        relatedTools: [TOOL_IDS.INCOME_ESTIMATOR as ToolId, TOOL_IDS.RETIRE_ABROAD as ToolId],
+        actionItems: [
+          `Compare your current US expenses to ${topCountry} cost of living`,
+          'Factor in currency exchange risks and inflation differences',
+          'Consider how Social Security and pension income transfer abroad',
+          'Plan for healthcare coverage in your destination country',
+          'Account for travel costs to visit family back home',
+        ],
+        dataUsed: [
+          { toolId: TOOL_IDS.INCOME_ESTIMATOR as ToolId, dataPoints: ['totalAnnualIncome'] },
+          { toolId: TOOL_IDS.RETIRE_ABROAD as ToolId, dataPoints: ['topCountry', 'monthlyCostOfLiving', 'annualSavingsVsCurrent'] },
+        ],
+      });
+    }
+
+    // If income barely covers costs abroad, flag it
+    if (totalIncome > 0 && annualCostAbroad > totalIncome * 0.85) {
+      insights.push({
+        id: 'income-abroad-tight-budget',
+        type: 'income-abroad',
+        priority: 'high',
+        title: `Budget may be tight in ${topCountry} on current income`,
+        description: `Your annual cost of living in ${topCountry} ($${formatNumber(annualCostAbroad)}) would consume ${Math.round((annualCostAbroad / totalIncome) * 100)}% of your retirement income ($${formatNumber(totalIncome)}). This leaves little room for emergencies, travel, or unexpected expenses.`,
+        potentialImpact: annualCostAbroad - totalIncome,
+        confidenceScore: 65,
+        relatedTools: [TOOL_IDS.INCOME_ESTIMATOR as ToolId, TOOL_IDS.RETIRE_ABROAD as ToolId],
+        actionItems: [
+          'Look at lower-cost cities within your target country',
+          'Explore ways to increase retirement income',
+          'Build an emergency fund before relocating',
+          'Consider part-time remote work possibilities',
+        ],
+        dataUsed: [
+          { toolId: TOOL_IDS.INCOME_ESTIMATOR as ToolId, dataPoints: ['totalAnnualIncome'] },
+          { toolId: TOOL_IDS.RETIRE_ABROAD as ToolId, dataPoints: ['topCountry', 'monthlyCostOfLiving'] },
+        ],
+      });
+    }
+  }
+
+  return insights;
+}
+
+// ============================================
+// NEW: Tax + Retire Abroad (international tax implications)
+// ============================================
+
+function analyzeTaxAbroadImplications(data: AggregatedToolData): CrossToolInsight[] {
+  const insights: CrossToolInsight[] = [];
+
+  if (!data.taxAnalyzer || !data.retireAbroad) return insights;
+
+  const currentState = data.taxAnalyzer.currentState;
+  const totalTax = data.taxAnalyzer.totalAnnualTax || (data.taxAnalyzer.annualStateTax + data.taxAnalyzer.annualFederalTax);
+  const topCountry = data.retireAbroad.topCountry;
+  const annualSavings = data.retireAbroad.annualSavingsVsCurrent;
+  const isHighTaxState = HIGH_TAX_STATES.includes(currentState);
+
+  if (topCountry && totalTax > 10000) {
+    const stateTaxSaved = isHighTaxState ? data.taxAnalyzer.annualStateTax : 0;
+    const combinedSavings = annualSavings + stateTaxSaved;
+
+    if (combinedSavings > 10000) {
+      insights.push({
+        id: 'tax-abroad-combined',
+        type: 'tax-abroad',
+        priority: determinePriority(combinedSavings, 40000, 25000, 10000),
+        title: `Moving abroad could eliminate $${formatNumber(stateTaxSaved)}/year in state taxes`,
+        description: `By moving from ${currentState} to ${topCountry}, you would no longer owe state income tax ($${formatNumber(data.taxAnalyzer.annualStateTax)}/year). Combined with lower cost of living savings of $${formatNumber(annualSavings)}/year, the total financial benefit could be $${formatNumber(combinedSavings)}/year. Note: US citizens still owe federal taxes on worldwide income, but Foreign Earned Income Exclusion and tax treaties may apply.`,
+        potentialImpact: combinedSavings * 15,
+        confidenceScore: 60,
+        relatedTools: [TOOL_IDS.TAX_IMPACT as ToolId, TOOL_IDS.RETIRE_ABROAD as ToolId],
+        actionItems: [
+          'Research US-' + topCountry + ' tax treaty provisions',
+          'Understand FBAR and FATCA reporting requirements for Americans abroad',
+          'Consult an international tax specialist',
+          'Consider Foreign Tax Credit to avoid double taxation',
+          'Plan for Social Security taxation while abroad',
+        ],
+        dataUsed: [
+          { toolId: TOOL_IDS.TAX_IMPACT as ToolId, dataPoints: ['currentState', 'annualStateTax', 'totalAnnualTax'] },
+          { toolId: TOOL_IDS.RETIRE_ABROAD as ToolId, dataPoints: ['topCountry', 'annualSavingsVsCurrent'] },
+        ],
+      });
+    }
+  }
+
+  return insights;
+}
+
+// ============================================
+// NEW: Income + Longevity (drawdown sustainability)
+// ============================================
+
+function analyzeIncomeDrawdownSustainability(data: AggregatedToolData): CrossToolInsight[] {
+  const insights: CrossToolInsight[] = [];
+
+  if (!data.incomeEstimator || !data.longevityPlanner) return insights;
+
+  const totalIncome = data.incomeEstimator.totalAnnualIncome;
+  const investmentIncome = data.incomeEstimator.investmentIncome;
+  const planningHorizon = data.longevityPlanner.planningHorizon;
+  const projectedLifespan = data.longevityPlanner.projectedLifespan;
+
+  // If investment income is a large portion of total, drawdown risk matters
+  if (investmentIncome > 0 && totalIncome > 0) {
+    const investmentPortion = investmentIncome / totalIncome;
+    const lifetimeInvestmentNeeded = investmentIncome * planningHorizon;
+
+    if (investmentPortion > 0.3 && planningHorizon > 20) {
+      insights.push({
+        id: 'income-longevity-drawdown',
+        type: 'income-longevity',
+        priority: investmentPortion > 0.5 ? 'high' : 'medium',
+        title: `${Math.round(investmentPortion * 100)}% of income relies on investments over ${planningHorizon} years`,
+        description: `You depend on $${formatNumber(investmentIncome)}/year from investments, which represents ${Math.round(investmentPortion * 100)}% of your income. Over your ${planningHorizon}-year planning horizon (to age ${projectedLifespan}), you'll need approximately $${formatNumber(lifetimeInvestmentNeeded)} from investments alone. A sustainable withdrawal rate (3-4%) is critical to avoid outliving your savings.`,
+        potentialImpact: lifetimeInvestmentNeeded,
+        confidenceScore: 75,
+        relatedTools: [TOOL_IDS.INCOME_ESTIMATOR as ToolId, TOOL_IDS.LONGEVITY as ToolId],
+        actionItems: [
+          'Review your current withdrawal rate against the 4% rule',
+          'Consider annuities to guarantee a portion of income',
+          'Adjust asset allocation for longevity risk',
+          'Build a cash buffer for market downturns (bucket strategy)',
+          'Re-evaluate spending if markets decline significantly',
+        ],
+        dataUsed: [
+          { toolId: TOOL_IDS.INCOME_ESTIMATOR as ToolId, dataPoints: ['totalAnnualIncome', 'investmentIncome'] },
+          { toolId: TOOL_IDS.LONGEVITY as ToolId, dataPoints: ['planningHorizon', 'projectedLifespan'] },
+        ],
+      });
+    }
+  }
+
+  // Low total income relative to long planning horizon
+  if (totalIncome > 0 && totalIncome < 40000 && planningHorizon > 25) {
+    insights.push({
+      id: 'income-longevity-low-income',
+      type: 'income-longevity',
+      priority: 'high',
+      title: `$${formatNumber(totalIncome)}/year may be stretched thin over ${planningHorizon} years`,
+      description: `Your projected retirement income of $${formatNumber(totalIncome)}/year needs to sustain you for ${planningHorizon} years. With inflation averaging 3%, your purchasing power will decrease by roughly half over 25 years. Consider strategies to supplement income or reduce expenses.`,
+      potentialImpact: totalIncome * planningHorizon * 0.3, // inflation impact estimate
+      confidenceScore: 70,
+      relatedTools: [TOOL_IDS.INCOME_ESTIMATOR as ToolId, TOOL_IDS.LONGEVITY as ToolId],
+      actionItems: [
+        'Explore retiring abroad for lower cost of living',
+        'Use Social Security Optimizer to maximize benefits',
+        'Consider relocating to a tax-friendly state',
+        'Look into part-time work in early retirement years',
+      ],
+      dataUsed: [
+        { toolId: TOOL_IDS.INCOME_ESTIMATOR as ToolId, dataPoints: ['totalAnnualIncome'] },
+        { toolId: TOOL_IDS.LONGEVITY as ToolId, dataPoints: ['planningHorizon'] },
+      ],
+    });
+  }
+
+  return insights;
+}
+
+// ============================================
+// NEW: Social Security + Tax (Roth conversion & bracket management)
+// ============================================
+
+function analyzeSSTaxStrategy(data: AggregatedToolData): CrossToolInsight[] {
+  const insights: CrossToolInsight[] = [];
+
+  if (!data.ssOptimizer || !data.taxAnalyzer) return insights;
+
+  const currentClaimAge = data.ssOptimizer.currentClaimAge;
+  const monthlyBenefit = data.ssOptimizer.monthlyBenefitAtCurrent;
+  const annualSSIncome = monthlyBenefit * 12;
+  const effectiveTaxRate = data.taxAnalyzer.effectiveTaxRate;
+  const federalTax = data.taxAnalyzer.annualFederalTax;
+
+  // SS income bracket management — if SS + other income pushes tax rate up
+  if (annualSSIncome > 25000 && effectiveTaxRate > 15) {
+    insights.push({
+      id: 'ss-tax-bracket-management',
+      type: 'ss-tax',
+      priority: 'medium',
+      title: 'Social Security may increase your tax bracket',
+      description: `Your estimated Social Security of $${formatNumber(annualSSIncome)}/year combined with other income puts your effective tax rate at ${effectiveTaxRate}%. Up to 85% of Social Security benefits can be taxable. Consider Roth conversions before claiming SS to reduce future tax burden, or plan withdrawals strategically across tax-deferred and tax-free accounts.`,
+      potentialImpact: annualSSIncome * 0.85 * (effectiveTaxRate / 100) * 15,
+      confidenceScore: 70,
+      relatedTools: [TOOL_IDS.SOCIAL_SECURITY as ToolId, TOOL_IDS.TAX_IMPACT as ToolId],
+      actionItems: [
+        'Consider Roth conversions in years before you claim Social Security',
+        'Coordinate withdrawal strategy across 401(k), IRA, and Roth accounts',
+        'Model the tax impact of different claiming ages',
+        'Plan for Required Minimum Distributions (RMDs) at age 73+',
+        'Consider qualified charitable distributions (QCDs) from IRAs',
+      ],
+      dataUsed: [
+        { toolId: TOOL_IDS.SOCIAL_SECURITY as ToolId, dataPoints: ['currentClaimAge', 'monthlyBenefitAtCurrent'] },
+        { toolId: TOOL_IDS.TAX_IMPACT as ToolId, dataPoints: ['effectiveTaxRate', 'annualFederalTax'] },
+      ],
+    });
+  }
+
+  // Delaying SS claim could allow Roth conversions in lower brackets
+  if (currentClaimAge <= 65 && federalTax > 5000) {
+    const yearsToDelay = 70 - currentClaimAge;
+    const conversionWindow = yearsToDelay;
+
+    if (conversionWindow >= 3) {
+      insights.push({
+        id: 'ss-tax-roth-conversion-window',
+        type: 'ss-tax',
+        priority: 'medium',
+        title: `${conversionWindow}-year Roth conversion window before claiming SS`,
+        description: `If you delay Social Security from ${currentClaimAge} to 70, you have a ${conversionWindow}-year window with lower income to do Roth conversions at reduced tax rates. This can significantly reduce your lifetime tax burden and eliminate RMD headaches later.`,
+        potentialImpact: federalTax * conversionWindow * 0.3,
+        confidenceScore: 65,
+        relatedTools: [TOOL_IDS.SOCIAL_SECURITY as ToolId, TOOL_IDS.TAX_IMPACT as ToolId],
+        actionItems: [
+          'Calculate how much to convert each year to stay in current bracket',
+          'Consider partial Roth conversions to fill lower brackets',
+          'Factor in ACA subsidy cliffs if on marketplace insurance',
+          'Coordinate with your tax advisor for optimal conversion amounts',
+        ],
+        dataUsed: [
+          { toolId: TOOL_IDS.SOCIAL_SECURITY as ToolId, dataPoints: ['currentClaimAge'] },
+          { toolId: TOOL_IDS.TAX_IMPACT as ToolId, dataPoints: ['annualFederalTax'] },
+        ],
+      });
+    }
+  }
+
+  return insights;
+}
+
+// ============================================
+// NEW: Identity + Volunteer (lifestyle alignment)
+// ============================================
+
+function analyzeIdentityVolunteerAlignment(data: AggregatedToolData): CrossToolInsight[] {
+  const insights: CrossToolInsight[] = [];
+
+  if (!data.identityBuilder || !data.volunteerMatcher) return insights;
+
+  const purposeScore = data.identityBuilder.purposeScore;
+  const weeklyHours = data.volunteerMatcher.weeklyHoursCommitted;
+  const matchedOpportunities = data.volunteerMatcher.matchedOpportunities;
+  const goals = data.identityBuilder.retirementGoals;
+  const skills = data.volunteerMatcher.skillsToShare;
+
+  // Good alignment between identity goals and volunteer engagement
+  if (purposeScore > 60 && weeklyHours > 0 && matchedOpportunities > 0) {
+    insights.push({
+      id: 'identity-volunteer-aligned',
+      type: 'identity-volunteer',
+      priority: 'low',
+      title: 'Your volunteer work aligns well with retirement goals',
+      description: `Your purpose score of ${purposeScore}/100 combined with ${weeklyHours} hours/week of volunteering shows strong alignment between your retirement identity and community engagement. Research shows retirees with purpose score above 60 report significantly higher life satisfaction.${skills.length > 0 ? ` Your skills in ${skills.slice(0, 3).join(', ')} are making an impact.` : ''}`,
+      potentialImpact: 0,
+      confidenceScore: 80,
+      relatedTools: [TOOL_IDS.IDENTITY_BUILDER as ToolId, TOOL_IDS.VOLUNTEER as ToolId],
+      actionItems: [
+        'Continue building on your current volunteer commitments',
+        'Consider mentoring roles that leverage your expertise',
+        'Look for volunteer opportunities when traveling or abroad',
+        'Document your impact for personal fulfillment tracking',
+      ],
+      dataUsed: [
+        { toolId: TOOL_IDS.IDENTITY_BUILDER as ToolId, dataPoints: ['purposeScore', 'retirementGoals'] },
+        { toolId: TOOL_IDS.VOLUNTEER as ToolId, dataPoints: ['weeklyHoursCommitted', 'matchedOpportunities'] },
+      ],
+    });
+  }
+
+  // High purpose score but no volunteer engagement
+  if (purposeScore > 50 && weeklyHours === 0 && matchedOpportunities > 0) {
+    insights.push({
+      id: 'identity-volunteer-opportunity',
+      type: 'identity-volunteer',
+      priority: 'medium',
+      title: `${matchedOpportunities} volunteer matches found for your interests`,
+      description: `Your Identity Builder shows clear retirement goals${goals.length > 0 ? ` including "${goals[0]}"` : ''}, and the Volunteer Matcher found ${matchedOpportunities} opportunities matching your profile. Getting involved can boost life satisfaction, maintain social connections, and give structure to your weeks.`,
+      potentialImpact: 0,
+      confidenceScore: 75,
+      relatedTools: [TOOL_IDS.IDENTITY_BUILDER as ToolId, TOOL_IDS.VOLUNTEER as ToolId],
+      actionItems: [
+        'Review your matched volunteer opportunities',
+        'Start with a small weekly commitment (2-4 hours)',
+        'Choose activities aligned with your top retirement priorities',
+        'Consider skills-based volunteering for maximum impact',
+      ],
+      dataUsed: [
+        { toolId: TOOL_IDS.IDENTITY_BUILDER as ToolId, dataPoints: ['purposeScore', 'retirementGoals'] },
+        { toolId: TOOL_IDS.VOLUNTEER as ToolId, dataPoints: ['matchedOpportunities', 'weeklyHoursCommitted'] },
+      ],
+    });
+  }
+
+  return insights;
+}
+
+// ============================================
+// NEW: Digital Estate + Legacy (estate plan completeness)
+// ============================================
+
+function analyzeDigitalLegacyReadiness(data: AggregatedToolData): CrossToolInsight[] {
+  const insights: CrossToolInsight[] = [];
+
+  if (!data.estateManager && !data.legacyVisualizer) return insights;
+
+  // Has legacy plan but no digital estate
+  if (data.legacyVisualizer && !data.estateManager) {
+    const estateValue = data.legacyVisualizer.totalEstateValue;
+    if (estateValue > 100000) {
+      insights.push({
+        id: 'digital-legacy-missing-digital',
+        type: 'digital-legacy',
+        priority: 'medium',
+        title: 'Your digital estate needs attention',
+        description: `You have a legacy plan covering $${formatNumber(estateValue)} in assets, but haven't documented your digital estate. Digital accounts (banking, investments, social media, email, subscriptions) are increasingly important for heirs to manage. Without documentation, beneficiaries may struggle to access or close accounts.`,
+        potentialImpact: estateValue * 0.02,
+        confidenceScore: 80,
+        relatedTools: [TOOL_IDS.LEGACY as ToolId, TOOL_IDS.DIGITAL_ESTATE as ToolId],
+        actionItems: [
+          'Use the Digital Estate Manager to inventory online accounts',
+          'Document login credentials securely',
+          'Designate a digital executor',
+          'Review social media legacy settings',
+          'Set up trusted contacts for major platforms',
+        ],
+        dataUsed: [
+          { toolId: TOOL_IDS.LEGACY as ToolId, dataPoints: ['totalEstateValue'] },
+        ],
+      });
+    }
+  }
+
+  // Has both — check completeness
+  if (data.estateManager && data.legacyVisualizer) {
+    const digitalAssets = data.estateManager.digitalAssetsCount;
+    const docsUploaded = data.estateManager.documentsUploaded;
+    const estatePlanComplete = data.legacyVisualizer.estatePlanComplete;
+
+    if (digitalAssets < 5 && !estatePlanComplete) {
+      insights.push({
+        id: 'digital-legacy-incomplete',
+        type: 'digital-legacy',
+        priority: 'medium',
+        title: 'Both your legacy and digital estate plans need completion',
+        description: `Your estate plan is incomplete, and you've only documented ${digitalAssets} digital assets with ${docsUploaded} documents uploaded. Consider this a priority — comprehensive estate planning reduces stress for loved ones and can prevent costly probate issues.`,
+        potentialImpact: data.legacyVisualizer.totalEstateValue * 0.05,
+        confidenceScore: 75,
+        relatedTools: [TOOL_IDS.LEGACY as ToolId, TOOL_IDS.DIGITAL_ESTATE as ToolId],
+        actionItems: [
+          'Complete your estate plan checklist in Legacy Visualizer',
+          'Add remaining digital accounts to Digital Estate Manager',
+          'Upload key documents (will, trust, power of attorney)',
+          'Review and update beneficiary designations',
+        ],
+        dataUsed: [
+          { toolId: TOOL_IDS.LEGACY as ToolId, dataPoints: ['estatePlanComplete', 'totalEstateValue'] },
+          { toolId: TOOL_IDS.DIGITAL_ESTATE as ToolId, dataPoints: ['digitalAssetsCount', 'documentsUploaded'] },
+        ],
+      });
+    }
+
+    if (digitalAssets >= 10 && estatePlanComplete) {
+      insights.push({
+        id: 'digital-legacy-well-prepared',
+        type: 'digital-legacy',
+        priority: 'low',
+        title: 'Your estate and digital plans are well-organized',
+        description: `Great work! You've documented ${digitalAssets} digital assets, uploaded ${docsUploaded} documents, and your estate plan is marked as complete. Consider reviewing annually to keep everything current.`,
+        potentialImpact: 0,
+        confidenceScore: 90,
+        relatedTools: [TOOL_IDS.LEGACY as ToolId, TOOL_IDS.DIGITAL_ESTATE as ToolId],
+        actionItems: [
+          'Schedule an annual review of all estate documents',
+          'Update digital accounts as you add or close services',
+          'Confirm beneficiaries are still accurate',
+        ],
+        dataUsed: [
+          { toolId: TOOL_IDS.LEGACY as ToolId, dataPoints: ['estatePlanComplete'] },
+          { toolId: TOOL_IDS.DIGITAL_ESTATE as ToolId, dataPoints: ['digitalAssetsCount', 'documentsUploaded'] },
+        ],
+      });
+    }
+  }
+
+  return insights;
+}
+
+// ============================================
+// NEW: Income + Healthcare + Longevity (holistic retirement funding)
+// ============================================
+
+function analyzeHolisticRetirementFunding(data: AggregatedToolData): CrossToolInsight[] {
+  const insights: CrossToolInsight[] = [];
+
+  // Need at least 2 of the 3 data sources
+  const has = [!!data.incomeEstimator, !!data.healthcareCost, !!data.longevityPlanner];
+  if (has.filter(Boolean).length < 2) return insights;
+
+  if (data.incomeEstimator && data.healthcareCost && data.longevityPlanner) {
+    const totalIncome = data.incomeEstimator.totalAnnualIncome;
+    const annualHealthcare = (data.healthcareCost.monthlyPremium * 12) + data.healthcareCost.annualOutOfPocket;
+    const planningHorizon = data.longevityPlanner.planningHorizon;
+    const healthcarePortion = annualHealthcare / totalIncome;
+
+    if (healthcarePortion > 0.2 && planningHorizon > 15) {
+      const lifetimeHealthcareTotal = annualHealthcare * planningHorizon;
+      const lifetimeIncomeTotal = totalIncome * planningHorizon;
+
+      insights.push({
+        id: 'holistic-healthcare-burden',
+        type: 'holistic-income',
+        priority: determinePriority(healthcarePortion * 100, 40, 30, 20),
+        title: `Healthcare consumes ${Math.round(healthcarePortion * 100)}% of your retirement income`,
+        description: `At $${formatNumber(annualHealthcare)}/year, healthcare takes ${Math.round(healthcarePortion * 100)}% of your $${formatNumber(totalIncome)} annual income. Over ${planningHorizon} years, that's $${formatNumber(lifetimeHealthcareTotal)} of your $${formatNumber(lifetimeIncomeTotal)} total income going to healthcare. Consider strategies to reduce this burden.`,
+        potentialImpact: lifetimeHealthcareTotal,
+        confidenceScore: 75,
+        relatedTools: [
+          TOOL_IDS.INCOME_ESTIMATOR as ToolId,
+          TOOL_IDS.HEALTHCARE as ToolId,
+          TOOL_IDS.LONGEVITY as ToolId,
+        ],
+        actionItems: [
+          'Compare Medicare Advantage vs Medigap plans for cost savings',
+          'Maximize HSA contributions before Medicare eligibility',
+          'Consider retiring abroad where healthcare costs less',
+          'Investigate long-term care insurance while premiums are lower',
+          'Build a dedicated healthcare reserve fund',
+        ],
+        dataUsed: [
+          { toolId: TOOL_IDS.INCOME_ESTIMATOR as ToolId, dataPoints: ['totalAnnualIncome'] },
+          { toolId: TOOL_IDS.HEALTHCARE as ToolId, dataPoints: ['monthlyPremium', 'annualOutOfPocket'] },
+          { toolId: TOOL_IDS.LONGEVITY as ToolId, dataPoints: ['planningHorizon'] },
+        ],
+      });
+    }
+  }
+
+  return insights;
+}
+
+// ============================================
+// NEW: Location + Identity + Lifestyle (relocation lifestyle fit)
+// ============================================
+
+function analyzeLocationLifestyleFit(data: AggregatedToolData): CrossToolInsight[] {
+  const insights: CrossToolInsight[] = [];
+
+  // Check abroad + identity fit
+  if (data.retireAbroad && data.identityBuilder) {
+    const topCountry = data.retireAbroad.topCountry;
+    const qualityOfLife = data.retireAbroad.qualityOfLifeScore;
+    const goals = data.identityBuilder.retirementGoals;
+    const activities = data.identityBuilder.activityPreferences;
+
+    if (topCountry && qualityOfLife > 0) {
+      // Check if volunteering is a goal but abroad may limit options
+      if (data.volunteerMatcher && data.volunteerMatcher.weeklyHoursCommitted > 5) {
+        insights.push({
+          id: 'location-volunteer-abroad',
+          type: 'location-lifestyle',
+          priority: 'medium',
+          title: `Plan volunteer activities before moving to ${topCountry}`,
+          description: `You currently commit ${data.volunteerMatcher.weeklyHoursCommitted} hours/week to volunteering, which is an important part of your retirement identity. Moving to ${topCountry} will require finding new volunteer opportunities. Research NGOs, expat community groups, and international organizations in your destination.`,
+          potentialImpact: 0,
+          confidenceScore: 65,
+          relatedTools: [
+            TOOL_IDS.RETIRE_ABROAD as ToolId,
+            TOOL_IDS.IDENTITY_BUILDER as ToolId,
+            TOOL_IDS.VOLUNTEER as ToolId,
+          ],
+          actionItems: [
+            `Research volunteer organizations in ${topCountry}`,
+            'Connect with expat communities online before moving',
+            'Consider remote volunteering with US-based organizations',
+            'Look into teaching English or skills-sharing programs',
+          ],
+          dataUsed: [
+            { toolId: TOOL_IDS.RETIRE_ABROAD as ToolId, dataPoints: ['topCountry'] },
+            { toolId: TOOL_IDS.VOLUNTEER as ToolId, dataPoints: ['weeklyHoursCommitted'] },
+            { toolId: TOOL_IDS.IDENTITY_BUILDER as ToolId, dataPoints: ['retirementGoals'] },
+          ],
+        });
+      }
+
+      // Lifestyle quality insight
+      if (qualityOfLife >= 70 && goals.length > 0) {
+        insights.push({
+          id: 'location-lifestyle-quality',
+          type: 'location-lifestyle',
+          priority: 'low',
+          title: `${topCountry} scores well for your lifestyle goals`,
+          description: `${topCountry} has a quality of life score of ${qualityOfLife}/100, which aligns well with your retirement priorities${goals.length > 0 ? ` including "${goals[0]}"` : ''}. Consider how the local culture, climate, and community support your vision for retirement.`,
+          potentialImpact: 0,
+          confidenceScore: 60,
+          relatedTools: [TOOL_IDS.RETIRE_ABROAD as ToolId, TOOL_IDS.IDENTITY_BUILDER as ToolId],
+          actionItems: [
+            `Visit ${topCountry} for an extended trial stay (1-3 months)`,
+            'Connect with expat communities to understand daily life',
+            'Research activity and hobby availability',
+            'Consider language and cultural adjustment factors',
+          ],
+          dataUsed: [
+            { toolId: TOOL_IDS.RETIRE_ABROAD as ToolId, dataPoints: ['topCountry', 'qualityOfLifeScore'] },
+            { toolId: TOOL_IDS.IDENTITY_BUILDER as ToolId, dataPoints: ['retirementGoals'] },
+          ],
+        });
+      }
+    }
+  }
+
+  // State relocation + identity fit
+  if (data.stateRelocator && data.identityBuilder && data.stateRelocator.topRecommendation) {
+    const targetState = data.stateRelocator.topRecommendation;
+    const activities = data.identityBuilder.activityPreferences;
+
+    if (activities.length > 0) {
+      insights.push({
+        id: 'state-lifestyle-fit',
+        type: 'location-lifestyle',
+        priority: 'low',
+        title: `Consider if ${targetState} supports your lifestyle preferences`,
+        description: `Your top relocation match is ${targetState} for financial reasons, but also consider whether it supports your activity preferences: ${activities.slice(0, 3).join(', ')}. The best retirement location balances financial benefits with lifestyle satisfaction.`,
+        potentialImpact: 0,
+        confidenceScore: 60,
+        relatedTools: [TOOL_IDS.STATE_RELOCATE as ToolId, TOOL_IDS.IDENTITY_BUILDER as ToolId],
+        actionItems: [
+          `Research recreational and cultural offerings in ${targetState}`,
+          'Visit potential cities or towns before committing',
+          'Connect with local retirement communities',
+          'Consider proximity to family and healthcare facilities',
+        ],
+        dataUsed: [
+          { toolId: TOOL_IDS.STATE_RELOCATE as ToolId, dataPoints: ['topRecommendation'] },
+          { toolId: TOOL_IDS.IDENTITY_BUILDER as ToolId, dataPoints: ['activityPreferences'] },
+        ],
+      });
+    }
+  }
+
+  return insights;
+}
+
+// ============================================
+// NEW: Gifting + Income (charitable giving capacity)
+// ============================================
+
+function analyzeGiftingIncomeCapacity(data: AggregatedToolData): CrossToolInsight[] {
+  const insights: CrossToolInsight[] = [];
+
+  if (!data.giftingPlanner || !data.incomeEstimator) return insights;
+
+  const totalIncome = data.incomeEstimator.totalAnnualIncome;
+  const giftBudget = data.giftingPlanner.annualGiftBudget;
+  const recipientCount = data.giftingPlanner.recipientCount;
+  const education529 = data.giftingPlanner.educationFunds529;
+
+  if (totalIncome > 0 && giftBudget > 0) {
+    const giftingPortion = giftBudget / totalIncome;
+
+    // High gifting relative to income
+    if (giftingPortion > 0.15) {
+      insights.push({
+        id: 'gifting-income-high-ratio',
+        type: 'gifting-income',
+        priority: 'medium',
+        title: `Gifting represents ${Math.round(giftingPortion * 100)}% of your retirement income`,
+        description: `You're planning to gift $${formatNumber(giftBudget)}/year to ${recipientCount} recipients from a $${formatNumber(totalIncome)}/year income. While generous, make sure this is sustainable over your planning horizon. Consider frontloading gifts in early retirement when you may have more financial flexibility.`,
+        potentialImpact: giftBudget * 10,
+        confidenceScore: 70,
+        relatedTools: [TOOL_IDS.GIFTING as ToolId, TOOL_IDS.INCOME_ESTIMATOR as ToolId],
+        actionItems: [
+          'Stress-test your budget with gifting factored in',
+          'Consider 529 superfunding for education gifts',
+          'Use IRA qualified charitable distributions (QCDs) after 70½',
+          'Ensure gifting doesn\'t jeopardize your own longevity needs',
+        ],
+        dataUsed: [
+          { toolId: TOOL_IDS.GIFTING as ToolId, dataPoints: ['annualGiftBudget', 'recipientCount'] },
+          { toolId: TOOL_IDS.INCOME_ESTIMATOR as ToolId, dataPoints: ['totalAnnualIncome'] },
+        ],
+      });
+    }
+
+    // Has income and 529 plans — tax benefit reminder
+    if (education529 > 0) {
+      insights.push({
+        id: 'gifting-income-529-benefit',
+        type: 'gifting-income',
+        priority: 'low',
+        title: `$${formatNumber(education529)} in 529 plans reduces your taxable estate`,
+        description: `Your 529 education fund contributions of $${formatNumber(education529)} not only support education but also reduce your taxable estate. You can superfund 529 plans with 5 years of annual exclusion gifts up front ($${formatNumber(18000 * 5)} per beneficiary) to maximize estate tax savings.`,
+        potentialImpact: education529 * 0.4,
+        confidenceScore: 70,
+        relatedTools: [TOOL_IDS.GIFTING as ToolId, TOOL_IDS.INCOME_ESTIMATOR as ToolId],
+        actionItems: [
+          'Consider superfunding 529 plans for grandchildren',
+          'Review 529 state tax deduction eligibility',
+          'Explore direct education expense payments (unlimited exclusion)',
+          'Coordinate with overall estate planning strategy',
+        ],
+        dataUsed: [
+          { toolId: TOOL_IDS.GIFTING as ToolId, dataPoints: ['educationFunds529'] },
+          { toolId: TOOL_IDS.INCOME_ESTIMATOR as ToolId, dataPoints: ['totalAnnualIncome'] },
+        ],
+      });
+    }
+  }
+
+  return insights;
+}
+
+// ============================================
+// NEW: Estate + Tax (estate tax optimization)
+// ============================================
+
+function analyzeEstateTaxOptimization(data: AggregatedToolData): CrossToolInsight[] {
+  const insights: CrossToolInsight[] = [];
+
+  if (!data.legacyVisualizer || !data.taxAnalyzer) return insights;
+
+  const estateValue = data.legacyVisualizer.totalEstateValue;
+  const charitableGiving = data.legacyVisualizer.charitableGivingPlanned;
+  const effectiveTaxRate = data.taxAnalyzer.effectiveTaxRate;
+
+  // Large estate with tax implications
+  // 2024 federal estate tax exemption is ~$13.61M
+  if (estateValue > 5000000) {
+    const potentialEstateTax = estateValue > 13610000
+      ? (estateValue - 13610000) * 0.4
+      : 0;
+
+    if (potentialEstateTax > 0) {
+      insights.push({
+        id: 'estate-tax-exposure',
+        type: 'estate-tax',
+        priority: 'critical',
+        title: `Potential $${formatNumber(potentialEstateTax)} in estate taxes`,
+        description: `Your estate of $${formatNumber(estateValue)} exceeds the federal exemption of $13.61M. Without planning, approximately $${formatNumber(potentialEstateTax)} could go to estate taxes (40% rate on excess). Strategic gifting, trusts, and charitable planning can significantly reduce this exposure.`,
+        potentialImpact: potentialEstateTax,
+        confidenceScore: 75,
+        relatedTools: [TOOL_IDS.LEGACY as ToolId, TOOL_IDS.TAX_IMPACT as ToolId],
+        actionItems: [
+          'Consult an estate planning attorney immediately',
+          'Maximize annual gift exclusions to reduce estate value',
+          'Consider irrevocable life insurance trusts (ILITs)',
+          'Explore charitable remainder trusts (CRTs)',
+          'Review the sunset of current exemption levels (after 2025)',
+        ],
+        dataUsed: [
+          { toolId: TOOL_IDS.LEGACY as ToolId, dataPoints: ['totalEstateValue'] },
+          { toolId: TOOL_IDS.TAX_IMPACT as ToolId, dataPoints: ['effectiveTaxRate'] },
+        ],
+      });
+    }
+
+    // Charitable giving as estate reduction strategy
+    if (charitableGiving > 0 && estateValue > 5000000) {
+      const taxBenefit = charitableGiving * (effectiveTaxRate / 100);
+
+      insights.push({
+        id: 'estate-charitable-strategy',
+        type: 'estate-tax',
+        priority: 'medium',
+        title: `Charitable giving of $${formatNumber(charitableGiving)} provides dual tax benefit`,
+        description: `Your planned charitable giving of $${formatNumber(charitableGiving)} not only reduces your estate value but also generates an income tax deduction worth approximately $${formatNumber(taxBenefit)}/year at your ${effectiveTaxRate}% effective rate. Consider donor-advised funds or charitable remainder trusts for maximum flexibility.`,
+        potentialImpact: taxBenefit * 10 + charitableGiving * 0.4,
+        confidenceScore: 70,
+        relatedTools: [TOOL_IDS.LEGACY as ToolId, TOOL_IDS.TAX_IMPACT as ToolId, TOOL_IDS.GIFTING as ToolId],
+        actionItems: [
+          'Set up a donor-advised fund for strategic timing of deductions',
+          'Consider donating appreciated assets instead of cash',
+          'Explore qualified charitable distributions from IRAs',
+          'Review charitable remainder trust options',
+        ],
+        dataUsed: [
+          { toolId: TOOL_IDS.LEGACY as ToolId, dataPoints: ['charitableGivingPlanned', 'totalEstateValue'] },
+          { toolId: TOOL_IDS.TAX_IMPACT as ToolId, dataPoints: ['effectiveTaxRate'] },
+        ],
+      });
+    }
+  }
+
+  return insights;
+}
+
+// ============================================
 // Helper Functions
 // ============================================
 
@@ -437,11 +1186,14 @@ export function formatInsightsForAI(insights: CrossToolInsight[]): string {
 
   const lines: string[] = ['## Cross-Tool Optimization Opportunities', ''];
 
-  for (const insight of insights.slice(0, 5)) { // Top 5 for AI context
+  for (const insight of insights.slice(0, 10)) { // Top 10 for AI context
     lines.push(`### [${insight.priority.toUpperCase()}] ${insight.title}`);
     lines.push(`- Potential Impact: $${formatNumber(insight.potentialImpact)}`);
     lines.push(`- Tools: ${insight.relatedTools.join(', ')}`);
     lines.push(`- ${insight.description}`);
+    if (insight.actionItems.length > 0) {
+      lines.push(`- Key Actions: ${insight.actionItems.slice(0, 3).join('; ')}`);
+    }
     lines.push('');
   }
 
