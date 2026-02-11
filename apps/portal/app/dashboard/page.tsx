@@ -13,6 +13,7 @@ import { useTheme } from '@/lib/theme';
 import { AICoach } from "@/components/AICoach";
 
 import { useRetirementData } from "@/lib/retirementContext";
+import { useToolData } from "@/contexts/ToolDataContext";
 import { analyzeUserData, hasNewInsights } from "@/lib/proactiveInsights";
 import { aggregateAllToolData } from "@/lib/dataAggregationService";
 import { analyzeCrossToolPatterns } from "@/lib/crossToolAnalyzer";
@@ -127,6 +128,7 @@ export default function DashboardPage() {
   const {user, loading: authLoading} = useAuth();
   const { theme } = useTheme();
   const { userData, loading: dataLoading } = useRetirementData();
+  const { toolData: cachedToolData, isLoading: toolDataLoading, isInitialized: toolDataReady } = useToolData();
   
   const {trackEvent} = useAnalytics();
   const [mounted, setMounted] = useState(false);
@@ -145,7 +147,7 @@ export default function DashboardPage() {
 
     try {
       const token = await auth.currentUser.getIdToken();
-      const aggregatedData = await aggregateAllToolData(token);
+      const aggregatedData = await aggregateAllToolData(token, cachedToolData);
       const insights = analyzeCrossToolPatterns(aggregatedData);
 
       // Check if new high-priority insights appeared
@@ -163,7 +165,7 @@ export default function DashboardPage() {
     } catch (error) {
       console.error('Error fetching cross-tool insights:', error);
     }
-  }, [user, crossToolInsights]);
+  }, [user, crossToolInsights, cachedToolData]);
 
 
  
@@ -194,12 +196,12 @@ export default function DashboardPage() {
     };
   }, []);
 
-  // Fetch cross-tool insights on mount and periodically
+  // Fetch cross-tool insights once ToolDataContext has finished loading
   useEffect(() => {
-    if (mounted && user && !insightsLastFetched) {
+    if (mounted && user && !insightsLastFetched && toolDataReady && !toolDataLoading) {
       fetchCrossToolInsights();
     }
-  }, [mounted, user, insightsLastFetched, fetchCrossToolInsights]);
+  }, [mounted, user, insightsLastFetched, toolDataReady, toolDataLoading, fetchCrossToolInsights]);
 
   // Listen for tool data changes via postMessage
   useEffect(() => {

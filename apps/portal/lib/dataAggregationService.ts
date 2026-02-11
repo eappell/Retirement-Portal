@@ -27,20 +27,28 @@ import type {
 const TOTAL_TOOLS = 12;
 
 /**
- * Aggregate all tool data from PocketBase into a normalized structure
+ * Aggregate all tool data from PocketBase into a normalized structure.
+ * Accepts optional pre-loaded data (e.g. from ToolDataContext cache) to avoid
+ * a redundant proxy call.
  */
 export async function aggregateAllToolData(
-  authToken: string
+  authToken: string,
+  cachedToolData?: Record<string, { data: Record<string, unknown>; created: string }>
 ): Promise<AggregatedToolData> {
   let rawData: RawToolDataMap = {};
 
-  try {
-    console.log('[DataAggregation] Fetching data from proxy...');
-    rawData = await loadAllToolData(authToken);
-    console.log('[DataAggregation] Raw data received:', Object.keys(rawData));
-  } catch (error) {
-    console.error('[DataAggregation] Failed to load tool data from proxy:', error);
-    // Return empty aggregated data if proxy is unavailable
+  if (cachedToolData && Object.keys(cachedToolData).length > 0) {
+    console.log('[DataAggregation] Using cached tool data:', Object.keys(cachedToolData));
+    rawData = cachedToolData;
+  } else {
+    try {
+      console.log('[DataAggregation] Fetching data from proxy...');
+      rawData = await loadAllToolData(authToken);
+      console.log('[DataAggregation] Raw data received:', Object.keys(rawData));
+    } catch (error) {
+      console.error('[DataAggregation] Failed to load tool data from proxy:', error);
+      // Return empty aggregated data if proxy is unavailable
+    }
   }
 
   const toolsWithData: ToolId[] = [];

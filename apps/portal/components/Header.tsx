@@ -242,7 +242,7 @@ export function Header({ onAICoachOpen, insightCount = 0, topInsight = null }: H
                 className="relative mr-2"
                 onMouseEnter={() => {
                   if (insightHideTimeout[0]) { clearTimeout(insightHideTimeout[0]); insightHideTimeout[1](null); }
-                  if (insightCount > 0 && topInsight) setShowInsightPreview(true);
+                  if (topInsight) setShowInsightPreview(true);
                 }}
                 onMouseLeave={() => {
                   const t = setTimeout(() => setShowInsightPreview(false), 400);
@@ -297,7 +297,7 @@ export function Header({ onAICoachOpen, insightCount = 0, topInsight = null }: H
                 )}
                 <button
                   onClick={onAICoachOpen}
-                  className="relative inline-flex items-center gap-2 px-3 py-1.5 bg-gradient-to-r from-purple-500 to-blue-500 text-white rounded-md text-sm font-medium hover:from-purple-600 hover:to-blue-600 focus:outline-none focus:ring-2 focus:ring-purple-300 transition-all"
+                  className="relative inline-flex items-center gap-2 px-3 py-1.5 bg-gradient-to-r from-purple-500 to-blue-500 text-white rounded-md text-sm font-bold hover:from-purple-600 hover:to-blue-600 focus:outline-none focus:ring-2 focus:ring-purple-300 transition-all"
                   aria-label="Open AI Coach"
                 >
                   <SparklesIcon className="w-4 h-4" />

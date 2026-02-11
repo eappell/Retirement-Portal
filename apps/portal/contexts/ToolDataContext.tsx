@@ -17,6 +17,7 @@ interface ToolDataState {
 interface ToolDataContextType {
   toolData: ToolDataState;
   isLoading: boolean;
+  isInitialized: boolean;
   loadDataForTool: (toolId: string) => Promise<{ data: any; created: string; id?: string } | null>;
   saveDataForTool: (toolId: string, data: any) => Promise<{ id?: string; success: boolean }>;
   clearDataForTool: (toolId: string) => Promise<boolean>;
@@ -198,6 +199,7 @@ export function ToolDataProvider({ children }: { children: ReactNode }) {
     <ToolDataContext.Provider value={{ 
       toolData, 
       isLoading, 
+      isInitialized,
       loadDataForTool, 
       saveDataForTool, 
       clearDataForTool,
