@@ -226,7 +226,7 @@ function transformTaxAnalyzer(
       return undefined;
     }
 
-    const totals = normalized.reduce(
+    const totals = normalized.reduce<{ federal: number; state: number; effective: number }>(
       (acc, p) => {
         acc.federal += toNumber(p.federalTax) || 0;
         acc.state += toNumber(p.stateTax) || 0;
