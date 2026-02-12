@@ -19,6 +19,23 @@ interface CachedToolDataPayload {
   data: ToolDataState;
 }
 
+function isToolDataEntry(value: unknown): value is { data: Record<string, unknown>; created: string; id?: string } {
+  if (!value || typeof value !== 'object' || Array.isArray(value)) return false;
+  const obj = value as Record<string, unknown>;
+  return !!obj.data && typeof obj.data === 'object' && !Array.isArray(obj.data) && typeof obj.created === 'string';
+}
+
+function isToolDataState(value: unknown): value is ToolDataState {
+  if (!value || typeof value !== 'object' || Array.isArray(value)) return false;
+  return Object.values(value as Record<string, unknown>).every((entry) => isToolDataEntry(entry));
+}
+
+function isCachedToolDataPayload(value: unknown): value is CachedToolDataPayload {
+  if (!value || typeof value !== 'object' || Array.isArray(value)) return false;
+  const obj = value as Record<string, unknown>;
+  return typeof obj.userId === 'string' && isToolDataState(obj.data);
+}
+
 interface ToolDataContextType {
   toolData: ToolDataState;
   isLoading: boolean;
@@ -56,10 +73,10 @@ export function ToolDataProvider({ children }: { children: ReactNode }) {
     try {
       const saved = localStorage.getItem(CACHE_KEY);
       if (!saved) return;
-      const parsed = JSON.parse(saved) as CachedToolDataPayload | ToolDataState;
+      const parsed: unknown = JSON.parse(saved);
 
       // Backward compatibility with older cache shape (raw map) — ignore it for safety.
-      if ('userId' in parsed && parsed.userId === user.uid && parsed.data) {
+      if (isCachedToolDataPayload(parsed) && parsed.userId === user.uid) {
         setToolData(parsed.data);
       }
     } catch (e) {
