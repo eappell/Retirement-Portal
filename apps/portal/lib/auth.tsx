@@ -10,6 +10,28 @@ import {
 import {setDoc, doc, getDoc} from "firebase/firestore";
 import {auth, db} from "@/lib/firebase";
 
+const USER_SCOPED_STORAGE_KEYS = [
+  "portalUser",
+  "userRole",
+  "retirewise_tool_data_cache",
+  "retirewise_orchestrator_plan_v1",
+  "selectedCountries",
+  "monthlyBudget",
+  "yearsAbroad",
+  "priorityWeights",
+];
+
+function clearUserScopedLocalStorage() {
+  if (typeof window === "undefined") return;
+  try {
+    for (const key of USER_SCOPED_STORAGE_KEYS) {
+      localStorage.removeItem(key);
+    }
+  } catch (err) {
+    console.warn("Could not clear user-scoped localStorage", err);
+  }
+}
+
 export interface User extends FirebaseUser {
   tier?: "free" | "paid" | "admin";
   // Optional profile fields available to apps
@@ -59,6 +81,8 @@ export const AuthProvider = ({children}: {children: ReactNode}) => {
       async (firebaseUser) => {
         try {
           if (firebaseUser) {
+            // Always clear any prior user's cached/session data before initializing this user.
+            clearUserScopedLocalStorage();
             try {
               // Get user tier from Firestore
               const userDocRef = doc(db, "users", firebaseUser.uid);
@@ -156,16 +180,7 @@ export const AuthProvider = ({children}: {children: ReactNode}) => {
             }
           } else {
             setUser(null);
-            try {
-              localStorage.removeItem("userRole");
-            } catch (err) {
-              console.warn("Could not remove userRole from localStorage", err);
-            }
-            try {
-              localStorage.removeItem('portalUser');
-            } catch (err) {
-              console.warn('Could not remove portalUser from localStorage', err);
-            }
+            clearUserScopedLocalStorage();
           }
         } catch (err) {
           console.error("Auth state change error:", err);

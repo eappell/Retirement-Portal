@@ -8,18 +8,23 @@ import { loadAllToolData, saveToolData, loadToolData as fetchToolData, deleteToo
 // Define the shape of our data
 interface ToolDataState {
   [toolId: string]: {
-    data: any;
+    data: unknown;
     created: string;
     id?: string;
   };
+}
+
+interface CachedToolDataPayload {
+  userId: string;
+  data: ToolDataState;
 }
 
 interface ToolDataContextType {
   toolData: ToolDataState;
   isLoading: boolean;
   isInitialized: boolean;
-  loadDataForTool: (toolId: string) => Promise<{ data: any; created: string; id?: string } | null>;
-  saveDataForTool: (toolId: string, data: any) => Promise<{ id?: string; success: boolean }>;
+  loadDataForTool: (toolId: string) => Promise<{ data: unknown; created: string; id?: string } | null>;
+  saveDataForTool: (toolId: string, data: unknown) => Promise<{ id?: string; success: boolean }>;
   clearDataForTool: (toolId: string) => Promise<boolean>;
   refreshAllData: () => Promise<void>;
 }
@@ -43,29 +48,42 @@ export function ToolDataProvider({ children }: { children: ReactNode }) {
   const [toolData, setToolData] = useState<ToolDataState>({});
   const [isLoading, setIsLoading] = useState(false);
   const [isInitialized, setIsInitialized] = useState(false);
+  const CACHE_KEY = 'retirewise_tool_data_cache';
 
-  // Load from localStorage on mount
+  // Load cache only for the currently authenticated user.
   useEffect(() => {
+    if (!user) return;
     try {
-      const saved = localStorage.getItem('retirewise_tool_data_cache');
-      if (saved) {
-        setToolData(JSON.parse(saved));
+      const saved = localStorage.getItem(CACHE_KEY);
+      if (!saved) return;
+      const parsed = JSON.parse(saved) as CachedToolDataPayload | ToolDataState;
+
+      // Backward compatibility with older cache shape (raw map) — ignore it for safety.
+      if ('userId' in parsed && parsed.userId === user.uid && parsed.data) {
+        setToolData(parsed.data);
       }
     } catch (e) {
       console.warn('Failed to load tool data cache from localStorage', e);
     }
-  }, []);
+  }, [user]);
 
   // Sync to localStorage whenever data changes
   useEffect(() => {
     try {
+      if (!user) return;
       if (Object.keys(toolData).length > 0) {
-        localStorage.setItem('retirewise_tool_data_cache', JSON.stringify(toolData));
+        const payload: CachedToolDataPayload = {
+          userId: user.uid,
+          data: toolData,
+        };
+        localStorage.setItem(CACHE_KEY, JSON.stringify(payload));
+      } else {
+        localStorage.removeItem(CACHE_KEY);
       }
     } catch (e) {
       console.warn('Failed to save tool data cache to localStorage', e);
     }
-  }, [toolData]);
+  }, [toolData, user]);
 
   // Load all data from API when user logs in
   const refreshAllData = useCallback(async () => {
@@ -73,6 +91,9 @@ export function ToolDataProvider({ children }: { children: ReactNode }) {
     
     try {
       setIsLoading(true);
+      // Always clear in-memory + local cache before loading from PocketBase.
+      setToolData({});
+      localStorage.removeItem(CACHE_KEY);
       const token = await getToken();
       if (!token) return;
 
@@ -99,7 +120,7 @@ export function ToolDataProvider({ children }: { children: ReactNode }) {
     } else if (!user) {
       // Clear data on logout
       setToolData({});
-      localStorage.removeItem('retirewise_tool_data_cache');
+      localStorage.removeItem(CACHE_KEY);
       setIsInitialized(false);
     }
   }, [user, isInitialized, isLoading, refreshAllData]);
@@ -132,7 +153,7 @@ export function ToolDataProvider({ children }: { children: ReactNode }) {
     }
   }, [toolData, user, getToken]);
 
-  const saveDataForTool = useCallback(async (toolId: string, data: any) => {
+  const saveDataForTool = useCallback(async (toolId: string, data: unknown) => {
     // Optimistic update
     const tempId = 'temp_' + Date.now();
     const now = new Date().toISOString();
