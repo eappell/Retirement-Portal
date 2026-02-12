@@ -8,7 +8,7 @@ import { loadAllToolData, saveToolData, loadToolData as fetchToolData, deleteToo
 // Define the shape of our data
 interface ToolDataState {
   [toolId: string]: {
-    data: unknown;
+    data: Record<string, unknown>;
     created: string;
     id?: string;
   };
@@ -23,8 +23,8 @@ interface ToolDataContextType {
   toolData: ToolDataState;
   isLoading: boolean;
   isInitialized: boolean;
-  loadDataForTool: (toolId: string) => Promise<{ data: unknown; created: string; id?: string } | null>;
-  saveDataForTool: (toolId: string, data: unknown) => Promise<{ id?: string; success: boolean }>;
+  loadDataForTool: (toolId: string) => Promise<{ data: Record<string, unknown>; created: string; id?: string } | null>;
+  saveDataForTool: (toolId: string, data: Record<string, unknown>) => Promise<{ id?: string; success: boolean }>;
   clearDataForTool: (toolId: string) => Promise<boolean>;
   refreshAllData: () => Promise<void>;
 }
@@ -153,7 +153,7 @@ export function ToolDataProvider({ children }: { children: ReactNode }) {
     }
   }, [toolData, user, getToken]);
 
-  const saveDataForTool = useCallback(async (toolId: string, data: unknown) => {
+  const saveDataForTool = useCallback(async (toolId: string, data: Record<string, unknown>) => {
     // Optimistic update
     const tempId = 'temp_' + Date.now();
     const now = new Date().toISOString();
