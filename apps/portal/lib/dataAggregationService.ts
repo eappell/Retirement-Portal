@@ -100,21 +100,44 @@ function transformIncomeEstimator(
   toolsWithData: ToolId[],
   lastUpdated: Record<string, string>
 ): IncomeEstimatorData | undefined {
-  const record = rawData[TOOL_IDS.INCOME_ESTIMATOR];
+  const incomeAliases = [
+    TOOL_IDS.INCOME_ESTIMATOR,
+    'monthly-retirement-income',
+    'monthly-retirement-income-ai',
+    'monthly-retirement-income-estimator',
+    'monthly-retirement-income-estimator-v1',
+  ];
+  const incomeCandidates = incomeAliases
+    .map((id) => rawData[id])
+    .filter((r): r is RawToolDataMap[string] => !!r?.data);
+  const record = incomeCandidates.sort((a, b) => {
+    const ta = Date.parse(a.created || '');
+    const tb = Date.parse(b.created || '');
+    return (isNaN(tb) ? 0 : tb) - (isNaN(ta) ? 0 : ta);
+  })[0];
   if (!record?.data) return undefined;
 
   const data = record.data as Record<string, unknown>;
   toolsWithData.push(TOOL_IDS.INCOME_ESTIMATOR as ToolId);
   lastUpdated[TOOL_IDS.INCOME_ESTIMATOR] = record.created;
 
+  const scenarioBundle = extractScenarioBundle(data);
+  const derived = deriveIncomeFromScenarioBundle(scenarioBundle);
+
+  const flatTotalAnnualIncome = toNumber(data.totalIncome) || toNumber(data.totalAnnualIncome) || 0;
+  const flatSocialSecurityIncome = toNumber(data.socialSecurity) || toNumber(data.socialSecurityIncome) || 0;
+  const flatPensionIncome = toNumber(data.pension) || toNumber(data.pensionIncome) || 0;
+  const flatInvestmentIncome = toNumber(data.investments) || toNumber(data.investmentIncome) || 0;
+  const flatOtherIncome = toNumber(data.otherIncome) || 0;
+
   return {
-    totalAnnualIncome: toNumber(data.totalIncome) || toNumber(data.totalAnnualIncome) || 0,
-    socialSecurityIncome: toNumber(data.socialSecurity) || toNumber(data.socialSecurityIncome) || 0,
-    pensionIncome: toNumber(data.pension) || toNumber(data.pensionIncome) || 0,
-    investmentIncome: toNumber(data.investments) || toNumber(data.investmentIncome) || 0,
-    otherIncome: toNumber(data.otherIncome) || 0,
-    scenarios: Array.isArray(data.scenarios) ? data.scenarios as IncomeEstimatorData['scenarios'] : undefined,
-    activeScenarioId: toString(data.activeScenario) || toString(data.activeScenarioId),
+    totalAnnualIncome: flatTotalAnnualIncome > 0 ? flatTotalAnnualIncome : derived.totalAnnualIncome,
+    socialSecurityIncome: flatSocialSecurityIncome > 0 ? flatSocialSecurityIncome : derived.socialSecurityIncome,
+    pensionIncome: flatPensionIncome > 0 ? flatPensionIncome : derived.pensionIncome,
+    investmentIncome: flatInvestmentIncome > 0 ? flatInvestmentIncome : derived.investmentIncome,
+    otherIncome: flatOtherIncome > 0 ? flatOtherIncome : derived.otherIncome,
+    scenarios: derived.scenarios,
+    activeScenarioId: scenarioBundle.activeScenarioId || toString(data.activeScenario) || toString(data.activeScenarioId),
   };
 }
 
@@ -127,15 +150,56 @@ function transformSSOptimizer(
   if (!record?.data) return undefined;
 
   const data = record.data as Record<string, unknown>;
+  const summary = asRecord(data.summary) || {};
+  const results = asRecord(data.results) || {};
+  const optimalStrategy = asRecord(results.optimalStrategy) || {};
+
+  const derivedClaimAge =
+    toNumber(summary.optimalClaimingAge) ||
+    toNumber(optimalStrategy.claimingAge) ||
+    toNumber(optimalStrategy.person1ClaimingAge);
+
+  const derivedMonthlyBenefit =
+    toNumber(summary.estimatedMonthlyBenefit) ||
+    toNumber(optimalStrategy.monthlyBenefit) ||
+    toNumber(optimalStrategy.combinedMonthlyBenefit);
+
+  const lifetimePotentialFromScenarios = (() => {
+    const scenarios = Array.isArray(results.allScenarios) ? results.allScenarios : [];
+    if (scenarios.length === 0) return undefined;
+    const normalized = scenarios
+      .map((s) => asRecord(s))
+      .filter((s): s is Record<string, unknown> => !!s);
+    if (normalized.length === 0) return undefined;
+
+    const best = normalized.reduce((max, s) => {
+      const value = toNumber(s.lifetimeBenefitToLifeExpectancy) || 0;
+      return value > max ? value : max;
+    }, 0);
+    const worst = normalized.reduce((min, s) => {
+      const value = toNumber(s.lifetimeBenefitToLifeExpectancy) || 0;
+      return value < min ? value : min;
+    }, Number.POSITIVE_INFINITY);
+
+    if (!isFinite(best) || !isFinite(worst) || best <= 0 || worst === Number.POSITIVE_INFINITY) {
+      return undefined;
+    }
+    return Math.max(0, best - worst);
+  })();
+
   toolsWithData.push(TOOL_IDS.SOCIAL_SECURITY as ToolId);
   lastUpdated[TOOL_IDS.SOCIAL_SECURITY] = record.created;
 
   return {
-    currentClaimAge: toNumber(data.claimAge) || toNumber(data.currentClaimAge) || 62,
-    optimalClaimAge: toNumber(data.optimalClaimAge) || 70,
-    monthlyBenefitAtCurrent: toNumber(data.estimatedBenefit) || toNumber(data.monthlyBenefitAtCurrent) || 0,
-    monthlyBenefitAtOptimal: toNumber(data.monthlyBenefitAtOptimal) || 0,
-    lifetimeOptimizationPotential: toNumber(data.optimizationPotential) || toNumber(data.lifetimeOptimizationPotential) || 0,
+    currentClaimAge: toNumber(data.claimAge) || toNumber(data.currentClaimAge) || derivedClaimAge || 62,
+    optimalClaimAge: toNumber(data.optimalClaimAge) || derivedClaimAge || 70,
+    monthlyBenefitAtCurrent: toNumber(data.estimatedBenefit) || toNumber(data.monthlyBenefitAtCurrent) || derivedMonthlyBenefit || 0,
+    monthlyBenefitAtOptimal: toNumber(data.monthlyBenefitAtOptimal) || derivedMonthlyBenefit || 0,
+    lifetimeOptimizationPotential:
+      toNumber(data.optimizationPotential) ||
+      toNumber(data.lifetimeOptimizationPotential) ||
+      lifetimePotentialFromScenarios ||
+      0,
     spousalStrategy: toString(data.spousalStrategy),
     spousalBenefit: toNumber(data.spousalBenefit),
   };
@@ -150,15 +214,77 @@ function transformTaxAnalyzer(
   if (!record?.data) return undefined;
 
   const data = record.data as Record<string, unknown>;
+  const summary = asRecord(data.summary) || {};
+  const taxSituation = asRecord(data.taxSituation) || {};
+  const projections = Array.isArray(data.projections) ? data.projections : [];
+
+  const projectionAverages = (() => {
+    const normalized = projections
+      .map((p) => asRecord(p))
+      .filter((p): p is Record<string, unknown> => !!p);
+    if (normalized.length === 0) {
+      return undefined;
+    }
+
+    const totals = normalized.reduce(
+      (acc, p) => {
+        acc.federal += toNumber(p.federalTax) || 0;
+        acc.state += toNumber(p.stateTax) || 0;
+        acc.effective += toNumber(p.effectiveRate) || 0;
+        return acc;
+      },
+      { federal: 0, state: 0, effective: 0 }
+    );
+
+    return {
+      avgFederalTax: totals.federal / normalized.length,
+      avgStateTax: totals.state / normalized.length,
+      avgEffectiveRate: totals.effective / normalized.length,
+    };
+  })();
+
+  const effectiveRateFromData =
+    toNumber(data.effectiveTaxRate) ||
+    toNumber(summary.avgEffectiveRate) ||
+    toNumber(data.effectiveRate) ||
+    projectionAverages?.avgEffectiveRate ||
+    0;
+  const normalizedEffectiveRate = effectiveRateFromData > 0 && effectiveRateFromData <= 1
+    ? effectiveRateFromData * 100
+    : effectiveRateFromData;
+
+  const annualFederalTax =
+    toNumber(data.federalTax) ||
+    toNumber(data.annualFederalTax) ||
+    toNumber(summary.avgFederalTax) ||
+    projectionAverages?.avgFederalTax ||
+    0;
+  const annualStateTax =
+    toNumber(data.annualTax) ||
+    toNumber(data.annualStateTax) ||
+    toNumber(data.stateTax) ||
+    toNumber(summary.avgStateTax) ||
+    projectionAverages?.avgStateTax ||
+    0;
+  const totalAnnualTax =
+    toNumber(data.totalTax) ||
+    toNumber(data.totalAnnualTax) ||
+    (annualFederalTax + annualStateTax);
+
   toolsWithData.push(TOOL_IDS.TAX_IMPACT as ToolId);
   lastUpdated[TOOL_IDS.TAX_IMPACT] = record.created;
 
   return {
-    currentState: toString(data.state) || toString(data.currentState) || '',
-    effectiveTaxRate: toNumber(data.effectiveTaxRate) || 0,
-    annualStateTax: toNumber(data.annualTax) || toNumber(data.annualStateTax) || 0,
-    annualFederalTax: toNumber(data.federalTax) || toNumber(data.annualFederalTax) || 0,
-    totalAnnualTax: toNumber(data.totalTax) || toNumber(data.totalAnnualTax) || 0,
+    currentState:
+      toString(data.state) ||
+      toString(data.currentState) ||
+      toString(summary.currentState) ||
+      toString(taxSituation.state) ||
+      '',
+    effectiveTaxRate: normalizedEffectiveRate,
+    annualStateTax,
+    annualFederalTax,
+    totalAnnualTax,
     potentialSavingsByState: (data.potentialSavings as Record<string, number>) ||
       (data.potentialSavingsByState as Record<string, number>) || {},
   };
@@ -384,6 +510,126 @@ function toStringArray(value: unknown): string[] | undefined {
   return undefined;
 }
 
+function asRecord(value: unknown): Record<string, unknown> | undefined {
+  if (!value || typeof value !== 'object' || Array.isArray(value)) return undefined;
+  return value as Record<string, unknown>;
+}
+
+function extractScenarioBundle(data: Record<string, unknown>): {
+  scenarios: Record<string, unknown>;
+  activeScenarioId?: string;
+} {
+  const directScenarios = asRecord(data.scenarios);
+  const wrappedState = asRecord(data.scenariosState);
+  const wrappedScenarios = wrappedState ? asRecord(wrappedState.scenarios) : undefined;
+  const scenarios = directScenarios || wrappedScenarios || {};
+
+  const activeScenarioId =
+    toString(data.activeScenarioId) ||
+    toString(data.activeScenario) ||
+    (wrappedState ? toString(wrappedState.activeScenarioId) : undefined);
+
+  return { scenarios, activeScenarioId };
+}
+
+function deriveIncomeFromScenarioBundle(bundle: {
+  scenarios: Record<string, unknown>;
+  activeScenarioId?: string;
+}): {
+  totalAnnualIncome: number;
+  socialSecurityIncome: number;
+  pensionIncome: number;
+  investmentIncome: number;
+  otherIncome: number;
+  scenarios?: IncomeEstimatorData['scenarios'];
+} {
+  const entries = Object.entries(bundle.scenarios);
+  if (entries.length === 0) {
+    return {
+      totalAnnualIncome: 0,
+      socialSecurityIncome: 0,
+      pensionIncome: 0,
+      investmentIncome: 0,
+      otherIncome: 0,
+    };
+  }
+
+  const derivedScenarios = entries.map(([id, rawScenario]) => {
+    const scenario = asRecord(rawScenario) || {};
+    const plan = asRecord(scenario.plan) || scenario;
+
+    const retirementAccounts = Array.isArray(plan.retirementAccounts) ? plan.retirementAccounts : [];
+    const investmentAccounts = Array.isArray(plan.investmentAccounts) ? plan.investmentAccounts : [];
+    const pensions = Array.isArray(plan.pensions) ? plan.pensions : [];
+    const otherIncomes = Array.isArray(plan.otherIncomes) ? plan.otherIncomes : [];
+    const annuities = Array.isArray(plan.annuities) ? plan.annuities : [];
+
+    const socialSecurity = asRecord(plan.socialSecurity) || {};
+    const socialSecurityIncome =
+      (toNumber(socialSecurity.person1EstimatedBenefit) || 0) +
+      (toNumber(socialSecurity.person2EstimatedBenefit) || 0);
+
+    const pensionIncome = pensions.reduce((sum, item) => {
+      const pension = asRecord(item) || {};
+      const payoutType = toString(pension.payoutType) || 'monthly';
+      if (payoutType === 'lump') return sum;
+      const monthly = toNumber(pension.monthlyBenefit) || 0;
+      const annual = toNumber(pension.annualBenefit) || (monthly * 12);
+      return sum + annual;
+    }, 0);
+
+    const otherIncome = otherIncomes.reduce((sum, item) => {
+      const income = asRecord(item) || {};
+      return sum + ((toNumber(income.annualAmount) || 0) + ((toNumber(income.monthlyAmount) || 0) * 12));
+    }, 0);
+
+    const annuityIncome = annuities.reduce((sum, item) => {
+      const annuity = asRecord(item) || {};
+      const amount = toNumber(annuity.pmtAmount) || toNumber(annuity.monthlyAmount) || 0;
+      const frequency = toString(annuity.pmtFrequency) || 'monthly';
+      if (frequency === 'annual') return sum + amount;
+      if (frequency === 'quarterly') return sum + (amount * 4);
+      return sum + (amount * 12);
+    }, 0);
+
+    const investmentBalance =
+      investmentAccounts.reduce((sum, item) => sum + (toNumber(asRecord(item)?.balance) || 0), 0) +
+      retirementAccounts.reduce((sum, item) => sum + (toNumber(asRecord(item)?.balance) || 0), 0);
+
+    const investmentIncome = 0;
+    const totalIncome = socialSecurityIncome + pensionIncome + otherIncome + annuityIncome + investmentIncome;
+
+    return {
+      id,
+      name: toString(scenario.name) || id,
+      totalIncome,
+      netWorth: investmentBalance,
+      socialSecurityIncome,
+      pensionIncome,
+      investmentIncome,
+      otherIncome: otherIncome + annuityIncome,
+    };
+  });
+
+  const activeScenario =
+    (bundle.activeScenarioId ? derivedScenarios.find((s) => s.id === bundle.activeScenarioId) : undefined) ||
+    derivedScenarios[0];
+
+  return {
+    totalAnnualIncome: activeScenario?.totalIncome || 0,
+    socialSecurityIncome: activeScenario?.socialSecurityIncome || 0,
+    pensionIncome: activeScenario?.pensionIncome || 0,
+    investmentIncome: activeScenario?.investmentIncome || 0,
+    otherIncome: activeScenario?.otherIncome || 0,
+    scenarios: derivedScenarios.map((s) => ({
+      id: s.id,
+      name: s.name,
+      totalIncome: s.totalIncome,
+      netWorth: s.netWorth,
+    })),
+  };
+}
+
 /**
  * Build a human-readable data snapshot for AI prompts
  */
@@ -403,6 +649,13 @@ export function buildDataSnapshotForAI(data: AggregatedToolData): string {
     }
     if (data.incomeEstimator.investmentIncome > 0) {
       lines.push(`- Investments: $${formatNumber(data.incomeEstimator.investmentIncome)}/year`);
+    }
+    const activeScenario =
+      (data.incomeEstimator.activeScenarioId
+        ? data.incomeEstimator.scenarios?.find((s) => s.id === data.incomeEstimator?.activeScenarioId)
+        : undefined) || data.incomeEstimator.scenarios?.[0];
+    if (activeScenario?.netWorth && activeScenario.netWorth > 0) {
+      lines.push(`- Estimated Investable Assets (active scenario): $${formatNumber(activeScenario.netWorth)}`);
     }
     lines.push('');
   }

@@ -11,12 +11,14 @@ import {Header} from "@/components/Header";
 import { AppIcon } from "@/components/icon-map";
 import { useTheme } from '@/lib/theme';
 import { AICoach } from "@/components/AICoach";
+import { Orchestrator } from "@/components/Orchestrator";
 
 import { useRetirementData } from "@/lib/retirementContext";
 import { useToolData } from "@/contexts/ToolDataContext";
 import { analyzeUserData, hasNewInsights } from "@/lib/proactiveInsights";
 import { aggregateAllToolData } from "@/lib/dataAggregationService";
 import { analyzeCrossToolPatterns } from "@/lib/crossToolAnalyzer";
+import { loadToolData, TOOL_IDS } from "@/lib/pocketbaseDataService";
 import type { CrossToolInsight } from "@/lib/types/aggregatedToolData";
 
 // Use shared icon resolver so Firestore icon names (e.g. "Heart") resolve correctly
@@ -30,6 +32,8 @@ interface DevSettings {
 }
 
 const DEV_SETTINGS_KEY = 'portal-dev-settings';
+const ORCHESTRATOR_CACHE_KEY = 'retirewise_orchestrator_plan_v1';
+const ORCHESTRATOR_PLAN_UPDATED_EVENT = 'orchestrator-plan-updated';
 
 function getDevSettings(): DevSettings {
   if (typeof window === 'undefined') return {};
@@ -136,10 +140,12 @@ export default function DashboardPage() {
   const [loadingApps, setLoadingApps] = useState(true);
   const [devSettings, setDevSettings] = useState<DevSettings>({});
   const [isAICoachOpen, setIsAICoachOpen] = useState(false);
+  const [isOrchestratorOpen, setIsOrchestratorOpen] = useState(false);
   const [hasAIInsight, setHasAIInsight] = useState(false);
   const [previousInsights, setPreviousInsights] = useState<any[]>([]);
   const [crossToolInsights, setCrossToolInsights] = useState<CrossToolInsight[]>([]);
   const [insightsLastFetched, setInsightsLastFetched] = useState<Date | null>(null);
+  const [orchestratorScore, setOrchestratorScore] = useState<number | null>(null);
 
   // Fetch cross-tool insights from PocketBase
   const fetchCrossToolInsights = useCallback(async () => {
@@ -202,6 +208,50 @@ export default function DashboardPage() {
       fetchCrossToolInsights();
     }
   }, [mounted, user, insightsLastFetched, toolDataReady, toolDataLoading, fetchCrossToolInsights]);
+
+  useEffect(() => {
+    if (!mounted || !user) return;
+
+    const loadOrchestratorSummary = async () => {
+      const raw = localStorage.getItem(ORCHESTRATOR_CACHE_KEY);
+      if (raw) {
+        try {
+          const parsed = JSON.parse(raw) as {
+            userId?: string;
+            plan?: { retirementReadinessScore?: number };
+          };
+          if (parsed.userId === user.uid && typeof parsed.plan?.retirementReadinessScore === 'number') {
+            setOrchestratorScore(parsed.plan.retirementReadinessScore);
+          }
+        } catch {
+          // ignore malformed cache
+        }
+      }
+
+      if (!auth.currentUser) return;
+      try {
+        const token = await auth.currentUser.getIdToken();
+        const saved = await loadToolData(token, TOOL_IDS.ORCHESTRATOR_PLAN);
+        const pbPlan = saved?.data?.plan as { retirementReadinessScore?: number } | undefined;
+        if (typeof pbPlan?.retirementReadinessScore === 'number') {
+          setOrchestratorScore(pbPlan.retirementReadinessScore);
+        }
+      } catch (error) {
+        console.warn('Failed to load orchestrator plan summary:', error);
+      }
+    };
+
+    const handlePlanUpdated = (event: Event) => {
+      const customEvent = event as CustomEvent<{ score?: number }>;
+      if (typeof customEvent.detail?.score === 'number') {
+        setOrchestratorScore(customEvent.detail.score);
+      }
+    };
+
+    void loadOrchestratorSummary();
+    window.addEventListener(ORCHESTRATOR_PLAN_UPDATED_EVENT, handlePlanUpdated as EventListener);
+    return () => window.removeEventListener(ORCHESTRATOR_PLAN_UPDATED_EVENT, handlePlanUpdated as EventListener);
+  }, [mounted, user]);
 
   // Listen for tool data changes via postMessage
   useEffect(() => {
@@ -378,6 +428,12 @@ export default function DashboardPage() {
         initialInsights={crossToolInsights}
       />
 
+      {/* Orchestrator Agent Panel */}
+      <Orchestrator
+        isOpen={isOrchestratorOpen}
+        onClose={() => setIsOrchestratorOpen(false)}
+      />
+
 
 
       {/* Background particles (static, no animation) */}
@@ -393,8 +449,53 @@ export default function DashboardPage() {
 
 
 
-      <main className="max-w-[1400px] mx-auto px-4 pt-10 pb-4 sm:px-6 lg:px-8">
-        {/* User info card removed: information is available in the header */}
+	      <main className="max-w-[1400px] mx-auto px-4 pt-10 pb-4 sm:px-6 lg:px-8">
+	        {/* Unified Plan Orchestrator CTA */}
+	        <div className="mb-8">
+          <button
+            onClick={() => setIsOrchestratorOpen(true)}
+            className="w-full group relative overflow-hidden rounded-2xl shadow-lg hover:shadow-2xl transition-all duration-300 transform hover:scale-[1.01]"
+            style={{
+              background: 'linear-gradient(135deg, #4f46e5 0%, #7c3aed 50%, #6366f1 100%)',
+              padding: '24px 30px',
+            }}
+          >
+	            <div className="flex items-center justify-between relative z-10">
+	              <div className="flex items-center gap-4">
+                <div className="w-12 h-12 rounded-xl bg-white/20 backdrop-blur-sm flex items-center justify-center">
+                  <svg className="w-7 h-7 text-white" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor">
+                    <path strokeLinecap="round" strokeLinejoin="round" d="M9.813 15.904 9 18.75l-.813-2.846a4.5 4.5 0 0 0-3.09-3.09L2.25 12l2.846-.813a4.5 4.5 0 0 0 3.09-3.09L9 5.25l.813 2.846a4.5 4.5 0 0 0 3.09 3.09L15.75 12l-2.846.813a4.5 4.5 0 0 0-3.09 3.09ZM18.259 8.715 18 9.75l-.259-1.035a3.375 3.375 0 0 0-2.455-2.456L14.25 6l1.036-.259a3.375 3.375 0 0 0 2.455-2.456L18 2.25l.259 1.035a3.375 3.375 0 0 0 2.455 2.456L21.75 6l-1.036.259a3.375 3.375 0 0 0-2.455 2.456ZM16.894 20.567 16.5 21.75l-.394-1.183a2.25 2.25 0 0 0-1.423-1.423L13.5 18.75l1.183-.394a2.25 2.25 0 0 0 1.423-1.423l.394-1.183.394 1.183a2.25 2.25 0 0 0 1.423 1.423l1.183.394-1.183.394a2.25 2.25 0 0 0-1.423 1.423Z" />
+                  </svg>
+                </div>
+	                <div className="text-left">
+	                  <div className="flex items-center gap-3">
+	                    <h2 className="text-lg font-bold text-white">
+	                      Generate Unified Retirement Plan
+	                    </h2>
+	                    {orchestratorScore !== null && (
+	                      <span className="inline-flex items-center gap-2 rounded-full bg-white/18 border border-white/35 px-3 py-1">
+	                        <span className="text-[11px] uppercase tracking-wide text-white/80">Retirement Score</span>
+	                        <span className="text-sm font-bold text-white">{Math.round(orchestratorScore)}/100</span>
+	                      </span>
+	                    )}
+	                  </div>
+	                  <p className="text-sm text-white/80">
+	                    AI Orchestrator analyzes all your tools together for cross-tool insights and a personalized action plan
+	                  </p>
+	                </div>
+	              </div>
+              <div className="hidden sm:flex items-center gap-2 text-white/90 text-sm font-medium">
+                <span>Launch</span>
+                <svg className="w-5 h-5 group-hover:translate-x-1 transition-transform" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor">
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M13.5 4.5 21 12m0 0-7.5 7.5M21 12H3" />
+                </svg>
+              </div>
+            </div>
+            {/* Decorative elements */}
+            <div className="absolute top-0 right-0 w-64 h-64 bg-white/5 rounded-full -translate-y-1/2 translate-x-1/2" />
+            <div className="absolute bottom-0 left-0 w-32 h-32 bg-white/5 rounded-full translate-y-1/2 -translate-x-1/2" />
+          </button>
+        </div>
 
         {/* Apps Grid */}
         <div>

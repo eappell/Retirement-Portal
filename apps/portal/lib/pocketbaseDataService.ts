@@ -29,6 +29,7 @@ export const TOOL_IDS = {
   LEGACY: 'legacy-flow-visualizer', // Was 'legacy-visualizer'
   GIFTING: 'gifting-planner',
   DIGITAL_ESTATE: 'digital-estate-manager', // Was 'estate-manager'
+  ORCHESTRATOR_PLAN: 'orchestrator-plan',
 } as const;
 
 export type ToolId = string; // Allow any string for flexibility
