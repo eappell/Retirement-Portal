@@ -25,6 +25,24 @@ interface RequestBody {
   tier?: 'free' | 'paid';
 }
 
+function normalizeToolId(toolId?: string): string {
+  if (!toolId) return '';
+  const token = toolId.trim().toLowerCase().replace(/\s+/g, '-');
+  const aliases: Record<string, string> = {
+    'healthcare-cost-estimator': 'healthcare-cost',
+    'healthcare-cost-calculator': 'healthcare-cost',
+    'healthcare-cost-simulator': 'healthcare-cost',
+    'state-relocator': 'state-relocate',
+    'social-security': 'social-security-optimizer',
+    'ss-optimizer': 'social-security-optimizer',
+    'identity-builder': 'Retirement-Identity-Builder',
+    'retirement-identity-builder': 'Retirement-Identity-Builder',
+    'volunteer-matcher': 'volunteer-purpose',
+    'volunteer-purpose-matchmaker': 'volunteer-purpose',
+  };
+  return aliases[token] || toolId.trim();
+}
+
 /**
  * Call Gemini Flash API (free tier)
  */
@@ -150,7 +168,8 @@ async function callClaude(prompt: string, dataSnapshot: string): Promise<{ text:
     },
     body: JSON.stringify({
       model: CLAUDE_MODEL,
-      max_tokens: 4096,
+      // Keep responses rich but bounded to improve paid-tier latency.
+      max_tokens: 2500,
       temperature: 0.7,
       messages: [
         {
@@ -226,7 +245,9 @@ function parsePlanResponse(
       summary: s.summary || '',
       details: s.details || [],
       recommendations: s.recommendations || [],
-      relatedTools: s.relatedTools || [],
+      relatedTools: Array.isArray(s.relatedTools)
+        ? s.relatedTools.map((toolId: string) => normalizeToolId(toolId))
+        : [],
       confidence: s.confidence || 'medium',
       priority: s.priority || 'medium',
     })),
@@ -236,7 +257,9 @@ function parsePlanResponse(
       title: w.title || 'Notice',
       description: w.description || '',
       actionRequired: w.actionRequired || '',
-      relatedTools: w.relatedTools || [],
+      relatedTools: Array.isArray(w.relatedTools)
+        ? w.relatedTools.map((toolId: string) => normalizeToolId(toolId))
+        : [],
     })),
     synergies: (parsed.synergies || []).map((s: any) => ({
       title: s.title || '',
@@ -249,7 +272,7 @@ function parsePlanResponse(
     longTermActions: parsed.longTermActions || [],
     missingDataSuggestions: (parsed.missingDataSuggestions || []).map((m: any) => ({
       tool: m.tool || '',
-      toolId: m.toolId || '',
+      toolId: normalizeToolId(m.toolId || ''),
       reason: m.reason || '',
     })),
   };

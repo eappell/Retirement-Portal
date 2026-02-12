@@ -16,6 +16,7 @@ import {
   LightBulbIcon,
   ShieldCheckIcon,
   ArrowTopRightOnSquareIcon,
+  PrinterIcon,
 } from "@heroicons/react/24/outline";
 import Link from "next/link";
 import { useTheme } from "@/lib/theme";
@@ -57,6 +58,7 @@ const TOOL_ROUTE_ALIASES: Record<string, string> = {
   "volunteer-purpose": "volunteer-purpose",
   "healthcare-cost-calculator": "healthcare-cost",
   "healthcare-cost-simulator": "healthcare-cost",
+  "healthcare-cost-estimator": "healthcare-cost",
 };
 const TOOL_LABELS: Record<string, string> = {
   "income-estimator": "Income Estimator",
@@ -65,7 +67,8 @@ const TOOL_LABELS: Record<string, string> = {
   "social-security-optimizer": "Social Security Optimizer",
   "tax-analyzer": "Tax Impact Analyzer",
   "tax-impact-analyzer": "Tax Impact Analyzer",
-  "healthcare-cost": "Healthcare Cost Estimator",
+  "healthcare-cost": "Healthcare Cost Calculator",
+  "healthcare-cost-estimator": "Healthcare Cost Calculator",
   "retire-abroad": "Retire Abroad",
   "state-relocate": "State Relocator",
   "state-relocator": "State Relocator",
@@ -95,6 +98,256 @@ function resolveToolLink(tool: string): { href: string; label: string } | null {
     href: `/apps/${resolvedAppId}`,
     label: TOOL_LABELS[resolvedAppId] || TOOL_LABELS[token] || rawTool,
   };
+}
+
+function escapeHtml(value: string): string {
+  return value
+    .replace(/&/g, "&amp;")
+    .replace(/</g, "&lt;")
+    .replace(/>/g, "&gt;")
+    .replace(/"/g, "&quot;")
+    .replace(/'/g, "&#039;");
+}
+
+function severityLabelClass(severity: string): string {
+  if (severity === "critical") return "critical";
+  if (severity === "warning") return "warning";
+  return "info";
+}
+
+function buildPrintablePlanHtml(plan: OrchestratorPlan): string {
+  const priorities = plan.topPriorities.map((p) => `<span class="pill">${escapeHtml(p)}</span>`).join("");
+  const warnings = plan.warnings
+    .map((w) => {
+      const related = w.relatedTools?.length
+        ? `<p class="related">Related tools: ${w.relatedTools.map((t) => escapeHtml(t)).join(", ")}</p>`
+        : "";
+      return `
+        <article class="warning ${severityLabelClass(w.severity)}">
+          <div class="warning-head">
+            <span class="badge ${severityLabelClass(w.severity)}">${escapeHtml(w.severity.toUpperCase())}</span>
+            <h3>${escapeHtml(w.title)}</h3>
+          </div>
+          <p>${escapeHtml(w.description)}</p>
+          <p><strong>Action:</strong> ${escapeHtml(w.actionRequired)}</p>
+          ${related}
+        </article>
+      `;
+    })
+    .join("");
+
+  const sections = plan.sections
+    .map((s) => {
+      const details = s.details.map((d) => `<li>${escapeHtml(d)}</li>`).join("");
+      const recs = s.recommendations.map((r) => `<li>${escapeHtml(r)}</li>`).join("");
+      const tools = s.relatedTools?.length
+        ? `<p class="related">Related tools: ${s.relatedTools.map((t) => escapeHtml(t)).join(", ")}</p>`
+        : "";
+      return `
+        <section class="card section">
+          <div class="section-head">
+            <h3>${escapeHtml(s.title)}</h3>
+            <span class="meta">${escapeHtml(s.priority)} priority • ${escapeHtml(s.confidence)} confidence</span>
+          </div>
+          <p>${escapeHtml(s.summary)}</p>
+          ${details ? `<h4>Key Findings</h4><ul>${details}</ul>` : ""}
+          ${recs ? `<h4>Recommendations</h4><ul>${recs}</ul>` : ""}
+          ${tools}
+        </section>
+      `;
+    })
+    .join("");
+
+  const synergies = plan.synergies
+    .map(
+      (s) => `
+        <article class="card mini">
+          <h4>${escapeHtml(s.title)}</h4>
+          <p>${escapeHtml(s.description)}</p>
+          <p class="meta">${escapeHtml((s.tools || []).join(", "))}</p>
+          ${s.potentialImpact ? `<p class="impact">${escapeHtml(s.potentialImpact)}</p>` : ""}
+        </article>
+      `
+    )
+    .join("");
+
+  const renderActions = (title: string, items: string[]) => {
+    if (!items.length) return "";
+    return `
+      <div class="card action-col">
+        <h4>${escapeHtml(title)}</h4>
+        <ol>
+          ${items.map((a) => `<li>${escapeHtml(a)}</li>`).join("")}
+        </ol>
+      </div>
+    `;
+  };
+
+  const missingData = plan.missingDataSuggestions
+    .map(
+      (m) => `
+        <article class="card mini">
+          <h4>${escapeHtml(m.tool)}</h4>
+          <p>${escapeHtml(m.reason)}</p>
+          ${m.toolId ? `<p class="meta">Tool ID: ${escapeHtml(m.toolId)}</p>` : ""}
+        </article>
+      `
+    )
+    .join("");
+
+  return `<!doctype html>
+<html>
+  <head>
+    <meta charset="utf-8" />
+    <title>Unified Retirement Plan</title>
+    <style>
+      :root {
+        --indigo: #4f46e5;
+        --slate-900: #0f172a;
+        --slate-700: #334155;
+        --slate-500: #64748b;
+        --slate-200: #e2e8f0;
+        --slate-100: #f1f5f9;
+        --white: #ffffff;
+        --green: #10b981;
+        --amber: #f59e0b;
+        --red: #ef4444;
+        --blue: #3b82f6;
+      }
+      * { box-sizing: border-box; }
+      body {
+        margin: 0;
+        font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+        color: var(--slate-900);
+        background: var(--slate-100);
+      }
+      .page {
+        max-width: 980px;
+        margin: 0 auto;
+        padding: 28px;
+      }
+      .hero {
+        background: linear-gradient(135deg, #4f46e5 0%, #7c3aed 65%, #6366f1 100%);
+        color: var(--white);
+        padding: 24px;
+        border-radius: 18px;
+      }
+      .hero-top { display: flex; justify-content: space-between; gap: 16px; align-items: flex-start; }
+      .hero h1 { margin: 0 0 8px 0; font-size: 28px; }
+      .hero p { margin: 0; opacity: 0.95; }
+      .score {
+        min-width: 120px;
+        text-align: center;
+        background: rgba(255,255,255,0.16);
+        border: 1px solid rgba(255,255,255,0.28);
+        border-radius: 14px;
+        padding: 10px 12px;
+      }
+      .score-value { font-size: 36px; line-height: 1; font-weight: 800; margin: 0 0 4px 0; }
+      .score-label { margin: 0; font-size: 11px; letter-spacing: .08em; text-transform: uppercase; opacity: 0.9; }
+      .meta-row {
+        margin-top: 14px;
+        display: flex;
+        flex-wrap: wrap;
+        gap: 10px;
+      }
+      .pill {
+        background: rgba(255,255,255,0.18);
+        border: 1px solid rgba(255,255,255,0.3);
+        border-radius: 999px;
+        padding: 6px 10px;
+        font-size: 12px;
+      }
+      .section-title {
+        margin: 22px 0 10px;
+        font-size: 16px;
+        text-transform: uppercase;
+        letter-spacing: 0.06em;
+        color: var(--slate-700);
+      }
+      .card {
+        background: var(--white);
+        border: 1px solid var(--slate-200);
+        border-radius: 14px;
+        padding: 14px;
+        margin-bottom: 10px;
+      }
+      .warning.critical { border-left: 6px solid var(--red); }
+      .warning.warning { border-left: 6px solid var(--amber); }
+      .warning.info { border-left: 6px solid var(--blue); }
+      .warning-head { display: flex; align-items: center; gap: 8px; margin-bottom: 6px; }
+      .warning-head h3 { margin: 0; font-size: 16px; }
+      .badge {
+        color: var(--white);
+        border-radius: 6px;
+        padding: 4px 8px;
+        font-size: 11px;
+        font-weight: 700;
+      }
+      .badge.critical { background: var(--red); }
+      .badge.warning { background: var(--amber); color: #111827; }
+      .badge.info { background: var(--blue); }
+      .section-head { display: flex; justify-content: space-between; gap: 10px; align-items: baseline; }
+      .section-head h3 { margin: 0; font-size: 18px; }
+      .section h4 { margin: 12px 0 6px; font-size: 13px; text-transform: uppercase; letter-spacing: .06em; color: var(--slate-500); }
+      .section ul, .action-col ol { margin: 0; padding-left: 20px; }
+      .section li, .action-col li { margin: 4px 0; }
+      .meta { color: var(--slate-500); font-size: 12px; }
+      .related { margin-top: 8px; color: var(--slate-500); font-size: 12px; }
+      .grid-two { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+      .grid-three { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; }
+      .mini h4 { margin: 0 0 6px; }
+      .impact { color: var(--green); font-weight: 700; margin: 8px 0 0; }
+      .footer { margin-top: 18px; color: var(--slate-500); font-size: 12px; text-align: center; }
+      @media (max-width: 760px) {
+        .hero-top { display: block; }
+        .score { margin-top: 12px; width: 100%; }
+        .grid-two, .grid-three { grid-template-columns: 1fr; }
+      }
+      @media print {
+        body { background: var(--white); }
+        .page { max-width: none; padding: 0; }
+        .card, .hero { break-inside: avoid; }
+        .section-title { break-after: avoid; }
+      }
+    </style>
+  </head>
+  <body>
+    <div class="page">
+      <header class="hero">
+        <div class="hero-top">
+          <div>
+            <h1>Unified Retirement Plan</h1>
+            <p>${escapeHtml(plan.executiveSummary)}</p>
+          </div>
+          <div class="score">
+            <p class="score-value">${plan.retirementReadinessScore}</p>
+            <p class="score-label">Readiness Score</p>
+          </div>
+        </div>
+        <div class="meta-row">
+          <span class="pill">${plan.dataCompleteness}% data coverage</span>
+          <span class="pill">${plan.toolsAnalyzed.length} tools analyzed</span>
+          <span class="pill">Generated ${escapeHtml(new Date(plan.generatedAt).toLocaleString())}</span>
+          <span class="pill">${escapeHtml(plan.modelUsed)}</span>
+        </div>
+        ${priorities ? `<div class="meta-row">${priorities}</div>` : ""}
+      </header>
+
+      ${warnings ? `<h2 class="section-title">Alerts</h2>${warnings}` : ""}
+      ${sections ? `<h2 class="section-title">Plan Details</h2>${sections}` : ""}
+      ${synergies ? `<h2 class="section-title">Cross-Tool Synergies</h2><div class="grid-two">${synergies}</div>` : ""}
+      <h2 class="section-title">Action Plan</h2>
+      <div class="grid-three">
+        ${renderActions("Do Now", plan.immediateActions)}
+        ${renderActions("1-6 Months", plan.shortTermActions)}
+        ${renderActions("6+ Months", plan.longTermActions)}
+      </div>
+      ${missingData ? `<h2 class="section-title">Improve Your Plan</h2><div class="grid-two">${missingData}</div>` : ""}
+      <p class="footer">RetireWise Unified Retirement Plan</p>
+    </div>
+  </body>
+</html>`;
 }
 
 function stableStringify(value: unknown): string {
@@ -127,7 +380,9 @@ export function Orchestrator({ isOpen, onClose }: OrchestratorProps) {
   const [tokensUsed, setTokensUsed] = useState<{ input: number; output: number } | undefined>();
   const [planCachedAt, setPlanCachedAt] = useState<string | null>(null);
   const [planDataSignature, setPlanDataSignature] = useState<string | null>(null);
+  const [showScrollToTop, setShowScrollToTop] = useState(false);
   const pocketBaseLoadAttemptedForUserRef = useRef<string | null>(null);
+  const contentRef = useRef<HTMLDivElement | null>(null);
 
   const dataSignature = useMemo(
     () => hashString(stableStringify(toolData || {})),
@@ -323,6 +578,43 @@ export function Orchestrator({ isOpen, onClose }: OrchestratorProps) {
     });
   };
 
+  const returnToTop = useCallback(() => {
+    contentRef.current?.scrollTo({ top: 0, behavior: "smooth" });
+  }, []);
+
+  const printPlan = useCallback(() => {
+    if (typeof window === "undefined" || !plan) return;
+    const printWindow = window.open("", "_blank", "width=1100,height=850");
+    if (!printWindow) return;
+    const html = buildPrintablePlanHtml(plan);
+    printWindow.document.open();
+    printWindow.document.write(html);
+    printWindow.document.close();
+    printWindow.focus();
+    const doPrint = () => {
+      try {
+        printWindow.print();
+      } catch {
+        // no-op
+      }
+    };
+    printWindow.onload = doPrint;
+    setTimeout(doPrint, 300);
+  }, [plan]);
+
+  useEffect(() => {
+    const container = contentRef.current;
+    if (!container || !isOpen) return;
+
+    const handleScroll = () => {
+      setShowScrollToTop(container.scrollTop > container.clientHeight);
+    };
+
+    handleScroll();
+    container.addEventListener("scroll", handleScroll, { passive: true });
+    return () => container.removeEventListener("scroll", handleScroll);
+  }, [isOpen, plan]);
+
   if (!isOpen) return null;
 
   const isDark = theme === "dark";
@@ -372,6 +664,16 @@ export function Orchestrator({ isOpen, onClose }: OrchestratorProps) {
                 {tierUsed === 'paid' ? 'Claude Sonnet' : 'Gemini Flash'}
               </span>
             )}
+            {plan && !isLoading && (
+              <button
+                onClick={printPlan}
+                className={`p-2 rounded-lg ${hoverBg} ${textPrimary} print:hidden`}
+                aria-label="Print Plan"
+                title="Print Plan"
+              >
+                <PrinterIcon className="w-5 h-5" />
+              </button>
+            )}
             <button
               onClick={onClose}
               className={`p-2 rounded-lg ${hoverBg} ${textPrimary}`}
@@ -383,7 +685,7 @@ export function Orchestrator({ isOpen, onClose }: OrchestratorProps) {
         </div>
 
         {/* Content */}
-        <div className="flex-1 overflow-y-auto">
+        <div ref={contentRef} className="flex-1 overflow-y-auto">
           {!plan && !isLoading && !error && (
             <EmptyState
               onGenerate={generatePlan}
@@ -424,6 +726,20 @@ export function Orchestrator({ isOpen, onClose }: OrchestratorProps) {
             />
           )}
         </div>
+
+        {plan && showScrollToTop && (
+          <button
+            onClick={returnToTop}
+            className="fixed bottom-6 right-6 z-[100002] p-3 text-white rounded-full shadow-lg focus:outline-none focus:ring-2 focus:ring-offset-2 transition-all duration-300 print:hidden hover:scale-110"
+            aria-label="Scroll to top"
+            title="Return to top"
+            style={{ backgroundColor: "#4f46e5", boxShadow: "0 6px 18px rgba(79,70,229,0.18)" }}
+          >
+            <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 15l7-7 7 7" />
+            </svg>
+          </button>
+        )}
       </div>
 
       <style jsx>{`
@@ -541,7 +857,7 @@ function LoadingState({
           ))}
         </div>
         <p className={`text-xs ${textSecondary} mt-6`}>
-          This may take 10-20 seconds...
+          This may take 30-40 seconds...
         </p>
       </div>
     </div>

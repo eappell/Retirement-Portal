@@ -146,7 +146,11 @@ function transformSSOptimizer(
   toolsWithData: ToolId[],
   lastUpdated: Record<string, string>
 ): SSOptimizerData | undefined {
-  const record = rawData[TOOL_IDS.SOCIAL_SECURITY];
+  const record = getLatestRecord(rawData, [
+    TOOL_IDS.SOCIAL_SECURITY,
+    'social-security-optimizer',
+    'social-security',
+  ]);
   if (!record?.data) return undefined;
 
   const data = record.data as Record<string, unknown>;
@@ -295,20 +299,42 @@ function transformHealthcareCost(
   toolsWithData: ToolId[],
   lastUpdated: Record<string, string>
 ): HealthcareCostData | undefined {
-  const record = rawData[TOOL_IDS.HEALTHCARE];
+  const record = getLatestRecord(rawData, [
+    TOOL_IDS.HEALTHCARE,
+    'healthcare-cost-estimator',
+  ]);
   if (!record?.data) return undefined;
 
   const data = record.data as Record<string, unknown>;
+  const formData = asRecord(data.formData) || {};
+  const summary = asRecord(data.summary) || {};
   toolsWithData.push(TOOL_IDS.HEALTHCARE as ToolId);
   lastUpdated[TOOL_IDS.HEALTHCARE] = record.created;
 
   return {
-    monthlyPremium: toNumber(data.monthlyPremium) || 0,
-    annualOutOfPocket: toNumber(data.outOfPocket) || toNumber(data.annualOutOfPocket) || 0,
-    lifetimeProjectedCost: toNumber(data.lifetimeProjectedCost) || toNumber(data.lifetimeCost) || 0,
+    monthlyPremium:
+      toNumber(data.monthlyPremium) ||
+      toNumber(summary.monthlyPremium) ||
+      0,
+    annualOutOfPocket:
+      toNumber(data.outOfPocket) ||
+      toNumber(data.annualOutOfPocket) ||
+      toNumber(summary.annualOutOfPocket) ||
+      ((toNumber(formData.prescriptionMonthlyCost) || 0) * 12) ||
+      0,
+    lifetimeProjectedCost:
+      toNumber(data.lifetimeProjectedCost) ||
+      toNumber(data.lifetimeCost) ||
+      toNumber(summary.lifetimeProjectedCost) ||
+      toNumber(summary.totalLifetimeCost) ||
+      0,
     hsaBalance: toNumber(data.hsaBalance) || 0,
     medicareEligibleAge: toNumber(data.medicareAge) || toNumber(data.medicareEligibleAge) || 65,
-    currentPlanType: toString(data.planType) || toString(data.currentPlanType),
+    currentPlanType:
+      toString(data.planType) ||
+      toString(data.currentPlanType) ||
+      toString(formData.insuranceType) ||
+      'documented',
   };
 }
 
@@ -340,7 +366,10 @@ function transformStateRelocator(
   toolsWithData: ToolId[],
   lastUpdated: Record<string, string>
 ): StateRelocatorData | undefined {
-  const record = rawData[TOOL_IDS.STATE_RELOCATE];
+  const record = getLatestRecord(rawData, [
+    TOOL_IDS.STATE_RELOCATE,
+    'state-relocate',
+  ]);
   if (!record?.data) return undefined;
 
   const data = record.data as Record<string, unknown>;
@@ -390,18 +419,59 @@ function transformIdentityBuilder(
   toolsWithData: ToolId[],
   lastUpdated: Record<string, string>
 ): IdentityBuilderData | undefined {
-  const record = rawData[TOOL_IDS.IDENTITY_BUILDER];
+  const record = getLatestRecord(rawData, [
+    TOOL_IDS.IDENTITY_BUILDER,
+    'Retirement-Identity-Builder',
+  ]);
   if (!record?.data) return undefined;
 
   const data = record.data as Record<string, unknown>;
+  const lifeDomains = Array.isArray(data.lifeDomains) ? data.lifeDomains : [];
+  const normalizedDomains = lifeDomains
+    .map((item) => asRecord(item))
+    .filter((item): item is Record<string, unknown> => !!item);
+  const purposeDomain = normalizedDomains.find((domain) =>
+    (toString(domain.name) || '').toLowerCase().includes('purpose')
+  );
+  const averageDomainScore =
+    normalizedDomains.length > 0
+      ? normalizedDomains.reduce((sum, domain) => sum + (toNumber(domain.current) || 0), 0) / normalizedDomains.length
+      : 0;
+
+  const derivedPurposeScore =
+    toNumber(data.purposeScore) ||
+    (toNumber(purposeDomain?.current) ? (toNumber(purposeDomain?.current) as number) * 10 : undefined) ||
+    (averageDomainScore > 0 ? averageDomainScore * 10 : undefined) ||
+    0;
+
+  const derivedGoals = [
+    ...(toStringArray(data.retirementGoals) || []),
+    ...(toStringArray(data.goals) || []),
+    ...(toStringArray(data.topValues) || []),
+  ];
+  const customValue = toString(data.customValue);
+  if (customValue) {
+    derivedGoals.push(customValue);
+  }
+
+  const derivedActivities = [
+    ...(toStringArray(data.activityPreferences) || []),
+    ...(toStringArray(data.activities) || []),
+    ...(toStringArray(data.energyDrivers) || []),
+    ...splitDelimitedString(toString(data.joyfulActivities)),
+  ];
+
   toolsWithData.push(TOOL_IDS.IDENTITY_BUILDER as ToolId);
   lastUpdated[TOOL_IDS.IDENTITY_BUILDER] = record.created;
 
   return {
-    retirementGoals: toStringArray(data.retirementGoals) || toStringArray(data.goals) || [],
-    activityPreferences: toStringArray(data.activityPreferences) || toStringArray(data.activities) || [],
-    purposeScore: toNumber(data.purposeScore) || 0,
-    topPriorities: toStringArray(data.topPriorities) || toStringArray(data.priorities),
+    retirementGoals: dedupeStrings(derivedGoals),
+    activityPreferences: dedupeStrings(derivedActivities),
+    purposeScore: Math.max(0, Math.min(100, Math.round(derivedPurposeScore))),
+    topPriorities:
+      toStringArray(data.topPriorities) ||
+      toStringArray(data.priorities) ||
+      toStringArray(data.willMiss),
   };
 }
 
@@ -410,7 +480,11 @@ function transformVolunteerMatcher(
   toolsWithData: ToolId[],
   lastUpdated: Record<string, string>
 ): VolunteerMatcherData | undefined {
-  const record = rawData[TOOL_IDS.VOLUNTEER];
+  const record = getLatestRecord(rawData, [
+    TOOL_IDS.VOLUNTEER,
+    'volunteer-purpose',
+    'volunteer-purpose-matchmaker',
+  ]);
   if (!record?.data) return undefined;
 
   const data = record.data as Record<string, unknown>;
@@ -513,6 +587,31 @@ function toStringArray(value: unknown): string[] | undefined {
 function asRecord(value: unknown): Record<string, unknown> | undefined {
   if (!value || typeof value !== 'object' || Array.isArray(value)) return undefined;
   return value as Record<string, unknown>;
+}
+
+function getLatestRecord(rawData: RawToolDataMap, toolIds: string[]): RawToolDataMap[string] | undefined {
+  const records = toolIds
+    .map((toolId) => rawData[toolId])
+    .filter((record): record is RawToolDataMap[string] => !!record?.data);
+
+  if (records.length === 0) return undefined;
+  return records.sort((a, b) => {
+    const ta = Date.parse(a.created || '');
+    const tb = Date.parse(b.created || '');
+    return (isNaN(tb) ? 0 : tb) - (isNaN(ta) ? 0 : ta);
+  })[0];
+}
+
+function splitDelimitedString(value?: string): string[] {
+  if (!value) return [];
+  return value
+    .split(/[,\n;]/g)
+    .map((v) => v.trim())
+    .filter((v) => v.length > 0);
+}
+
+function dedupeStrings(values: string[]): string[] {
+  return values.filter((value, index, arr) => arr.findIndex((item) => item.toLowerCase() === value.toLowerCase()) === index);
 }
 
 function extractScenarioBundle(data: Record<string, unknown>): {
@@ -684,8 +783,18 @@ export function buildDataSnapshotForAI(data: AggregatedToolData): string {
     lines.push('### Healthcare');
     lines.push(`- Monthly Premium: $${formatNumber(data.healthcareCost.monthlyPremium)}`);
     lines.push(`- Annual Out-of-Pocket: $${formatNumber(data.healthcareCost.annualOutOfPocket)}`);
+    if (data.healthcareCost.currentPlanType) {
+      lines.push(`- Current Coverage Type: ${data.healthcareCost.currentPlanType}`);
+    }
     if (data.healthcareCost.hsaBalance > 0) {
       lines.push(`- HSA Balance: $${formatNumber(data.healthcareCost.hsaBalance)}`);
+    }
+    if (
+      data.healthcareCost.monthlyPremium === 0 &&
+      data.healthcareCost.annualOutOfPocket === 0 &&
+      data.healthcareCost.currentPlanType
+    ) {
+      lines.push('- Healthcare inputs are documented, but projected premium/out-of-pocket values are not yet available.');
     }
     lines.push('');
   }
