@@ -508,14 +508,32 @@ function transformLegacyVisualizer(
   if (!record?.data) return undefined;
 
   const data = record.data as Record<string, unknown>;
+  const assets = Array.isArray(data.assets) ? data.assets : [];
+  const beneficiariesList = Array.isArray(data.beneficiaries) ? data.beneficiaries : [];
+  const derivedEstateValue = assets.reduce((sum, asset) => {
+    const value = asRecord(asset);
+    return sum + (toNumber(value?.value) || 0);
+  }, 0);
+  const derivedBeneficiaryCount = beneficiariesList.length;
   toolsWithData.push(TOOL_IDS.LEGACY as ToolId);
   lastUpdated[TOOL_IDS.LEGACY] = record.created;
 
   return {
-    totalEstateValue: toNumber(data.totalEstateValue) || toNumber(data.estateValue) || 0,
-    beneficiaries: toNumber(data.beneficiaries) || toNumber(data.beneficiaryCount) || 0,
+    totalEstateValue:
+      toNumber(data.totalEstateValue) ||
+      toNumber(data.estateValue) ||
+      derivedEstateValue ||
+      0,
+    beneficiaries:
+      toNumber(data.beneficiaries) ||
+      toNumber(data.beneficiaryCount) ||
+      derivedBeneficiaryCount ||
+      0,
     charitableGivingPlanned: toNumber(data.charitableGiving) || toNumber(data.charitableGivingPlanned) || 0,
-    estatePlanComplete: Boolean(data.estatePlanComplete) || Boolean(data.planComplete),
+    estatePlanComplete:
+      Boolean(data.estatePlanComplete) ||
+      Boolean(data.planComplete) ||
+      (derivedEstateValue > 0 && derivedBeneficiaryCount > 0),
   };
 }
 
@@ -524,7 +542,10 @@ function transformGiftingPlanner(
   toolsWithData: ToolId[],
   lastUpdated: Record<string, string>
 ): GiftingPlannerData | undefined {
-  const record = rawData[TOOL_IDS.GIFTING];
+  const record = getLatestRecord(rawData, [
+    TOOL_IDS.GIFTING,
+    'gifting-strategy-planner',
+  ]);
   if (!record?.data) return undefined;
 
   const data = record.data as Record<string, unknown>;
