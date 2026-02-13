@@ -21,6 +21,7 @@ interface RequestBody {
   history?: Message[];
   userId?: string;
   authToken?: string;
+  cachedToolData?: Record<string, { data: Record<string, unknown>; created: string }>;
 }
 
 interface EnhancedContext {
@@ -33,10 +34,31 @@ interface EnhancedContext {
 /**
  * Fetch user data from PocketBase via proxy and analyze for insights
  */
-async function fetchEnhancedUserContext(authToken: string): Promise<EnhancedContext> {
+function sanitizeCachedToolData(
+  input?: RequestBody["cachedToolData"]
+): Record<string, { data: Record<string, unknown>; created: string }> | undefined {
+  if (!input || typeof input !== "object") return undefined;
+  const sanitized: Record<string, { data: Record<string, unknown>; created: string }> = {};
+  for (const [toolId, value] of Object.entries(input)) {
+    if (!value || typeof value !== "object") continue;
+    const record = value as { data?: unknown; created?: unknown };
+    if (!record.data || typeof record.data !== "object" || Array.isArray(record.data)) continue;
+    if (typeof record.created !== "string") continue;
+    sanitized[toolId] = {
+      data: record.data as Record<string, unknown>,
+      created: record.created,
+    };
+  }
+  return Object.keys(sanitized).length > 0 ? sanitized : undefined;
+}
+
+async function fetchEnhancedUserContext(
+  authToken: string,
+  cachedToolData?: Record<string, { data: Record<string, unknown>; created: string }>
+): Promise<EnhancedContext> {
   try {
     // Aggregate all tool data from PocketBase
-    const aggregatedData = await aggregateAllToolData(authToken);
+    const aggregatedData = await aggregateAllToolData(authToken, cachedToolData);
 
     // Analyze for cross-tool opportunities
     const crossToolInsights = analyzeCrossToolPatterns(aggregatedData);
@@ -49,15 +71,21 @@ async function fetchEnhancedUserContext(authToken: string): Promise<EnhancedCont
       const toolNames: Record<string, string> = {
         'income-estimator': 'Income Estimator',
         'ss-optimizer': 'Social Security Optimizer',
+        'social-security-optimizer': 'Social Security Optimizer',
         'tax-analyzer': 'Tax Impact Analyzer',
         'healthcare-cost': 'Healthcare Cost Estimator',
+        'healthcare-cost-estimator': 'Healthcare Cost Estimator',
         'retire-abroad': 'Retire Abroad',
         'state-relocator': 'State Relocator',
+        'state-relocate': 'State Relocator',
         'longevity-planner': 'Longevity Planner',
         'retirement-identity-builder': 'Identity Builder',
+        'Retirement-Identity-Builder': 'Identity Builder',
         'volunteer-matcher': 'Volunteer Matcher',
+        'volunteer-purpose': 'Volunteer Matcher',
         'legacy-flow-visualizer': 'Legacy Visualizer',
         'gifting-planner': 'Gifting Planner',
+        'gifting-strategy-planner': 'Gifting Planner',
         'digital-estate-manager': 'Digital Estate Manager',
       };
       return toolNames[toolId] || toolId;
@@ -140,9 +168,11 @@ export async function POST(request: NextRequest) {
 
     let userProfileContext = "";
 
+    const cachedToolData = sanitizeCachedToolData(body.cachedToolData);
+
     if (authToken) {
       // Primary path: Use PocketBase via proxy
-      enhancedContext = await fetchEnhancedUserContext(authToken);
+      enhancedContext = await fetchEnhancedUserContext(authToken, cachedToolData);
     }
 
     // Also fetch basic profile from Firestore

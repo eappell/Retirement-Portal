@@ -5,7 +5,9 @@ import { useRouter, useSearchParams } from "next/navigation";
 import { useAuth } from "@/lib/auth";
 import { useUserTier } from "@/lib/useUserTier";
 import { useTheme } from "@/lib/theme";
+import { useDashboardLayout } from '@/lib/dashboardLayout';
 import { Header } from "@/components/Header";
+import { DashboardVariantTwo } from '@/components/DashboardVariantTwo';
 import UserInfoDialog from "@/components/UserInfoDialog";
 import { db, functions as firebaseFunctions } from "@/lib/firebase";
 import { httpsCallable } from "firebase/functions";
@@ -115,6 +117,7 @@ function AdminDashboardContent() {
   const { user } = useAuth();
   const { tier, loading: tierLoading } = useUserTier();
   const { theme } = useTheme();
+  const { layout } = useDashboardLayout();
   const forcedTextColor = theme === 'dark' ? '#F9F8F6' : '#2A354A';
   const [mounted, setMounted] = useState(false);
   const [loading, setLoading] = useState(true);
@@ -535,30 +538,29 @@ function AdminDashboardContent() {
     return null;
   }
 
-  return (
-    <div className={`min-h-screen admin-dashboard ${theme === 'dark' ? 'bg-[#0a1628]' : 'bg-[#f8f9fa]'}`}>
+  const adminContent = (
+    <>
       <style jsx>{`
-        .admin-dashboard :where(*:not([role="tooltip"]):not(.app-tooltip-light):not(.app-tooltip-dark):not(.header-tooltip)) {
-          color: ${forcedTextColor} !important;
+        .admin-dashboard-content *:not([role="tooltip"]):not(.app-tooltip-light):not(.app-tooltip-dark):not(.header-tooltip):not(.force-light-text) {
+          color: ${forcedTextColor};
         }
-        .admin-dashboard a {
+        .admin-dashboard-content a {
           color: #0B5394 !important;
         }
-        /* Increased specificity to override the global rule */
-        div.admin-dashboard :global(.force-light-text),
-        div.admin-dashboard :global(button.force-light-text) {
+        /* Force white text on dark-bg buttons */
+        .admin-dashboard-content :global(.force-light-text),
+        .admin-dashboard-content :global(button.force-light-text) {
           color: #ffffff !important;
         }
-        div.admin-dashboard :global(.force-light-text svg) {
+        .admin-dashboard-content :global(.force-light-text svg) {
           color: inherit !important;
         }
-        .admin-dashboard .force-dark-text {
+        .admin-dashboard-content .force-dark-text {
           color: ${theme === 'dark' ? '#111827' : 'inherit'} !important;
         }
       `}</style>
-      <Header />
 
-      <main className={`max-w-7xl mx-auto px-4 py-12 sm:px-6 lg:px-8 ${theme === 'dark' ? 'text-gray-100' : 'text-gray-900'}`}>
+      <main className={`admin-dashboard-content max-w-7xl mx-auto px-4 py-12 sm:px-6 lg:px-8 ${theme === 'dark' ? 'text-gray-100' : 'text-gray-900'}`}>
         <div className="mb-8">
           <h1 className="text-3xl font-bold" style={{ color: forcedTextColor, WebkitTextFillColor: forcedTextColor, WebkitBackgroundClip: 'unset' }}>Admin Dashboard</h1>
           <p className="mt-2" style={{ color: theme === 'dark' ? '#d1d5db' : '#6b5e62' }}>System analytics and user management</p>
@@ -1002,7 +1004,7 @@ function AdminDashboardContent() {
                             <div className="flex items-center gap-2">
                               <button
                                 onClick={() => setSelectedUser(u)}
-                                className="px-3 py-1 bg-gray-100 dark:bg-slate-700 force-light-text rounded"
+                                className="px-3 py-1 bg-slate-700 text-white rounded force-light-text"
                               >
                                 Details
                               </button>
@@ -1430,6 +1432,24 @@ function AdminDashboardContent() {
         )}
 
       </main>
+    </>
+  );
+
+  // If sidebar layout is active, render inside the dashboard shell
+  if (layout === 'sidebar') {
+    return (
+      <div className={`admin-dashboard ${theme === 'dark' ? 'bg-transparent' : 'bg-transparent'}`}>
+        <DashboardVariantTwo activeNavId="admin">
+          {adminContent}
+        </DashboardVariantTwo>
+      </div>
+    );
+  }
+
+  return (
+    <div className={`min-h-screen admin-dashboard ${theme === 'dark' ? 'bg-[#0a1628]' : 'bg-[#f8f9fa]'}`}>
+      <Header />
+      {adminContent}
     </div>
   );
 }

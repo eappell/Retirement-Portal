@@ -5,6 +5,8 @@ import { useRouter } from "next/navigation";
 import { useAuth } from "@/lib/auth";
 import { Header } from "@/components/Header";
 import { useTheme } from '@/lib/theme';
+import { useDashboardLayout } from '@/lib/dashboardLayout';
+import { DashboardVariantTwo } from '@/components/DashboardVariantTwo';
 import {
   updatePassword,
   EmailAuthProvider,
@@ -79,6 +81,7 @@ export default function ProfilePage() {
   const [lifeExpectancyError, setLifeExpectancyError] = useState<string | null>(null);
   const { trackEvent } = useAnalytics();
   const { theme } = useTheme();
+  const { layout } = useDashboardLayout();
 
   useEffect(() => {
     setMounted(true);
@@ -208,10 +211,7 @@ export default function ProfilePage() {
     );
   }
 
-  return (
-    <div className="min-h-screen" style={{ backgroundColor: theme === 'light' ? '#f3f4f6' : '#0f172a' }}>
-      <Header />
-
+  const profileContent = (
       <main className="mx-auto px-4 py-12 sm:px-6 lg:px-8" style={{ maxWidth: 1340 }}>
         <div className="mb-8">
           <h1 className="text-3xl font-bold" style={{ 
@@ -561,6 +561,21 @@ export default function ProfilePage() {
           </div>
         </div>
       </main>
+  );
+
+  // If sidebar layout is active, render inside the dashboard shell
+  if (layout === 'sidebar') {
+    return (
+      <DashboardVariantTwo activeNavId="profile">
+        {profileContent}
+      </DashboardVariantTwo>
+    );
+  }
+
+  return (
+    <div className="min-h-screen" style={{ backgroundColor: theme === 'light' ? '#f3f4f6' : '#0f172a' }}>
+      <Header />
+      {profileContent}
     </div>
   );
 }

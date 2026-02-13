@@ -10,8 +10,10 @@ import Link from "next/link";
 import {Header} from "@/components/Header";
 import { AppIcon } from "@/components/icon-map";
 import { useTheme } from '@/lib/theme';
+import { useDashboardLayout } from '@/lib/dashboardLayout';
 import { AICoach } from "@/components/AICoach";
 import { Orchestrator } from "@/components/Orchestrator";
+import { DashboardVariantTwo } from "@/components/DashboardVariantTwo";
 
 import { useRetirementData } from "@/lib/retirementContext";
 import { useToolData } from "@/contexts/ToolDataContext";
@@ -131,6 +133,7 @@ export default function DashboardPage() {
   const router = useRouter();
   const {user, loading: authLoading} = useAuth();
   const { theme } = useTheme();
+  const { layout } = useDashboardLayout();
   const { userData, loading: dataLoading } = useRetirementData();
   const { toolData: cachedToolData, isLoading: toolDataLoading, isInitialized: toolDataReady } = useToolData();
   
@@ -415,11 +418,19 @@ export default function DashboardPage() {
     );
   }
 
-  
+  // Render the sidebar layout variant if selected
+  if (layout === 'sidebar') {
+    return <DashboardVariantTwo />;
+  }
 
   return (
     <div className="flex-1 bg-background portal-dashboard dashboard-redesign pb-0">
-      <Header onAICoachOpen={() => setIsAICoachOpen(true)} insightCount={crossToolInsights.filter(i => i.priority === 'critical' || i.priority === 'high').length} topInsight={crossToolInsights[0] || null} />
+      <Header
+        onAICoachOpen={() => setIsAICoachOpen(true)}
+        insightCount={crossToolInsights.length}
+        topInsight={crossToolInsights[0] || null}
+        insights={crossToolInsights}
+      />
 
       {/* AI Coach Panel */}
       <AICoach

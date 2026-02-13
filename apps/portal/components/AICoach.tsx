@@ -12,6 +12,7 @@ import {
 import { useTheme } from "@/lib/theme";
 import { useAuth } from "@/lib/auth";
 import { auth } from "@/lib/firebase";
+import { useToolData } from "@/contexts/ToolDataContext";
 import type { CrossToolInsight } from "@/lib/types/aggregatedToolData";
 
 interface Message {
@@ -29,10 +30,20 @@ interface AICoachProps {
 }
 
 type TabType = "chat" | "insights";
+const AI_COACH_INSIGHTS_CACHE_KEY = "retirewise_ai_coach_insights_v1";
+const AI_COACH_INSIGHTS_CACHE_TTL_MS = 24 * 60 * 60 * 1000;
+
+interface AICoachInsightsCache {
+  userId: string;
+  insights: CrossToolInsight[];
+  dataCompleteness: number;
+  cachedAt: string;
+}
 
 export function AICoach({ isOpen, onClose, initialInsights = [] }: AICoachProps) {
   const { theme } = useTheme();
   const { user } = useAuth();
+  const { toolData } = useToolData();
   const [activeTab, setActiveTab] = useState<TabType>("chat");
   const [messages, setMessages] = useState<Message[]>([
     {
@@ -48,8 +59,46 @@ export function AICoach({ isOpen, onClose, initialInsights = [] }: AICoachProps)
   const [insights, setInsights] = useState<CrossToolInsight[]>(initialInsights);
   const [isLoadingInsights, setIsLoadingInsights] = useState(false);
   const [dataCompleteness, setDataCompleteness] = useState(0);
+  const [cacheHydrated, setCacheHydrated] = useState(false);
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLInputElement>(null);
+
+  useEffect(() => {
+    if (!user?.uid) return;
+    try {
+      const raw = localStorage.getItem(AI_COACH_INSIGHTS_CACHE_KEY);
+      if (!raw) return;
+      const parsed = JSON.parse(raw) as AICoachInsightsCache;
+      if (parsed.userId !== user.uid) return;
+      const ageMs = Date.now() - Date.parse(parsed.cachedAt);
+      if (!isFinite(ageMs) || ageMs > AI_COACH_INSIGHTS_CACHE_TTL_MS) return;
+      if (Array.isArray(parsed.insights)) {
+        setInsights(parsed.insights);
+      }
+      if (typeof parsed.dataCompleteness === "number") {
+        setDataCompleteness(parsed.dataCompleteness);
+      }
+    } catch (error) {
+      console.warn("Failed to load AI Coach insight cache:", error);
+    } finally {
+      setCacheHydrated(true);
+    }
+  }, [user?.uid]);
+
+  useEffect(() => {
+    if (!user?.uid) return;
+    try {
+      const payload: AICoachInsightsCache = {
+        userId: user.uid,
+        insights,
+        dataCompleteness,
+        cachedAt: new Date().toISOString(),
+      };
+      localStorage.setItem(AI_COACH_INSIGHTS_CACHE_KEY, JSON.stringify(payload));
+    } catch (error) {
+      console.warn("Failed to save AI Coach insight cache:", error);
+    }
+  }, [insights, dataCompleteness, user?.uid]);
 
   const scrollToBottom = () => {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
@@ -83,6 +132,7 @@ export function AICoach({ isOpen, onClose, initialInsights = [] }: AICoachProps)
           message: "What insights do you have for me?",
           userId: user.uid,
           authToken: token,
+          cachedToolData: toolData,
         }),
       });
 
@@ -100,13 +150,13 @@ export function AICoach({ isOpen, onClose, initialInsights = [] }: AICoachProps)
     } finally {
       setIsLoadingInsights(false);
     }
-  }, [user]);
+  }, [user, toolData]);
 
   useEffect(() => {
-    if (isOpen && insights.length === 0) {
+    if (isOpen && cacheHydrated && insights.length === 0) {
       fetchInsights();
     }
-  }, [isOpen, insights.length, fetchInsights]);
+  }, [isOpen, cacheHydrated, insights.length, fetchInsights]);
 
   const handleSend = async (messageText?: string) => {
     const textToSend = messageText || input.trim();
@@ -141,6 +191,7 @@ export function AICoach({ isOpen, onClose, initialInsights = [] }: AICoachProps)
           history: messages.slice(-10),
           userId: user?.uid,
           authToken: token,
+          cachedToolData: toolData,
         }),
       });
 
@@ -223,9 +274,7 @@ export function AICoach({ isOpen, onClose, initialInsights = [] }: AICoachProps)
     low: "bg-blue-500 text-white",
   };
 
-  const highPriorityCount = insights.filter(
-    (i) => i.priority === "critical" || i.priority === "high"
-  ).length;
+  const totalInsightCount = insights.length;
 
   return (
     <>
@@ -288,9 +337,9 @@ export function AICoach({ isOpen, onClose, initialInsights = [] }: AICoachProps)
           >
             <LightBulbIcon className="w-4 h-4" />
             Insights
-            {highPriorityCount > 0 && (
+            {totalInsightCount > 0 && (
               <span className="absolute top-2 right-[calc(50%-40px)] flex h-5 w-5 items-center justify-center rounded-full bg-red-500 text-xs font-bold text-white">
-                {highPriorityCount}
+                {totalInsightCount > 9 ? "9+" : totalInsightCount}
               </span>
             )}
           </button>
@@ -514,15 +563,21 @@ function formatToolName(toolId: string): string {
   const names: Record<string, string> = {
     "income-estimator": "Income",
     "ss-optimizer": "Social Security",
+    "social-security-optimizer": "Social Security",
     "tax-analyzer": "Tax",
     "healthcare-cost": "Healthcare",
+    "healthcare-cost-estimator": "Healthcare",
     "retire-abroad": "Retire Abroad",
     "state-relocator": "State Relocator",
+    "state-relocate": "State Relocator",
     "longevity-planner": "Longevity",
     "retirement-identity-builder": "Identity",
+    "Retirement-Identity-Builder": "Identity",
     "volunteer-matcher": "Volunteer",
+    "volunteer-purpose": "Volunteer",
     "legacy-flow-visualizer": "Legacy",
     "gifting-planner": "Gifting",
+    "gifting-strategy-planner": "Gifting",
     "digital-estate-manager": "Digital Estate",
   };
   return names[toolId] || toolId;

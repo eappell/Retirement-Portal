@@ -9,6 +9,8 @@ import { useTheme } from "@/lib/theme";
 import { Header } from "@/components/Header";
 import { IFrameWrapper } from "@/components/IFrameWrapper";
 import { AICoach } from "@/components/AICoach";
+import { DashboardVariantTwo } from "@/components/DashboardVariantTwo";
+import { useDashboardLayout } from "@/lib/dashboardLayout";
 
 import { db, auth } from "@/lib/firebase";
 import { aggregateAllToolData } from "@/lib/dataAggregationService";
@@ -89,6 +91,7 @@ export default function AppPage() {
   const { tier, loading: tierLoading } = useUserTier();
   const { trackEvent } = useAnalytics();
   const { theme } = useTheme();
+  const { layout } = useDashboardLayout();
   const [mounted, setMounted] = useState(false);
   const [appTitle, setAppTitle] = useState<string>("");
   const [appDescription, setAppDescription] = useState<string>("");
@@ -283,19 +286,27 @@ export default function AppPage() {
   }
 
   if (!appId || !appConfig) {
+    const notFoundContent = (
+      <div className="text-center py-12">
+        <p className="text-red-600 font-semibold mb-4">Application not found</p>
+        <button
+          onClick={() => router.push("/dashboard")}
+          className="bg-indigo-600 hover:bg-indigo-700 text-white font-semibold py-2 px-6 rounded-lg"
+        >
+          Back to Dashboard
+        </button>
+      </div>
+    );
+
+    if (layout === 'sidebar') {
+      return <DashboardVariantTwo>{notFoundContent}</DashboardVariantTwo>;
+    }
+
     return (
       <div className="min-h-screen bg-gray-50">
         <Header />
         <div className="max-w-7xl mx-auto px-4 py-12 sm:px-6 lg:px-8">
-          <div className="text-center">
-            <p className="text-red-600 font-semibold mb-4">Application not found</p>
-            <button
-              onClick={() => router.push("/dashboard")}
-              className="bg-indigo-600 hover:bg-indigo-700 text-white font-semibold py-2 px-6 rounded-lg"
-            >
-              Back to Dashboard
-            </button>
-          </div>
+          {notFoundContent}
         </div>
       </div>
     );
@@ -303,20 +314,28 @@ export default function AppPage() {
 
   // If app is disabled in Firestore, show an offline placeholder page
   if (appConfig?.disabled) {
+    const disabledContent = (
+      <div className="text-center py-12">
+        <p className="text-red-600 font-semibold mb-4">{appConfig.name || 'This application'} is temporarily offline</p>
+        <p className="text-gray-600 mb-6">We&apos;re sorry — this tool is temporarily unavailable. Please check back later.</p>
+        <button
+          onClick={() => router.push('/dashboard')}
+          className="bg-indigo-600 hover:bg-indigo-700 text-white font-semibold py-2 px-6 rounded-lg"
+        >
+          Back to Dashboard
+        </button>
+      </div>
+    );
+
+    if (layout === 'sidebar') {
+      return <DashboardVariantTwo activeNavId={appId}>{disabledContent}</DashboardVariantTwo>;
+    }
+
     return (
       <div className="min-h-screen bg-gray-50">
         <Header />
         <div className="max-w-7xl mx-auto px-4 py-12 sm:px-6 lg:px-8">
-          <div className="text-center">
-            <p className="text-red-600 font-semibold mb-4">{appConfig.name || 'This application'} is temporarily offline</p>
-            <p className="text-gray-600 mb-6">We're sorry — this tool is temporarily unavailable. Please check back later.</p>
-            <button
-              onClick={() => router.push('/dashboard')}
-              className="bg-indigo-600 hover:bg-indigo-700 text-white font-semibold py-2 px-6 rounded-lg"
-            >
-              Back to Dashboard
-            </button>
-          </div>
+          {disabledContent}
         </div>
       </div>
     );
@@ -333,6 +352,54 @@ export default function AppPage() {
   const finalAppUrl = `${baseAppUrl}${baseAppUrl.includes('?') ? '&' : '?'}embedded=true`;
   const finalAppName = appName || appConfig.name;
 
+  // App Info Bar content
+  const appInfoBar = (
+    <div 
+      className={`border-b z-10 transition-top duration-300 ${layout !== 'sidebar' ? 'sticky' : ''}`}
+      style={{ 
+        top: layout !== 'sidebar' ? 'var(--portal-header-height, 4rem)' : undefined,
+        backgroundColor: theme === 'light' ? '#F9F8F6' : '#1e293b',
+        borderColor: theme === 'light' ? '#e5e7eb' : '#334155'
+      }}
+    >
+      <div className={`${layout !== 'sidebar' ? 'max-w-[1400px]' : ''} mx-auto px-4 py-3 sm:px-6 lg:px-8 flex items-center justify-between`}>
+        <div className="flex items-center gap-4 flex-1">
+          {/* App Icon */}
+          <AppIcon icon={appConfig.icon} className={`h-8 w-8 ${theme === 'light' ? 'text-gray-700' : 'text-gray-300'}`} />
+          
+          {/* App Name and Description */}
+          <div className="flex-1">
+            <h2 className={`text-lg font-semibold ${theme === 'light' ? 'text-gray-900' : 'text-white'}`}>
+              {appConfig.name}
+            </h2>
+            {appConfig.description && (
+              <p className={`text-sm ${theme === 'light' ? 'text-gray-600' : 'text-gray-400'}`}>{appConfig.description}</p>
+            )}
+          </div>
+        </div>
+        <div id="app-toolbar-placeholder" className="flex-shrink-0 flex items-center gap-2" />
+      </div>
+    </div>
+  );
+
+  // Sidebar layout: render inside DashboardVariantTwo shell
+  if (layout === 'sidebar') {
+    return (
+      <DashboardVariantTwo activeNavId={appId}>
+        <div className="v2-app-content">
+          {appInfoBar}
+          <IFrameWrapper
+            key={`${appId}-${finalAppUrl}`}
+            appId={appId}
+            appName={finalAppName}
+            appUrl={finalAppUrl}
+            description={appConfig.description}
+          />
+        </div>
+      </DashboardVariantTwo>
+    );
+  }
+
   return (
     <div className={`min-h-screen ${theme === 'light' ? 'bg-[#F9F8F6]' : 'bg-[#0f172a]'}`}>
       <Header onAICoachOpen={() => setIsAICoachOpen(true)} insightCount={crossToolInsights.filter(i => i.priority === 'critical' || i.priority === 'high').length} topInsight={crossToolInsights[0] || null} />
@@ -344,35 +411,7 @@ export default function AppPage() {
         initialInsights={crossToolInsights}
       />
 
-
-
-      {/* App Info Bar - sticky below header */}
-      <div 
-        className="border-b sticky z-10 transition-top duration-300"
-        style={{ 
-          top: 'var(--portal-header-height, 4rem)',
-          backgroundColor: theme === 'light' ? '#F9F8F6' : '#1e293b',
-          borderColor: theme === 'light' ? '#e5e7eb' : '#334155'
-        }}
-      >
-        <div className="max-w-[1400px] mx-auto px-4 py-3 sm:px-6 lg:px-8 flex items-center justify-between">
-          <div className="flex items-center gap-4 flex-1">
-            {/* App Icon */}
-            <AppIcon icon={appConfig.icon} className={`h-8 w-8 ${theme === 'light' ? 'text-gray-700' : 'text-gray-300'}`} />
-            
-            {/* App Name and Description */}
-            <div className="flex-1">
-              <h2 className={`text-lg font-semibold ${theme === 'light' ? 'text-gray-900' : 'text-white'}`}>
-                {appConfig.name}
-              </h2>
-              {appConfig.description && (
-                <p className={`text-sm ${theme === 'light' ? 'text-gray-600' : 'text-gray-400'}`}>{appConfig.description}</p>
-              )}
-            </div>
-          </div>
-          <div id="app-toolbar-placeholder" className="flex-shrink-0 flex items-center gap-2" />
-        </div>
-      </div>
+      {appInfoBar}
 
       {/* iFrame Container */}
       <IFrameWrapper

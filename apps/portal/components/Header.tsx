@@ -22,6 +22,7 @@ interface HeaderProps {
   onAICoachOpen?: () => void;
   insightCount?: number;
   topInsight?: CrossToolInsight | null;
+  insights?: CrossToolInsight[];
 }
 
 function formatImpact(num: number): string {
@@ -30,7 +31,7 @@ function formatImpact(num: number): string {
   return num.toLocaleString();
 }
 
-export function Header({ onAICoachOpen, insightCount = 0, topInsight = null }: HeaderProps) {
+export function Header({ onAICoachOpen, insightCount = 0, topInsight = null, insights = [] }: HeaderProps) {
   const router = useRouter();
   const { user, logout } = useAuth();
   const { tier, loading: tierLoading } = useUserTier();
@@ -44,7 +45,16 @@ export function Header({ onAICoachOpen, insightCount = 0, topInsight = null }: H
   const [hoveredUpgrade, setHoveredUpgrade] = useState(false);
   const [suppressHoverTooltips, setSuppressHoverTooltips] = useState(false);
   const [showInsightPreview, setShowInsightPreview] = useState(false);
+  const [previewInsightIndex, setPreviewInsightIndex] = useState(0);
   const insightHideTimeout = useState<ReturnType<typeof setTimeout> | null>(null);
+  const previewInsights = insights.length > 0 ? insights : (topInsight ? [topInsight] : []);
+  const previewInsight = previewInsights[previewInsightIndex] || null;
+
+  useEffect(() => {
+    if (previewInsightIndex >= previewInsights.length) {
+      setPreviewInsightIndex(0);
+    }
+  }, [previewInsightIndex, previewInsights.length]);
 
   const headerBgClass = theme === "dark" ? "bg-[#1A2A40] shadow" : "bg-white shadow";
   const headerBorderClass = theme === "dark" ? "border-b border-[#1A2A40]" : "border-b border-white";
@@ -242,7 +252,10 @@ export function Header({ onAICoachOpen, insightCount = 0, topInsight = null }: H
                 className="relative mr-2"
                 onMouseEnter={() => {
                   if (insightHideTimeout[0]) { clearTimeout(insightHideTimeout[0]); insightHideTimeout[1](null); }
-                  if (topInsight) setShowInsightPreview(true);
+                  if (previewInsight) {
+                    setPreviewInsightIndex(0);
+                    setShowInsightPreview(true);
+                  }
                 }}
                 onMouseLeave={() => {
                   const t = setTimeout(() => setShowInsightPreview(false), 400);
@@ -250,7 +263,7 @@ export function Header({ onAICoachOpen, insightCount = 0, topInsight = null }: H
                 }}
               >
                 {/* Insight Preview Card */}
-                {showInsightPreview && topInsight && (
+                {showInsightPreview && previewInsight && (
                   <div
                     onClick={onAICoachOpen}
                     role="button"
@@ -270,25 +283,54 @@ export function Header({ onAICoachOpen, insightCount = 0, topInsight = null }: H
                     <div className="flex items-center gap-2 mb-2">
                       <span
                         className={`text-xs font-bold px-2 py-0.5 rounded text-white ${
-                          topInsight.priority === "critical" ? "bg-red-500" :
-                          topInsight.priority === "high" ? "bg-orange-500" :
-                          topInsight.priority === "medium" ? "bg-yellow-500" : "bg-blue-500"
+                          previewInsight.priority === "critical" ? "bg-red-500" :
+                          previewInsight.priority === "high" ? "bg-orange-500" :
+                          previewInsight.priority === "medium" ? "bg-yellow-500" : "bg-blue-500"
                         }`}
                       >
-                        {topInsight.priority.toUpperCase()}
+                        {previewInsight.priority.toUpperCase()}
                       </span>
                       <span className={`text-xs ${theme === "dark" ? "text-slate-400" : "text-gray-500"}`}>
-                        ${formatImpact(topInsight.potentialImpact)} impact
+                        ${formatImpact(previewInsight.potentialImpact)} impact
                       </span>
                     </div>
                     {/* Title */}
                     <h4 className={`text-sm font-semibold mb-1 ${theme === "dark" ? "text-slate-100" : "text-gray-900"}`}>
-                      {topInsight.title}
+                      {previewInsight.title}
                     </h4>
                     {/* Description */}
                     <p className={`text-xs line-clamp-2 mb-3 ${theme === "dark" ? "text-slate-400" : "text-gray-600"}`}>
-                      {topInsight.description}
+                      {previewInsight.description}
                     </p>
+                    {previewInsights.length > 1 && (
+                      <div className="flex items-center justify-between mb-2">
+                        <button
+                          type="button"
+                          className={`text-xs px-2 py-1 rounded ${theme === "dark" ? "bg-slate-700 hover:bg-slate-600 text-slate-200" : "bg-gray-100 hover:bg-gray-200 text-gray-700"}`}
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            setPreviewInsightIndex((i) => (i - 1 + previewInsights.length) % previewInsights.length);
+                          }}
+                          aria-label="Previous insight"
+                        >
+                          ← Prev
+                        </button>
+                        <span className={`text-[11px] ${theme === "dark" ? "text-slate-400" : "text-gray-500"}`}>
+                          {previewInsightIndex + 1}/{previewInsights.length}
+                        </span>
+                        <button
+                          type="button"
+                          className={`text-xs px-2 py-1 rounded ${theme === "dark" ? "bg-slate-700 hover:bg-slate-600 text-slate-200" : "bg-gray-100 hover:bg-gray-200 text-gray-700"}`}
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            setPreviewInsightIndex((i) => (i + 1) % previewInsights.length);
+                          }}
+                          aria-label="Next insight"
+                        >
+                          Next →
+                        </button>
+                      </div>
+                    )}
                     {/* CTA */}
                     <span className="text-xs text-purple-500 font-medium hover:text-purple-600 hover:underline">
                       Click to learn more →
