@@ -720,7 +720,6 @@ export function IFrameWrapper({
               const finalDesired = desired + (Number(extraPaddingRef.current) || 0);
               baseAppliedRef.current = desired;
               currentAppliedRef.current = finalDesired;
-
               iframeRef.current!.style.setProperty('height', `${finalDesired}px`, 'important');
               iframeRef.current!.style.minHeight = `${finalDesired}px`;
               iframeRef.current!.contentWindow?.postMessage({ type: 'IFRAME_HEIGHT_APPLIED', height: finalDesired }, '*');

@@ -1431,6 +1431,9 @@ p.app-description {
   display: flex;
   flex-direction: column;
   min-height: 100vh;
+  height: 100vh;
+  overflow-y: auto;
+  overflow-x: hidden;
   transition: margin-left 0.25s cubic-bezier(0.4,0,0.2,1);
 }
 
@@ -2262,4 +2265,3 @@ p.app-description {
     grid-template-columns: 1fr;
   }
 }
-

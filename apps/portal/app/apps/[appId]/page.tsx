@@ -355,9 +355,9 @@ export default function AppPage() {
   // App Info Bar content
   const appInfoBar = (
     <div 
-      className={`border-b z-10 transition-top duration-300 ${layout !== 'sidebar' ? 'sticky' : ''}`}
+      className="border-b z-30 transition-top duration-300 sticky"
       style={{ 
-        top: layout !== 'sidebar' ? 'var(--portal-header-height, 4rem)' : undefined,
+        top: 'var(--portal-header-height, 4rem)',
         backgroundColor: theme === 'light' ? '#F9F8F6' : '#1e293b',
         borderColor: theme === 'light' ? '#e5e7eb' : '#334155'
       }}

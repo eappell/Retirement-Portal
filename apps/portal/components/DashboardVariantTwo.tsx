@@ -24,6 +24,8 @@ import { useRetirementData } from "@/lib/retirementContext";
 
 import logoSmBlack from "../public/images/RetireWise-Logo-black-notag-240.png";
 import logoSmWhite from "../public/images/RetireWise-Logo-white-notag-240.png";
+import nestEggLight from "../public/images/Nestegg-light.png";
+import nestEggDark from "../public/images/NesteggOnly-dark.png";
 
 interface DevSettings {
   [appId: string]: {
@@ -599,6 +601,7 @@ export function DashboardVariantTwo({ children, activeNavId }: { children?: Reac
   }
 
   const logoSrc = theme === "light" ? logoSmBlack : logoSmWhite;
+  const collapsedLogoSrc = theme === "light" ? nestEggLight : nestEggDark;
   const insightCount = crossToolInsights.filter(i => i.priority === 'critical' || i.priority === 'high').length;
   const previewInsights = crossToolInsights.length > 0 ? crossToolInsights : [];
   const previewInsight = previewInsights[previewInsightIndex] || null;
@@ -685,7 +688,16 @@ export function DashboardVariantTwo({ children, activeNavId }: { children?: Reac
               className="v2-logo-full"
               priority
             />
-            <span className="v2-logo-icon">RW</span>
+            <span className="v2-logo-icon">
+              <Image
+                src={collapsedLogoSrc}
+                alt="Nest Egg"
+                width={28}
+                height={28}
+                style={{ height: '28px', width: '28px', objectFit: 'contain' }}
+                priority
+              />
+            </span>
           </Link>
           <button
             className="v2-sidebar-collapse-btn"

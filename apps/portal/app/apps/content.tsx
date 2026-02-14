@@ -224,7 +224,10 @@ export default function AppPageContent() {
       <Header />
 
       {/* App Info Bar */}
-      <div className="bg-white border-b border-gray-200">
+      <div
+        className="bg-white border-b border-gray-200 sticky z-30"
+        style={{ top: 'var(--portal-header-height, 4rem)' }}
+      >
         <div className="max-w-7xl mx-auto px-4 py-2 sm:px-6 lg:px-8 flex items-center justify-between">
           <div className="flex-1">
             <h2 className="text-lg font-semibold text-gray-900">
